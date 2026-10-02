@@ -1,0 +1,100 @@
+"""Integration tests run against PostgreSQL (database ``snoska_test``).
+
+The schema is migrated once per session as the owner role; every test
+starts from empty tables. The API is exercised in-process with test
+doubles only for providers outside the database: token keys, the
+organization directory and the embedding model.
+"""
+
+from __future__ import annotations
+
+import os
+from collections.abc import AsyncIterator
+from pathlib import Path
+
+import httpx
+import pytest
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import text
+
+os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
+
+from snoska.api.app import create_app
+from snoska.bootstrap.container import Container, Overrides, build_container
+from snoska.bootstrap.settings import BACKEND_ROOT, Settings
+from snoska.domain.corpus.embedding import EmbeddingSpace
+from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
+from tests.support.fakes import FakeDirectory, HashEmbedder
+from tests.support.scenario import ORG_A, ORG_B
+from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
+
+TABLES = (
+    "document_blocks, document_structures, document_versions, documents, workspaces, "
+    "organizations, user_profiles, outbox_messages, norm_embeddings, norm_units, "
+    "corpus_editions, legal_acts"
+)
+
+
+@pytest.fixture(scope="session")
+def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
+    base = Settings()
+    assert base.database.name.endswith("_test"), "integration tests need a dedicated database"
+    keycloak = base.keycloak.model_copy(update={"url": ISSUER.removesuffix("/realms/snoska")})
+    storage = base.storage.model_copy(
+        update={"storage_root": Path(tmp_path_factory.mktemp("blobs"))}
+    )
+    return base.model_copy(update={"keycloak": keycloak, "storage": storage})
+
+
+def _owner(settings: Settings) -> DatabaseConfig:
+    db = settings.database
+    return DatabaseConfig(
+        db.host, db.port, db.name, db.owner_user, db.owner_password.get_secret_value()
+    )
+
+
+@pytest.fixture(scope="session")
+def alembic_config() -> Config:
+    return Config(str(BACKEND_ROOT / "alembic.ini"))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def migrated(alembic_config: Config, settings: Settings) -> None:
+    command.upgrade(alembic_config, "head")
+
+
+@pytest.fixture(autouse=True)
+async def clean_database(settings: Settings) -> None:
+    engine = create_engine(_owner(settings))
+    async with engine.begin() as connection:
+        await connection.execute(text(f"TRUNCATE {TABLES} CASCADE"))
+    await engine.dispose()
+
+
+@pytest.fixture(scope="session")
+def tokens() -> TokenFactory:
+    return TokenFactory()
+
+
+@pytest.fixture
+async def container(settings: Settings, tokens: TokenFactory) -> AsyncIterator[Container]:
+    built = await build_container(
+        settings,
+        overrides=Overrides(
+            key_source=StaticKeys(tokens),
+            directory=FakeDirectory([ORG_A, ORG_B]),
+            embedder=HashEmbedder(EmbeddingSpace("bge-m3", 1024)),
+        ),
+    )
+    yield built
+    await built.close()
+
+
+@pytest.fixture
+async def api(container: Container, settings: Settings) -> AsyncIterator[httpx.AsyncClient]:
+    app = create_app(settings)
+    app.state.container = container
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://api.test") as client:
+        yield client
