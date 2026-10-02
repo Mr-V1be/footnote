@@ -1,0 +1,13 @@
+.screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: var(--space-gutter);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}

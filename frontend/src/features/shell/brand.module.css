@@ -1,0 +1,23 @@
+.brand {
+  display: inline-flex;
+  align-items: flex-start;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+}
+
+.word {
+  font-family: var(--font-document);
+  font-size: var(--text-xl);
+}
+
+.mark {
+  margin-inline-start: var(--space-0-5);
+  color: var(--color-ink);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+}

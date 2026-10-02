@@ -1,0 +1,13 @@
+.mark {
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--space-5);
+  padding-inline: var(--space-1-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: default;
+}

@@ -1,0 +1,203 @@
+{
+  "app": {
+    "name": "Сноска",
+    "description": "Проверка документов на соответствие 152-ФЗ и правилам оформления со сносками на нормы",
+    "demo": "Демо-версия",
+    "demoHint": "Данные вымышленные, документы созданы для демонстрации"
+  },
+  "common": {
+    "close": "Закрыть",
+    "cancel": "Отмена",
+    "retry": "Повторить",
+    "back": "Назад",
+    "more": "Ещё",
+    "loading": "Загрузка",
+    "unknownUser": "Пользователь не указан"
+  },
+  "nav": {
+    "label": "Разделы",
+    "documents": "Документы",
+    "openMenu": "Открыть меню",
+    "menu": "Меню",
+    "organization": "Организация",
+    "switchOrganization": "Сменить организацию",
+    "workspace": "Пространство",
+    "skipToContent": "К содержимому"
+  },
+  "user": {
+    "menu": "Профиль и настройки",
+    "theme": "Тема",
+    "themeSystem": "Как в системе",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "signOut": "Выйти",
+    "role": "Роль"
+  },
+  "roles": {
+    "owner": "Владелец",
+    "lawyer": "Юрист",
+    "executor": "Исполнитель",
+    "observer": "Наблюдатель"
+  },
+  "documents": {
+    "title": "Документы",
+    "upload": "Загрузить",
+    "uploadDocument": "Загрузить документ",
+    "search": "Поиск по названию",
+    "searchPlaceholder": "Найти документ",
+    "clearSearch": "Очистить поиск",
+    "kindFilter": "Вид документа",
+    "allKinds": "Все виды",
+    "columns": {
+      "title": "Документ",
+      "kind": "Вид",
+      "version": "Версия",
+      "status": "Состояние",
+      "updated": "Изменён"
+    },
+    "version": "Версия {number}",
+    "pages": "{count, plural, one {# страница} few {# страницы} many {# страниц} other {# страницы}}",
+    "uploadedBy": "Загрузил {name}",
+    "loadMore": "Показать ещё",
+    "emptyTitle": "Документов пока нет",
+    "emptyDescription": "Загрузите политику, согласие, договор или приказ в формате DOCX или PDF — структура появится через несколько секунд.",
+    "emptyReadOnly": "Здесь появятся документы, которые загрузят юристы и исполнители.",
+    "noMatchesTitle": "Ничего не нашлось",
+    "noMatchesDescription": "Измените запрос или сбросьте фильтр по виду.",
+    "resetFilters": "Сбросить фильтры",
+    "errorTitle": "Не удалось загрузить документы",
+    "errorDescription": "Сервер не ответил. Повторите попытку через минуту.",
+    "count": "{count, plural, one {# документ} few {# документа} many {# документов} other {# документа}}",
+    "versionWord": "Версия"
+  },
+  "status": {
+    "queued": "В очереди",
+    "parsing": "Разбор",
+    "parsed": "Готов",
+    "failed": "Ошибка"
+  },
+  "kinds": {
+    "pd_policy": "Политика обработки ПДн",
+    "pd_consent": "Согласие на обработку ПДн",
+    "contract": "Договор",
+    "regulation": "Положение",
+    "order": "Приказ",
+    "other": "Другое"
+  },
+  "formats": {
+    "docx": "DOCX",
+    "pdf": "PDF"
+  },
+  "methods": {
+    "docx": "Текст и оформление из DOCX",
+    "pdf_text": "Текстовый слой PDF",
+    "pdf_ocr": "Распознавание скана",
+    "pdf_mixed": "Текстовый слой и распознавание"
+  },
+  "failures": {
+    "corrupted_file": "Файл повреждён или не является документом.",
+    "encrypted_file": "PDF защищён паролем. Снимите защиту и загрузите файл снова.",
+    "empty_document": "В документе не найден текст.",
+    "too_large": "Документ слишком большой для разбора.",
+    "ocr_failed": "Не удалось распознать скан.",
+    "internal_error": "Разбор не удался из-за внутренней ошибки. Загрузите файл ещё раз."
+  },
+  "upload": {
+    "title": "Загрузка документа",
+    "description": "Документ в формате DOCX или PDF, в том числе скан.",
+    "dropTitle": "Выберите файл или перетащите сюда",
+    "dropHint": "DOCX или PDF, не больше {size}",
+    "kind": "Вид документа",
+    "titleLabel": "Название",
+    "titleHint": "Если не указать, возьмём имя файла",
+    "submit": "Загрузить",
+    "uploading": "Загрузка файла",
+    "selectAnother": "Выбрать другой файл",
+    "done": "Документ загружен",
+    "doneDescription": "Разбор структуры займёт несколько секунд.",
+    "versionTitle": "Новая версия",
+    "versionDescription": "Загрузите обновлённый файл. Предыдущие версии сохранятся.",
+    "versionDone": "Загружена версия {number}",
+    "errors": {
+      "unsupported_format": "Поддерживаются только DOCX и PDF.",
+      "file_too_large": "Файл больше допустимых {size}.",
+      "version_unchanged": "Этот файл совпадает с последней версией.",
+      "missing_permission": "У вашей роли нет права загружать документы.",
+      "network": "Соединение прервалось. Проверьте сеть и повторите.",
+      "unexpected": "Не удалось загрузить файл. Повторите попытку."
+    }
+  },
+  "viewer": {
+    "backToList": "К документам",
+    "outline": "Содержание",
+    "noOutline": "Заголовков не найдено",
+    "requisites": "Реквизиты",
+    "noRequisites": "Реквизиты не распознаны",
+    "details": "Сведения",
+    "download": "Скачать оригинал",
+    "newVersion": "Новая версия",
+    "versionSelect": "Версия документа",
+    "versionOption": "Версия {number} от {date}",
+    "processingTitle": "Документ разбирается",
+    "processingDescription": "Обычно это занимает несколько секунд, сканы — до минуты. Страница обновится сама.",
+    "failedTitle": "Документ не удалось разобрать",
+    "notFoundTitle": "Документ не найден",
+    "notFoundDescription": "Он был удалён или относится к другой организации.",
+    "errorTitle": "Не удалось открыть документ",
+    "errorDescription": "Сервер не ответил. Повторите попытку.",
+    "file": "Файл",
+    "format": "Формат",
+    "size": "Размер",
+    "pagesLabel": "Страниц",
+    "method": "Извлечение",
+    "ocrConfidence": "Уверенность распознавания",
+    "blocks": "Блоков структуры",
+    "uploaded": "Загружен",
+    "parsed": "Разобран",
+    "layout": "Поля страницы",
+    "layoutDeclared": "заданы в файле",
+    "layoutMeasured": "измерены по тексту",
+    "margins": "верх {top}, низ {bottom}, лево {left}, право {right} мм",
+    "lowConfidence": "Текст распознан со скана: возможны ошибки, сверяйтесь с оригиналом.",
+    "footnoteLabel": "Сноска {number}: {kind}",
+    "showInText": "Показать в тексте",
+    "table": "Таблица",
+    "page": "Стр. {number}",
+    "footnotes": "Сноски на реквизиты",
+    "actions": "Действия с документом",
+    "uploadedBy": "{date}, {name}"
+  },
+  "requisites": {
+    "organization_name": "Наименование организации",
+    "document_type": "Вид документа",
+    "date": "Дата документа",
+    "registration_number": "Регистрационный номер",
+    "place": "Место составления",
+    "access_restriction": "Гриф ограничения доступа",
+    "approval_stamp": "Гриф утверждения",
+    "title": "Заголовок к тексту",
+    "attachment_note": "Отметка о приложении",
+    "signature": "Подпись",
+    "executor_note": "Отметка об исполнителе"
+  },
+  "access": {
+    "noOrganizationsTitle": "Нет доступа ни к одной организации",
+    "noOrganizationsDescription": "Попросите владельца организации добавить вас в участники.",
+    "notMemberTitle": "Нет доступа к организации",
+    "notMemberDescription": "Вы не состоите в этой организации или ваша роль не даёт доступа.",
+    "toMyOrganizations": "К моим организациям",
+    "signOut": "Выйти"
+  },
+  "errors": {
+    "notFoundTitle": "Страница не найдена",
+    "notFoundDescription": "Ссылка устарела или в адресе опечатка.",
+    "unexpectedTitle": "Что-то пошло не так",
+    "unexpectedDescription": "Страница не загрузилась из-за ошибки. Повторите попытку.",
+    "home": "На главную"
+  },
+  "format": {
+    "bytes": "{value} Б",
+    "kilobytes": "{value} КБ",
+    "megabytes": "{value} МБ"
+  }
+}

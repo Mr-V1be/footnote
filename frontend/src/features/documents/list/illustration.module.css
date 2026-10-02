@@ -1,0 +1,54 @@
+.illustration {
+  inline-size: min(15rem, 70vw);
+  block-size: auto;
+  margin-block-end: var(--space-2);
+}
+
+.sheet {
+  fill: var(--color-sheet);
+  stroke: var(--color-border-strong);
+}
+
+.line {
+  fill: var(--color-neutral-soft);
+}
+
+.mark {
+  fill: var(--color-ink-soft);
+}
+
+.marker {
+  fill: var(--color-ink);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.link {
+  fill: none;
+  stroke: var(--color-ink-line);
+  stroke-dasharray: 3 3;
+  stroke-width: 1.5;
+}
+
+.note {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-ink-line);
+}
+
+.noteLine {
+  fill: var(--color-ink-soft);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .link {
+    animation: draw var(--duration-loop) var(--ease-standard) both;
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 60;
+    opacity: 0;
+  }
+}

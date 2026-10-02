@@ -1,0 +1,6 @@
+.screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 70dvh;
+  padding: var(--space-gutter);
+}

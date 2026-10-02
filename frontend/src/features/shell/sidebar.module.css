@@ -1,0 +1,57 @@
+.sidebar {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-block-size: 100%;
+  padding: var(--space-4) var(--space-3);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-inline: var(--space-2);
+}
+
+.nav {
+  flex: 1;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--control-height-md);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.link svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+
+.link:hover {
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+}
+
+.active,
+.active:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sheet);
+}
+
+.active svg {
+  color: var(--color-ink);
+}
+
+.footer {
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-width) solid var(--color-divider);
+}

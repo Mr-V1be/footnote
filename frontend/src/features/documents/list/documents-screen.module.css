@@ -1,0 +1,66 @@
+.screen {
+  display: grid;
+  gap: var(--space-5);
+  inline-size: 100%;
+  max-inline-size: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-gutter) calc(var(--bottom-bar-height) + var(--space-8));
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.search {
+  min-inline-size: 0;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+}
+
+.headerAction {
+  display: none;
+}
+
+.fab {
+  position: fixed;
+  inset-inline-end: max(var(--space-gutter), env(safe-area-inset-right));
+  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: var(--layer-sticky);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-popover);
+}
+
+.fab > button {
+  block-size: var(--control-height-lg);
+  padding-inline: var(--space-4);
+}
+
+@media (width >= 40rem) {
+  .toolbar {
+    grid-template-columns: minmax(0, 24rem) auto;
+    justify-content: start;
+  }
+}
+
+@media (width >= 64rem) {
+  .screen {
+    padding-block: var(--space-8) var(--space-12);
+  }
+
+  .headerAction {
+    display: flex;
+  }
+
+  .fab {
+    display: none;
+  }
+}
+
+.toolbar[hidden] {
+  display: none;
+}
