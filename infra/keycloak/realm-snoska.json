@@ -1,6 +1,7 @@
 {
   "realm": "snoska",
   "displayName": "Сноска",
+  "loginTheme": "snoska",
   "enabled": true,
   "organizationsEnabled": true,
   "sslRequired": "external",
@@ -11,8 +12,7 @@
   "rememberMe": true,
   "internationalizationEnabled": true,
   "supportedLocales": [
-    "ru",
-    "en"
+    "ru"
   ],
   "defaultLocale": "ru",
   "accessTokenLifespan": 300,

@@ -19,7 +19,9 @@
     "api:generate": "node scripts/generate-api-types.mjs",
     "api:check": "node scripts/generate-api-types.mjs --check",
     "screenshots": "node e2e/screenshots.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "theme:sync": "node scripts/sync-theme-assets.mjs",
+    "theme:check": "node scripts/sync-theme-assets.mjs --check"
   },
   "dependencies": {
     "@tabler/icons-react": "3.48.0",

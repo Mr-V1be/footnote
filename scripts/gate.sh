@@ -39,6 +39,8 @@ if [[ "$SCOPE" == all || "$SCOPE" == frontend ]]; then
   cd "$ROOT/frontend"
   step "frontend: generated API types are up to date"
   pnpm run --silent api:check
+  step "frontend: sign-in theme shares the app's tokens and icon"
+  pnpm run --silent theme:check
   step "frontend: typecheck"
   pnpm run --silent typecheck
   step "frontend: eslint"

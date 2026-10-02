@@ -84,6 +84,7 @@ services:
       - "127.0.0.1:${SNOSKA_KEYCLOAK_PORT:-46320}:8080"
     volumes:
       - ./infra/keycloak/realm-snoska.json:/opt/keycloak/data/import/realm-snoska.json:ro
+      - ./infra/keycloak/themes/snoska:/opt/keycloak/themes/snoska:ro
     mem_limit: 1g
     healthcheck:
       test:
