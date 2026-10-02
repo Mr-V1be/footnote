@@ -82,7 +82,6 @@ document_versions = Table(
     Column("method", Text, nullable=True),
     Column("page_count", Integer, nullable=True),
     Column("block_count", Integer, nullable=True),
-    Column("requisite_count", Integer, nullable=True),
     Column("ocr_confidence", Float, nullable=True),
     ForeignKeyConstraint(
         ["document_id", "organization_id"],
@@ -108,7 +107,6 @@ document_structures = Table(
     Column("version_id", Uuid, primary_key=True),
     Column("organization_id", Uuid, nullable=False),
     Column("layout", JSONB, nullable=False),
-    Column("requisites", JSONB, nullable=False),
     ForeignKeyConstraint(
         ["version_id", "organization_id"],
         ["document_versions.id", "document_versions.organization_id"],

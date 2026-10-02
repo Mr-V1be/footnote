@@ -47,6 +47,7 @@ def create_app(
 
     app = FastAPI(
         title="Snoska API",
+        generate_unique_id_function=lambda route: route.name,
         version=API_VERSION,
         lifespan=lifespan,
         docs_url=f"{API_PREFIX}/docs",

@@ -137,9 +137,12 @@ class OutlineEntry:
 
 @dataclass(frozen=True, slots=True)
 class DocumentStructure:
+    """Blocks and page geometry as parsed. Requisites are derived from the
+    blocks when read, so improved detection reaches every stored version."""
+
     blocks: tuple[Block, ...]
-    requisites: tuple[Requisite, ...] = ()
     layout: DocumentLayout = field(default_factory=DocumentLayout)
+    requisites: tuple[Requisite, ...] = ()
 
     def outline(self) -> tuple[OutlineEntry, ...]:
         """Navigation tree derived from headings; never stored separately."""

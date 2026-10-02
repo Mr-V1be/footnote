@@ -3,9 +3,10 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep, PlatformAccessDep
+from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.tenancy import OrganizationOut, OrganizationPageOut, WorkspaceOut
 
-router = APIRouter(prefix="/v1", tags=["tenancy"])
+router = APIRouter(prefix="/v1", tags=["tenancy"], responses=PROBLEM_RESPONSES)
 
 PLATFORM_PAGE_SIZE = 100
 

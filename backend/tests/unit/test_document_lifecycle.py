@@ -32,7 +32,7 @@ def version() -> DocumentVersion:
     )
 
 
-SUMMARY = ParseSummary(ExtractionMethod.DOCX, None, 3, 1, None)
+SUMMARY = ParseSummary(ExtractionMethod.DOCX, None, 3, None)
 
 
 def test_parsing_lifecycle_and_redelivery() -> None:

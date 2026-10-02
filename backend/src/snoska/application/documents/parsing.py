@@ -5,7 +5,6 @@ from uuid import UUID
 import structlog
 
 from snoska.application.shared.jobs import PARSE_DOCUMENT_VERSION
-from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.documents.structure import DocumentStructure
 from snoska.domain.documents.version import DocumentVersion, ParseFailureCode, ParseSummary
 from snoska.ports.blob_storage import BlobStorage
@@ -33,13 +32,11 @@ class ParseDocumentVersion:
         uow_factory: UnitOfWorkFactory,
         blobs: BlobStorage,
         parsers: DocumentParserRegistry,
-        requisites: RequisiteDetector,
         clock: Clock,
     ) -> None:
         self._uow_factory = uow_factory
         self._blobs = blobs
         self._parsers = parsers
-        self._requisites = requisites
         self._clock = clock
 
     async def __call__(self, payload: JobPayload) -> None:
@@ -67,16 +64,11 @@ class ParseDocumentVersion:
         if not parsed.blocks:
             await self._fail(organization_id, version_id, ParseFailureCode.EMPTY_DOCUMENT)
             return
-        structure = DocumentStructure(
-            blocks=parsed.blocks,
-            requisites=self._requisites.detect(parsed.blocks),
-            layout=parsed.layout,
-        )
+        structure = DocumentStructure(blocks=parsed.blocks, layout=parsed.layout)
         summary = ParseSummary(
             method=parsed.method,
             page_count=parsed.page_count,
             block_count=len(parsed.blocks),
-            requisite_count=len(structure.requisites),
             ocr_confidence=parsed.ocr_confidence,
         )
         async with self._uow_factory.for_tenant(organization_id) as uow:

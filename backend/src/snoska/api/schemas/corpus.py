@@ -4,7 +4,8 @@ from datetime import date, datetime
 from uuid import UUID
 
 from snoska.api.schemas.common import ApiModel
-from snoska.domain.corpus.units import NormUnit
+from snoska.domain.corpus.acts import ActKind
+from snoska.domain.corpus.units import NormUnit, UnitKind
 from snoska.ports.corpus_repositories import ActOverview, NormSearchHit
 
 
@@ -19,7 +20,7 @@ class EditionOut(ApiModel):
 
 class ActOut(ApiModel):
     code: str
-    kind: str
+    kind: ActKind
     short_title: str
     title: str
     adopted_on: date
@@ -31,7 +32,7 @@ class ActOut(ApiModel):
         edition = overview.active_edition
         return cls(
             code=overview.act.code,
-            kind=overview.act.kind.value,
+            kind=overview.act.kind,
             short_title=overview.act.short_title,
             title=overview.act.title,
             adopted_on=overview.act.adopted_on,
@@ -55,7 +56,7 @@ class NormUnitOut(ApiModel):
     id: UUID
     parent_id: UUID | None
     depth: int
-    kind: str
+    kind: UnitKind
     number: str | None
     anchor: str
     citation: str
@@ -70,7 +71,7 @@ class NormUnitOut(ApiModel):
             id=unit.id,
             parent_id=unit.parent_id,
             depth=unit.depth,
-            kind=unit.kind.value,
+            kind=unit.kind,
             number=unit.number,
             anchor=unit.anchor,
             citation=unit.citation,

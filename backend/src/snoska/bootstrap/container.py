@@ -168,7 +168,7 @@ async def build_container(
         ),
         workspaces=WorkspaceQueries(uow),
         uploads=DocumentUploads(uow, blobs, SUPPORTED_FORMATS, DOCUMENT_KINDS, clock, limits),
-        documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS),
+        documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS, RequisiteDetector()),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),
         corpus_sync=CorpusSync(uow, catalog, sources, clock),
         corpus=CorpusQueries(uow),
@@ -179,9 +179,7 @@ async def build_container(
         ai=ai,
         health_checks=(DatabaseHealth(engine),),
         job_handlers={
-            PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(
-                uow, blobs, parsers, RequisiteDetector(), clock
-            ),
+            PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(uow, blobs, parsers, clock),
             EMBED_CORPUS_EDITION.name: EmbedCorpusEdition(uow, embedder, clock),
         },
         relay=OutboxRelay(uow, publisher, clock) if publisher is not None else None,

@@ -29,6 +29,8 @@ if [[ "$SCOPE" == all || "$SCOPE" == backend ]]; then
   uv run --frozen mypy
   step "backend: import contracts"
   uv run --frozen lint-imports
+  step "backend: OpenAPI document is up to date"
+  uv run --frozen snoska openapi | diff -q - openapi.json
   step "backend: tests"
   uv run --frozen pytest
 fi

@@ -16,8 +16,6 @@ from snoska.domain.documents.structure import (
     LayoutSource,
     PageSetup,
     ParagraphFormat,
-    Requisite,
-    RequisiteKind,
     TableCell,
     TableContent,
 )
@@ -154,16 +152,6 @@ class SqlDocumentStructureRepository:
                 version_id=version_id,
                 organization_id=organization_id,
                 layout=_layout_json(structure.layout),
-                requisites=[
-                    {
-                        "kind": r.kind.value,
-                        "block": r.block_ordinal,
-                        "start": r.start,
-                        "end": r.end,
-                        "value": r.value,
-                    }
-                    for r in structure.requisites
-                ],
             )
         )
         rows = [
@@ -199,15 +187,5 @@ class SqlDocumentStructureRepository:
         )
         return DocumentStructure(
             blocks=tuple(_block(row) for row in result.mappings()),
-            requisites=tuple(
-                Requisite(
-                    kind=RequisiteKind(r["kind"]),
-                    block_ordinal=r["block"],
-                    start=r["start"],
-                    end=r["end"],
-                    value=r["value"],
-                )
-                for r in header["requisites"]
-            ),
             layout=_layout(header["layout"]),
         )

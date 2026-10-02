@@ -78,3 +78,10 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(IdentityProviderError, dependency_unavailable)
     app.add_exception_handler(AiProviderError, dependency_unavailable)
     app.add_exception_handler(Exception, unexpected)
+
+
+# Documented error shapes; every router declares them for its operations.
+PROBLEM_RESPONSES: dict[int | str, dict[str, object]] = {
+    status: {"model": Problem, "description": HTTPStatus(status).phrase}
+    for status in (401, 403, 404, 409, 413, 422, 503)
+}

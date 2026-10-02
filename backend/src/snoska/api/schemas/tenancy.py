@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from snoska.api.schemas.common import ApiModel
+from snoska.domain.tenancy.permissions import Permission
 
 
 class OrganizationOut(ApiModel):
@@ -15,7 +16,7 @@ class MembershipOut(ApiModel):
     organization: OrganizationOut
     role: str
     roles: list[str]
-    permissions: list[str]
+    permissions: list[Permission]
 
 
 class MeOut(ApiModel):
@@ -24,7 +25,7 @@ class MeOut(ApiModel):
     display_name: str
     memberships: list[MembershipOut]
     platform_roles: list[str]
-    platform_permissions: list[str]
+    platform_permissions: list[Permission]
 
 
 class WorkspaceOut(ApiModel):

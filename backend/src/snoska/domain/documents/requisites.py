@@ -5,7 +5,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 
-from snoska.domain.documents.structure import Block, Requisite, RequisiteKind
+from snoska.domain.documents.structure import Block, BlockKind, Requisite, RequisiteKind
 
 # Requisites cluster at the top (header) and the bottom (signature area) of
 # a document. Restricting detectors to these zones keeps body text that merely
@@ -123,6 +123,23 @@ DEFAULT_DETECTORS: tuple[PatternDetector, ...] = (
 )
 
 
+def _is_numbered_section(block: Block) -> bool:
+    return block.label is not None and block.kind in (BlockKind.HEADING, BlockKind.LIST_ITEM)
+
+
+def _header_zone(blocks: Sequence[Block]) -> Sequence[Block]:
+    """Blocks before the numbered body starts, at most HEADER_ZONE_BLOCKS."""
+    end = next((i for i, block in enumerate(blocks) if _is_numbered_section(block)), len(blocks))
+    return blocks[: min(end, HEADER_ZONE_BLOCKS)]
+
+
+def _tail_zone(blocks: Sequence[Block]) -> Sequence[Block]:
+    """Blocks after the last numbered section, at most TAIL_ZONE_BLOCKS."""
+    last = max((i for i, block in enumerate(blocks) if _is_numbered_section(block)), default=-1)
+    tail = blocks[last + 1 :] if last >= 0 else blocks
+    return tail[-TAIL_ZONE_BLOCKS:]
+
+
 class RequisiteDetector:
     """Runs the registered detectors over the zones of a document."""
 
@@ -132,9 +149,11 @@ class RequisiteDetector:
     def detect(self, blocks: Sequence[Block]) -> tuple[Requisite, ...]:
         # Table blocks take part too: header requisites are often laid out in
         # a borderless table (place on the left, date on the right).
-        header = blocks[:HEADER_ZONE_BLOCKS]
-        tail = blocks[-TAIL_ZONE_BLOCKS:]
-        zones = {Zone.HEADER: header, Zone.TAIL: tail, Zone.ANYWHERE: blocks}
+        zones = {
+            Zone.HEADER: _header_zone(blocks),
+            Zone.TAIL: _tail_zone(blocks),
+            Zone.ANYWHERE: blocks,
+        }
         found: list[Requisite] = []
         for detector in self._detectors:
             for block in zones[detector.zone]:

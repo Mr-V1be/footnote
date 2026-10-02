@@ -6,8 +6,21 @@ from uuid import UUID
 from snoska.api.schemas.common import ApiModel
 from snoska.api.schemas.tenancy import WorkspaceOut
 from snoska.application.documents.queries import DocumentDetails
-from snoska.domain.documents.structure import Block, DocumentStructure, PageSetup
-from snoska.domain.documents.version import DocumentVersion
+from snoska.domain.documents.structure import (
+    Alignment,
+    Block,
+    BlockKind,
+    DocumentStructure,
+    LayoutSource,
+    PageSetup,
+    RequisiteKind,
+)
+from snoska.domain.documents.version import (
+    DocumentVersion,
+    ExtractionMethod,
+    ParseFailureCode,
+    ParseStatus,
+)
 from snoska.ports.document_repositories import DocumentListItem
 
 
@@ -18,8 +31,8 @@ class DocumentListItemOut(ApiModel):
     created_at: datetime
     updated_at: datetime
     latest_version: int
-    status: str
-    failure_code: str | None
+    status: ParseStatus
+    failure_code: ParseFailureCode | None
     format: str
     size_bytes: int
     page_count: int | None
@@ -34,8 +47,8 @@ class DocumentListItemOut(ApiModel):
             created_at=item.created_at,
             updated_at=item.updated_at,
             latest_version=item.latest_version_number,
-            status=item.latest_status.value,
-            failure_code=item.latest_failure_code.value if item.latest_failure_code else None,
+            status=item.latest_status,
+            failure_code=item.latest_failure_code,
             format=item.latest_format_code,
             size_bytes=item.latest_size_bytes,
             page_count=item.latest_page_count,
@@ -54,14 +67,13 @@ class VersionOut(ApiModel):
     format: str
     media_type: str
     size_bytes: int
-    status: str
-    failure_code: str | None
+    status: ParseStatus
+    failure_code: ParseFailureCode | None
     uploaded_at: datetime
     parsed_at: datetime | None
-    method: str | None
+    method: ExtractionMethod | None
     page_count: int | None
     block_count: int | None
-    requisite_count: int | None
     ocr_confidence: float | None
 
     @classmethod
@@ -73,14 +85,13 @@ class VersionOut(ApiModel):
             format=version.file.format_code,
             media_type=version.file.media_type,
             size_bytes=version.file.size_bytes,
-            status=version.status.value,
-            failure_code=version.failure_code.value if version.failure_code else None,
+            status=version.status,
+            failure_code=version.failure_code,
             uploaded_at=version.created_at,
             parsed_at=version.parsed_at,
-            method=summary.method.value if summary else None,
+            method=summary.method if summary else None,
             page_count=summary.page_count if summary else None,
             block_count=summary.block_count if summary else None,
-            requisite_count=summary.requisite_count if summary else None,
             ocr_confidence=summary.ocr_confidence if summary else None,
         )
 
@@ -121,7 +132,7 @@ class FontOut(ApiModel):
 
 
 class ParagraphFormatOut(ApiModel):
-    alignment: str | None
+    alignment: Alignment | None
     first_line_indent_mm: float | None
     left_indent_mm: float | None
     line_spacing: float | None
@@ -137,7 +148,7 @@ class TableCellOut(ApiModel):
 
 class BlockOut(ApiModel):
     ordinal: int
-    kind: str
+    kind: BlockKind
     text: str
     level: int | None
     label: str | None
@@ -152,7 +163,7 @@ class BlockOut(ApiModel):
         p = block.paragraph
         return cls(
             ordinal=block.ordinal,
-            kind=block.kind.value,
+            kind=block.kind,
             text=block.text,
             level=block.level,
             label=block.label,
@@ -165,7 +176,7 @@ class BlockOut(ApiModel):
             ],
             paragraph=(
                 ParagraphFormatOut(
-                    alignment=p.alignment.value if p.alignment else None,
+                    alignment=p.alignment,
                     first_line_indent_mm=p.first_line_indent_mm,
                     left_indent_mm=p.left_indent_mm,
                     line_spacing=p.line_spacing,
@@ -191,7 +202,7 @@ class BlockOut(ApiModel):
 
 
 class RequisiteOut(ApiModel):
-    kind: str
+    kind: RequisiteKind
     block_ordinal: int
     start: int
     end: int
@@ -206,7 +217,7 @@ class OutlineEntryOut(ApiModel):
 
 
 class PageSetupOut(ApiModel):
-    source: str
+    source: LayoutSource
     width_mm: float
     height_mm: float
     margin_top_mm: float | None
@@ -218,7 +229,7 @@ class PageSetupOut(ApiModel):
     @classmethod
     def of(cls, page: PageSetup) -> PageSetupOut:
         return cls(
-            source=page.source.value,
+            source=page.source,
             width_mm=page.width_mm,
             height_mm=page.height_mm,
             margin_top_mm=page.margin_top_mm,
@@ -247,7 +258,7 @@ class StructureOut(ApiModel):
             blocks=[BlockOut.of(block) for block in structure.blocks],
             requisites=[
                 RequisiteOut(
-                    kind=r.kind.value,
+                    kind=r.kind,
                     block_ordinal=r.block_ordinal,
                     start=r.start,
                     end=r.end,

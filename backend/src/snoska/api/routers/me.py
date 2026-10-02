@@ -3,10 +3,11 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from snoska.api.dependencies import ContainerDep, PrincipalDep
+from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.catalog import CatalogOut, DocumentFormatOut, DocumentKindOut
 from snoska.api.schemas.tenancy import MembershipOut, MeOut, OrganizationOut
 
-router = APIRouter(prefix="/v1", tags=["session"])
+router = APIRouter(prefix="/v1", tags=["session"], responses=PROBLEM_RESPONSES)
 
 
 @router.get("/me", response_model=MeOut, response_model_by_alias=True)
@@ -51,6 +52,6 @@ async def catalog(container: ContainerDep, _: PrincipalDep) -> CatalogOut:
             )
             for fmt in data.formats
         ],
-        requisite_kinds=[kind.value for kind in data.requisite_kinds],
+        requisite_kinds=list(data.requisite_kinds),
         max_upload_bytes=data.max_upload_bytes,
     )

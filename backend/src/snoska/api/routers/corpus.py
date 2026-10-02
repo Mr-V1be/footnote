@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from snoska.api.dependencies import ContainerDep, CorpusReaderDep
+from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.corpus import (
     ActOut,
     EditionContentOut,
@@ -14,7 +15,7 @@ from snoska.api.schemas.corpus import (
 )
 from snoska.application.corpus.search import NormSearchQuery
 
-router = APIRouter(prefix="/v1/corpus", tags=["corpus"])
+router = APIRouter(prefix="/v1/corpus", tags=["corpus"], responses=PROBLEM_RESPONSES)
 
 
 @router.get("/acts", response_model=list[ActOut], response_model_by_alias=True)

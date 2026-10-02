@@ -45,3 +45,17 @@ def test_spans_point_into_block_text() -> None:
 def test_words_inside_sentences_are_not_stamps() -> None:
     found = RequisiteDetector().detect(blocks("Соблюдать конфиденциальность сведений."))
     assert RequisiteKind.ACCESS_RESTRICTION not in kinds(found)
+
+
+def test_body_text_after_numbered_sections_is_not_a_header() -> None:
+    blocks = [
+        Block(ordinal=0, kind=BlockKind.HEADING, text="ПОЛОЖЕНИЕ"),
+        Block(ordinal=1, kind=BlockKind.HEADING, text="Общие положения", label="1."),
+        Block(
+            ordinal=2,
+            kind=BlockKind.LIST_ITEM,
+            text="Положение действует в ООО «Полярная звезда».",
+            label="1.1.",
+        ),
+    ]
+    assert RequisiteKind.ORGANIZATION_NAME not in kinds(RequisiteDetector().detect(blocks))

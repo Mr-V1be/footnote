@@ -274,7 +274,6 @@ def upgrade() -> None:
         sa.Column("method", sa.Text(), nullable=True),
         sa.Column("page_count", sa.Integer(), nullable=True),
         sa.Column("block_count", sa.Integer(), nullable=True),
-        sa.Column("requisite_count", sa.Integer(), nullable=True),
         sa.Column("ocr_confidence", sa.Float(), nullable=True),
         sa.CheckConstraint(
             "(status = 'failed') = (failure_code IS NOT NULL)",
@@ -318,7 +317,6 @@ def upgrade() -> None:
         sa.Column("version_id", sa.Uuid(), nullable=False),
         sa.Column("organization_id", sa.Uuid(), nullable=False),
         sa.Column("layout", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("requisites", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.ForeignKeyConstraint(
             ["version_id", "organization_id"],
             ["document_versions.id", "document_versions.organization_id"],

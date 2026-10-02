@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from uuid import UUID
 
 from snoska.application.documents.upload import DocumentNotFoundError
@@ -9,6 +9,7 @@ from snoska.application.shared.pagination import Page, clamp_page_size
 from snoska.application.tenancy.workspaces import WorkspaceNotFoundError
 from snoska.domain.documents.document import Document
 from snoska.domain.documents.kinds import DocumentKindRegistry
+from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.documents.structure import DocumentStructure
 from snoska.domain.documents.version import DocumentVersion
 from snoska.domain.shared.errors import NotFoundError
@@ -52,11 +53,16 @@ class OriginalFile:
 
 class DocumentQueries:
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, blobs: BlobStorage, kinds: DocumentKindRegistry
+        self,
+        uow_factory: UnitOfWorkFactory,
+        blobs: BlobStorage,
+        kinds: DocumentKindRegistry,
+        requisites: RequisiteDetector,
     ) -> None:
         self._uow_factory = uow_factory
         self._blobs = blobs
         self._kinds = kinds
+        self._requisites = requisites
 
     async def list(
         self,
@@ -111,6 +117,8 @@ class DocumentQueries:
             if version is None:
                 raise VersionNotFoundError("version not found")
             structure = await uow.structures.load(version.id)
+        if structure is not None:
+            structure = replace(structure, requisites=self._requisites.detect(structure.blocks))
         return VersionStructure(version=version, structure=structure)
 
     async def original(

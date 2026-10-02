@@ -48,7 +48,6 @@ class ParseSummary:
     method: ExtractionMethod
     page_count: int | None
     block_count: int
-    requisite_count: int
     ocr_confidence: float | None
 
 

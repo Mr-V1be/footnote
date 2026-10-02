@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 
 from snoska.api.cursors import decode_cursor, encode_cursor
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep, PrincipalDep
+from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.documents import (
     DocumentListItemOut,
     DocumentOut,
@@ -19,7 +20,9 @@ from snoska.api.schemas.documents import (
 )
 from snoska.application.documents.upload import IncomingFile
 
-router = APIRouter(prefix="/v1/organizations/{organization}", tags=["documents"])
+router = APIRouter(
+    prefix="/v1/organizations/{organization}", tags=["documents"], responses=PROBLEM_RESPONSES
+)
 
 UPLOAD_CHUNK_BYTES = 256 * 1024
 IdempotencyKey = Annotated[str | None, Header(alias="Idempotency-Key", max_length=128)]
