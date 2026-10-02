@@ -136,6 +136,11 @@
   --sheet-padding: 3.5rem;
   --bottom-bar-height: 4rem;
 
+  /* A floating action keeps this distance from the screen edge; content
+     scrolls clear of it by the clearance (add the bottom safe area). */
+  --floating-offset: var(--space-4);
+  --floating-clearance: calc(var(--control-height-lg) + var(--floating-offset) + var(--space-6));
+
   /* Measures of floating and centred elements. */
   --size-tooltip-max: 18rem;
   --size-state-max: 26rem;

@@ -4,7 +4,8 @@
   inline-size: 100%;
   max-inline-size: var(--content-max);
   margin-inline: auto;
-  padding: var(--space-6) var(--space-gutter) calc(var(--bottom-bar-height) + var(--space-8));
+  padding: var(--space-6) var(--space-gutter)
+    calc(var(--floating-clearance) + env(safe-area-inset-bottom));
 }
 
 .toolbar {
@@ -29,7 +30,7 @@
 .fab {
   position: fixed;
   inset-inline-end: max(var(--space-gutter), env(safe-area-inset-right));
-  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+  inset-block-end: calc(var(--floating-offset) + env(safe-area-inset-bottom));
   z-index: var(--layer-sticky);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-popover);
