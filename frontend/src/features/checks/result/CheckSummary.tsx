@@ -12,8 +12,9 @@ import type { CheckReport, Severity } from "@/shared/api/types";
 import { Button } from "@/shared/ui/button/Button";
 import { ProgressBar } from "@/shared/ui/progress/ProgressBar";
 
-import { isRunPending } from "../queries";
 import { SEVERITIES, type RunTally } from "../findings";
+import { isRunPending } from "../queries";
+import { SeverityTally } from "../SeverityTally";
 import styles from "./result.module.css";
 
 /**
@@ -96,28 +97,23 @@ export function CheckSummary({
 
   const outstanding = SEVERITIES.reduce((sum, severity) => sum + counts[severity], 0);
   const unavailable = tally.notPerformed - tally.modelMissing;
+  // Nothing found is "clean" only when every check gave a verdict.
+  const partial = tally.notPerformed > 0;
   return (
     <section className={styles.summary} data-state="completed" aria-live="polite">
       <div className={styles.summaryMain}>
         <div className={styles.summaryLine}>
-          {outstanding === 0 ? (
+          {outstanding === 0 && !partial ? (
             <IconCircleCheck stroke={1.75} className={styles.summaryClean} aria-hidden />
           ) : null}
           <p className={styles.summaryTitle}>
-            {outstanding === 0
-              ? t("summary.clean")
-              : t("summary.outstanding", { count: outstanding })}
+            {outstanding > 0
+              ? t("summary.outstanding", { count: outstanding })
+              : partial
+                ? t("summary.cleanPartial")
+                : t("summary.clean")}
           </p>
-          <ul className={styles.tally}>
-            {SEVERITIES.filter((severity) => counts[severity] > 0).map((severity) => (
-              <li key={severity} data-severity={severity}>
-                {t(`severityCount.${severity}`, { count: counts[severity] })}
-              </li>
-            ))}
-            {reviews > 0 ? (
-              <li data-severity="review">{t("summary.reviews", { count: reviews })}</li>
-            ) : null}
-          </ul>
+          <SeverityTally counts={counts} reviews={reviews} />
         </div>
         <p className={styles.facts}>
           {run.finishedAt ? (

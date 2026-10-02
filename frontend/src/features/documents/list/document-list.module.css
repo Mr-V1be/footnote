@@ -177,7 +177,7 @@
 @media (width >= 64rem) {
   .head,
   .row {
-    grid-template-columns: minmax(0, 1fr) 11rem 4rem 8.5rem 7rem;
+    grid-template-columns: minmax(0, 1fr) 11rem 4rem 8.5rem 9.5rem;
     grid-template-areas: none;
     gap: var(--space-4);
   }

@@ -40,15 +40,6 @@
   gap: var(--space-3);
 }
 
-.notes[data-layout="column"] .notesHead {
-  position: sticky;
-  inset-block-start: 0;
-  z-index: var(--layer-raised);
-  margin-block: calc(var(--space-2) * -1) 0;
-  padding-block: var(--space-2);
-  background: var(--color-canvas);
-}
-
 .group {
   display: grid;
   gap: var(--space-2);

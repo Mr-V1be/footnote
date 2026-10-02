@@ -3,6 +3,7 @@
 import { IconListCheck, IconQuote } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
+import { CompactFindingList } from "@/features/checks/result/CompactFindingList";
 import { FindingFilters } from "@/features/checks/result/FindingFilters";
 import { FindingList, type CardHandlers } from "@/features/checks/result/FindingList";
 import { SidenoteColumn } from "@/features/checks/result/SidenoteColumn";
@@ -73,7 +74,15 @@ export function NotesPanel({
           {state.general.length > 0 ? (
             <section className={styles.group} aria-label={t("checks.documentWide")}>
               <h2 className={styles.groupTitle}>{t("checks.documentWide")}</h2>
-              <FindingList items={state.general} checks={state.checks} handlers={handlers} />
+              {layout === "column" ? (
+                <CompactFindingList
+                  items={state.general}
+                  checks={state.checks}
+                  handlers={handlers}
+                />
+              ) : (
+                <FindingList items={state.general} checks={state.checks} handlers={handlers} />
+              )}
             </section>
           ) : null}
           {state.located.length > 0 ? (
@@ -94,7 +103,11 @@ export function NotesPanel({
                 {filtered ? t("checks.noneMatchTitle") : t("checks.noFindingsTitle")}
               </p>
               <p>
-                {filtered ? t("checks.noneMatchDescription") : t("checks.noFindingsDescription")}
+                {filtered
+                  ? t("checks.noneMatchDescription")
+                  : state.tally.notPerformed > 0
+                    ? t("checks.noFindingsPartial")
+                    : t("checks.noFindingsDescription")}
               </p>
               {filtered ? (
                 <Button

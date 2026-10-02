@@ -179,12 +179,22 @@
 }
 
 .marker a {
+  position: relative;
   display: inline-block;
   min-inline-size: 1.4em;
   padding-inline: 0.15em;
   border-radius: var(--radius-xs);
   color: var(--color-ink);
+  line-height: 1.3;
   text-align: center;
+}
+
+/* A finger-sized target around the small marker, without moving the text. */
+.marker a::after {
+  position: absolute;
+  inset-block: calc(50% - var(--tap-target) / 2);
+  inset-inline: calc(50% - var(--tap-target) / 3);
+  content: "";
 }
 
 .marker a:hover {

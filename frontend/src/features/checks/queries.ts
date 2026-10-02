@@ -5,6 +5,7 @@ import type {
   CheckReport,
   CheckRun,
   Finding,
+  Quality,
   ReviewStatus,
   RunStatus,
 } from "@/shared/api/types";
@@ -20,6 +21,7 @@ export const checkKeys = {
   report: (organization: string, documentId: string, version: number) =>
     [...checkKeys.all(organization), "report", documentId, version] as const,
   catalog: () => ["checks", "catalog"] as const,
+  quality: () => ["checks", "quality"] as const,
 };
 
 export async function fetchReport(
@@ -66,6 +68,11 @@ export async function reviewFinding(
 
 export async function fetchCheckCatalog(api: ApiClient): Promise<CheckCatalog> {
   return unwrap(await api.GET("/api/v1/checks/catalog"));
+}
+
+/** The last measurement of the checks on the reference set; null until there is one. */
+export async function fetchQuality(api: ApiClient): Promise<Quality | null> {
+  return unwrap(await api.GET("/api/v1/checks/quality"));
 }
 
 /** Server-sent progress of a run, through the web server like every API call. */

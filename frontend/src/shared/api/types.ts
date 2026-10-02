@@ -35,3 +35,6 @@ export type Severity = Schemas["Severity"];
 export type ReviewStatus = Schemas["ReviewStatus"];
 export type RunStatus = Schemas["RunStatus"];
 export type RunSummary = Schemas["RunSummaryOut"];
+export type Quality = Schemas["QualityOut"];
+export type QualityMetrics = Schemas["MetricsOut"];
+export type DocumentTiming = Schemas["DocumentTimingOut"];

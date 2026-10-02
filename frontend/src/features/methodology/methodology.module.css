@@ -1,0 +1,358 @@
+.screen {
+  display: grid;
+  gap: var(--space-8);
+  inline-size: 100%;
+  max-inline-size: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-gutter) calc(var(--space-12) + env(safe-area-inset-bottom));
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Quality tiles. */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-4);
+  min-inline-size: 0;
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.tileHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.tileIcon {
+  flex: none;
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
+  color: var(--color-ink);
+}
+
+.tileTitle {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.tileBasis {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.shares {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.shareItem {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+
+.shareItem dt,
+.stage dt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.shareItem dd {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.share {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.share[data-size="lg"] {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+}
+
+.share[data-empty] {
+  color: var(--color-text-tertiary);
+  font-weight: var(--weight-medium);
+}
+
+.share[data-size="lg"][data-empty] {
+  font-size: var(--text-lg);
+}
+
+.unmeasured {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+
+.unmeasuredValue {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.unmeasuredHint {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.hinted {
+  display: inline-flex;
+  inline-size: fit-content;
+  border-block-end: var(--border-width) dashed var(--color-border-strong);
+  cursor: help;
+}
+
+.tileFoot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5) var(--space-3);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-width) solid var(--color-divider);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.stages {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.stage {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.stage dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.stage dd[data-empty] {
+  color: var(--color-text-tertiary);
+  font-weight: var(--weight-regular);
+}
+
+.stage[data-stage="total"] {
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width) solid var(--color-divider);
+}
+
+.stage[data-stage="total"] dt {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+/* The registry of checks. */
+
+.family {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.familyTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.familyCount {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.checks {
+  container-type: inline-size;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.check {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "norm"
+    "tags"
+    "shares";
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-block-end: var(--border-width) solid var(--color-divider);
+}
+
+.check:last-child {
+  border-block-end: 0;
+}
+
+.checkMain {
+  grid-area: main;
+  display: grid;
+  gap: var(--space-0-5);
+  min-inline-size: 0;
+}
+
+.checkTitle {
+  font-weight: var(--weight-medium);
+}
+
+.checkRequirement {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.checkNorm {
+  grid-area: norm;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5) var(--space-2);
+  min-inline-size: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.checkLabel {
+  color: var(--color-text-tertiary);
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5) var(--space-2);
+}
+
+.citations li:not(:last-child)::after {
+  content: ";";
+}
+
+.checkTags {
+  grid-area: tags;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.method {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.method svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
+.checkShares {
+  grid-area: shares;
+  font-size: var(--text-sm);
+}
+
+.shareList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+}
+
+.shareList > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+}
+
+.checkShareLabel {
+  color: var(--color-text-tertiary);
+}
+
+.checkShareValue {
+  margin: 0;
+}
+
+@container (inline-size >= 52rem) {
+  .check {
+    grid-template-columns: minmax(0, 1fr) 11rem 7.5rem 9rem;
+    grid-template-areas: "main norm tags shares";
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .citations {
+    flex-direction: column;
+  }
+
+  .checkLabel {
+    display: none;
+  }
+
+  .checkTags {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shareList {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .shareList > div {
+    justify-content: space-between;
+  }
+}
+
+@media (width >= 64rem) {
+  .screen {
+    padding-block: var(--space-8) var(--space-12);
+  }
+}

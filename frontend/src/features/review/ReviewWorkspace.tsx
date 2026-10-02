@@ -10,7 +10,11 @@ import { useCheckReport, useFindingReview } from "@/features/checks/useCheckRepo
 import { isRunPending } from "@/features/checks/queries";
 import { useCan } from "@/features/session/membership";
 import { DocumentSheet } from "@/features/documents/viewer/DocumentSheet";
-import { FootnoteProvider, useFootnotes } from "@/features/documents/viewer/FootnoteContext";
+import {
+  FootnoteProvider,
+  useFootnotes,
+  type CardPlace,
+} from "@/features/documents/viewer/FootnoteContext";
 import { OutlineNav } from "@/features/documents/viewer/OutlineNav";
 import type { DocumentStructure } from "@/shared/api/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
@@ -60,6 +64,7 @@ function Workspace({
   version,
   structure,
   state,
+  completed,
   panel,
   setPanel,
 }: {
@@ -68,6 +73,8 @@ function Workspace({
   version: number;
   structure: DocumentStructure;
   state: ReviewState;
+  /** The latest run finished: an empty margin means "no findings", not "not yet". */
+  completed: boolean;
   panel: Panel;
   setPanel: (panel: Panel) => void;
 }) {
@@ -130,7 +137,7 @@ function Workspace({
               handlers={handlers}
               layout="column"
               sheet={sheet}
-              checked
+              checked={completed}
             />
           </aside>
         ) : null}
@@ -158,7 +165,7 @@ function Workspace({
               handlers={handlers}
               layout="drawer"
               sheet={null}
-              checked
+              checked={completed}
               onLocateRequisite={closePanel}
             />
           </DrawerContent>
@@ -193,12 +200,14 @@ export function ReviewWorkspace({
 
   // A marker in the text opens its finding: in the margin, or in the drawer.
   const revealCard = useCallback(
-    (number: number) => {
+    (number: number): CardPlace => {
       if (state.mode === "findings") {
         const item = state.byNumber(number);
         if (item) state.setSelectedId(item.finding.id);
       }
-      if (!window.matchMedia(MARGIN_QUERY).matches) setPanel("notes");
+      if (window.matchMedia(MARGIN_QUERY).matches) return "margin";
+      setPanel("notes");
+      return "panel";
     },
     [state],
   );
@@ -221,6 +230,7 @@ export function ReviewWorkspace({
           version={version}
           structure={structure}
           state={state}
+          completed={data?.run.status === "completed"}
           panel={panel}
           setPanel={setPanel}
         />

@@ -1,5 +1,6 @@
 import type { InfiniteData } from "@tanstack/react-query";
 
+import { isRunPending } from "@/features/checks/queries";
 import { BFF_PREFIX, type ApiClient } from "@/shared/api/client";
 import { unwrap } from "@/shared/api/errors";
 import type {
@@ -16,7 +17,7 @@ export interface DocumentFilters {
 }
 
 export const PAGE_SIZE = 30;
-/** While a version is being parsed its state is refreshed this often. */
+/** While a version is being parsed or checked its state is refreshed this often. */
 export const PROCESSING_POLL_MS = 2000;
 const PROCESSING: readonly ParseStatus[] = ["queued", "parsing"];
 
@@ -89,8 +90,16 @@ export async function fetchStructure(
   );
 }
 
+/** Something in the list is still being read or checked: its row will change. */
 export function anyProcessing(data: InfiniteData<DocumentPage> | undefined): boolean {
-  return Boolean(data?.pages.some((page) => page.items.some((item) => isProcessing(item.status))));
+  return Boolean(
+    data?.pages.some((page) =>
+      page.items.some(
+        (item) =>
+          isProcessing(item.status) || (item.check !== null && isRunPending(item.check.status)),
+      ),
+    ),
+  );
 }
 
 export function originalFileUrl(organization: string, documentId: string, version: number): string {

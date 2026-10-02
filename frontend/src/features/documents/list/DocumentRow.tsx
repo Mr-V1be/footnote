@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import type { DocumentListItem } from "@/shared/api/types";
+import { CheckStatus } from "@/features/checks/CheckStatus";
 import { useFormatDate } from "@/shared/format/useFormatDate";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 
 import { FileTypeIcon } from "../FileTypeIcon";
-import { StatusBadge } from "../StatusBadge";
 import styles from "./document-list.module.css";
 import { Typeset } from "@/shared/typography/Typeset";
 
@@ -50,7 +50,7 @@ export function DocumentRow({
         </time>
       </div>
       <span className={styles.status}>
-        <StatusBadge status={item.status} failure={item.failureCode} />
+        <CheckStatus item={item} />
       </span>
     </li>
   );

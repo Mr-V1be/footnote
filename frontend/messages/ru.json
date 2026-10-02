@@ -278,7 +278,8 @@
       "modelUnavailable": "Часть проверок не выполнена: модель не ответила. Проверьте документ снова позже.",
       "checked": "Что проверено",
       "recheck": "Проверить снова",
-      "rechecking": "Ставим на проверку…"
+      "rechecking": "Ставим на проверку…",
+      "cleanPartial": "Замечаний нет, но проверено не всё"
     },
     "results": {
       "passed": "Пройдено",
@@ -311,7 +312,17 @@
       "numbering_depth": "Пункт «{label}» — {levels}-й уровень нумерации, допустимо не больше {max}.",
       "numbering_gap": "После предыдущего пункта ожидался номер {expected}, а стоит «{label}».",
       "numbering_gap_widespread": "Пропуски или повторы в нумерации — {count, plural, one {# место} few {# места} many {# мест} other {# места}}."
-    }
+    },
+    "status": {
+      "unchecked": "Не проверен",
+      "queued": "В очереди",
+      "running": "Проверка {done}/{total}",
+      "failed": "Сбой проверки",
+      "clean": "Без замечаний",
+      "partial": "Проверено частично",
+      "partialHint": "Замечаний нет, но {count, plural, one {#\u00a0проверка не выполнена} few {#\u00a0проверки не выполнены} many {#\u00a0проверок не выполнено} other {#\u00a0проверки не выполнено}} — подробности в документе."
+    },
+    "noFindingsPartial": "Выполненные проверки замечаний не нашли, но часть проверок не выполнена."
   },
   "families": {
     "formatting": "Оформление по ГОСТ Р 7.0.97-2016",
@@ -320,5 +331,59 @@
   "familiesShort": {
     "formatting": "ГОСТ Р 7.0.97",
     "personal_data": "152-ФЗ"
+  },
+  "methodology": {
+    "title": "Как мы проверяем",
+    "checksCount": "{count, plural, one {#\u00a0проверка} few {#\u00a0проверки} many {#\u00a0проверок} other {#\u00a0проверки}}",
+    "measuredAt": "Замер {date}",
+    "stale": "Замер сделан на прежней версии правил",
+    "modelConnected": "Модель: {name}",
+    "modelMissing": "Модель не подключена",
+    "quality": "Качество",
+    "referenceSet": "Эталонный набор: {count, plural, one {#\u00a0документ} few {#\u00a0документа} many {#\u00a0документов} other {#\u00a0документа}} с размеченными нарушениями",
+    "method": {
+      "deterministic": "Правила оформления",
+      "model": "Юридические проверки"
+    },
+    "methodShort": {
+      "deterministic": "Правило",
+      "model": "Модель"
+    },
+    "methodBasis": {
+      "deterministic": "ГОСТ Р 7.0.97 · без модели",
+      "model": "152-ФЗ · модель цитирует найденное"
+    },
+    "precision": "Точность",
+    "recall": "Полнота",
+    "precisionHint": "Доля верных среди найденных нарушений",
+    "recallHint": "Доля найденных среди размеченных нарушений",
+    "share": "{value}",
+    "noCases": "—",
+    "noCasesPrecision": "В наборе проверка не нашла ни одного нарушения",
+    "noCasesRecall": "В наборе нет размеченных нарушений для этой проверки",
+    "notMeasured": "Не измерено",
+    "notMeasuredHint": "Модель не была подключена во время замера",
+    "observations": "{count, plural, one {#\u00a0наблюдение} few {#\u00a0наблюдения} many {#\u00a0наблюдений} other {#\u00a0наблюдения}}",
+    "falsePositives": "ложных: {count}",
+    "misses": "пропущено: {count}",
+    "reviews": "юристу: {count}",
+    "timing": "Время проверки",
+    "typical": "Типовая политика, {pages, plural, one {#\u00a0страница} few {#\u00a0страницы} many {#\u00a0страниц} other {#\u00a0страницы}}",
+    "stage": {
+      "parse": "Разбор",
+      "rules": "Правила",
+      "model": "Модель",
+      "total": "Всего"
+    },
+    "seconds": "{value}\u00a0с",
+    "underSeconds": "<\u00a0{value}\u00a0с",
+    "noMeasurementTitle": "Замер ещё не проводился",
+    "noMeasurementDescription": "Точность и полнота появятся после запуска замера на эталонном наборе.",
+    "checks": "Проверки",
+    "kindFilter": "Вид документа",
+    "allKinds": "Все виды документов",
+    "norm": "Норма",
+    "errorTitle": "Не удалось загрузить",
+    "errorDescription": "Проверьте соединение и попробуйте ещё раз."
   }
 }

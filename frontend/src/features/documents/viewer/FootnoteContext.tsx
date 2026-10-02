@@ -17,13 +17,19 @@ interface FootnoteState {
   revealCard: (number: number) => void;
 }
 
+/**
+ * Where a revealed card is shown: in the margin beside its marker, which the
+ * reader is already looking at, or in a panel opened over the document.
+ */
+export type CardPlace = "margin" | "panel";
+
 const FootnoteContext = createContext<FootnoteState | null>(null);
 
-function scrollAndFlash(id: string) {
+function scrollAndFlash(id: string, block: ScrollLogicalPosition = "center") {
   const element = document.getElementById(id);
   if (!element) return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  element.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  element.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block });
   element.classList.add(FLASH_CLASS);
   window.setTimeout(() => element.classList.remove(FLASH_CLASS), FLASH_MS);
 }
@@ -33,17 +39,20 @@ export function FootnoteProvider({
   children,
 }: {
   /** Called before scrolling to a card: select it, open the panel on a phone. */
-  onRevealCard: (number: number) => void;
+  onRevealCard: (number: number) => CardPlace;
   children: ReactNode;
 }) {
   const [active, setActive] = useState<number | null>(null);
   const revealMark = useCallback((number: number) => scrollAndFlash(anchors.mark(number)), []);
   const revealCard = useCallback(
     (number: number) => {
-      onRevealCard(number);
+      const place = onRevealCard(number);
+      // In the margin the card stands level with the marker: scroll only as
+      // much as it takes to show it whole, so the text does not jump away.
+      const block = place === "margin" ? "nearest" : "center";
       // Two frames: the panel opens and the card takes its place before scrolling.
       window.requestAnimationFrame(() =>
-        window.requestAnimationFrame(() => scrollAndFlash(anchors.footnote(number))),
+        window.requestAnimationFrame(() => scrollAndFlash(anchors.footnote(number), block)),
       );
     },
     [onRevealCard],

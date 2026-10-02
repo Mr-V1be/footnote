@@ -1,4 +1,4 @@
-import { IconFiles, type Icon } from "@tabler/icons-react";
+import { IconChecklist, IconFiles, type Icon } from "@tabler/icons-react";
 
 import type { Messages } from "@/shared/i18n/messages";
 
@@ -26,5 +26,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
     matches: (pathname, { organization }) =>
       pathname.startsWith(`/o/${organization}/w/`) ||
       pathname.startsWith(`/o/${organization}/documents/`),
+  },
+  {
+    id: "methodology",
+    icon: IconChecklist,
+    label: "methodology",
+    href: ({ organization }) => `/o/${organization}/methodology`,
+    matches: (pathname, { organization }) => pathname.startsWith(`/o/${organization}/methodology`),
   },
 ];
