@@ -19,6 +19,7 @@ import { OutlineNav } from "@/features/documents/viewer/OutlineNav";
 import type { DocumentStructure } from "@/shared/api/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { Button } from "@/shared/ui/button/Button";
+import { BottomBar } from "@/shared/ui/bottom-bar/BottomBar";
 import { Drawer, DrawerContent } from "@/shared/ui/drawer/Drawer";
 
 import { NotesPanel } from "./NotesPanel";
@@ -98,7 +99,8 @@ function Workspace({
 
   return (
     <>
-      <nav className={styles.viewerBar} aria-label={t("viewer.actions")}>
+      {/* Wide screens: the outline opens from a toolbar until it has a column. */}
+      <div className={styles.viewerBar}>
         <Button
           variant="secondary"
           icon={<IconListTree stroke={1.75} />}
@@ -106,26 +108,36 @@ function Workspace({
         >
           {t("viewer.outline")}
         </Button>
-        <span className={styles.notesToggle}>
-          <Button
-            variant="secondary"
-            icon={<IconListCheck stroke={1.75} />}
-            onClick={() => openNotes("findings")}
-          >
-            {t("checks.findings")}
-            <span className={styles.count}>{findingCount}</span>
-          </Button>
-        </span>
-        <span className={styles.notesToggle}>
-          <Button
-            variant="secondary"
-            icon={<IconQuote stroke={1.75} />}
-            onClick={() => openNotes("requisites")}
-          >
-            {t("viewer.requisites")}
-          </Button>
-        </span>
-      </nav>
+      </div>
+      <BottomBar
+        className={styles.bottomBar}
+        label={t("viewer.actions")}
+        items={[
+          {
+            id: "outline",
+            icon: <IconListTree stroke={1.75} />,
+            label: t("viewer.outline"),
+            expanded: panel === "outline",
+            onClick: () => setPanel("outline"),
+          },
+          {
+            id: "findings",
+            icon: <IconListCheck stroke={1.75} />,
+            label: t("checks.findings"),
+            badge: findingCount,
+            badgeLabel: t("checks.summary.outstanding", { count: findingCount }),
+            expanded: panel === "notes" && state.mode === "findings",
+            onClick: () => openNotes("findings"),
+          },
+          {
+            id: "requisites",
+            icon: <IconQuote stroke={1.75} />,
+            label: t("viewer.requisites"),
+            expanded: panel === "notes" && state.mode === "requisites",
+            onClick: () => openNotes("requisites"),
+          },
+        ]}
+      />
 
       <div className={styles.workspace}>
         <aside className={styles.outlineColumn} aria-label={t("viewer.outline")}>
