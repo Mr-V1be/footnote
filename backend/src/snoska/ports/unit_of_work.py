@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from types import TracebackType
+from typing import Protocol, Self
+from uuid import UUID
+
+from snoska.domain.shared.errors import ConflictError
+from snoska.ports.corpus_repositories import CorpusRepository
+from snoska.ports.document_repositories import (
+    DocumentRepository,
+    DocumentStructureRepository,
+    DocumentVersionRepository,
+)
+from snoska.ports.outbox import OutboxRepository
+from snoska.ports.tenancy_repositories import (
+    OrganizationRepository,
+    UserProfileRepository,
+    WorkspaceRepository,
+)
+
+
+class ConcurrentModificationError(ConflictError):
+    code = "concurrent_modification"
+
+
+class UnitOfWork(Protocol):
+    """One database transaction.
+
+    Opened either for a tenant (tenant tables are visible only for that
+    organization, enforced by the database) or for the platform (tenant
+    tables are invisible). Leaving the context without ``commit`` rolls back.
+    """
+
+    @property
+    def organizations(self) -> OrganizationRepository: ...
+
+    @property
+    def workspaces(self) -> WorkspaceRepository: ...
+
+    @property
+    def profiles(self) -> UserProfileRepository: ...
+
+    @property
+    def documents(self) -> DocumentRepository: ...
+
+    @property
+    def versions(self) -> DocumentVersionRepository: ...
+
+    @property
+    def structures(self) -> DocumentStructureRepository: ...
+
+    @property
+    def corpus(self) -> CorpusRepository: ...
+
+    @property
+    def outbox(self) -> OutboxRepository: ...
+
+    async def commit(self) -> None: ...
+
+    async def __aenter__(self) -> Self: ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None: ...
+
+
+class UnitOfWorkFactory(Protocol):
+    def for_tenant(self, organization_id: UUID) -> UnitOfWork: ...
+
+    def for_platform(self) -> UnitOfWork: ...
