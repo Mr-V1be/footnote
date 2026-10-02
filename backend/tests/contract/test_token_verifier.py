@@ -74,3 +74,14 @@ async def test_jwks_source_refreshes_on_unknown_key_with_rate_limit() -> None:
         with pytest.raises(AuthenticationError):
             await source.key("rotated-away")
     assert route.call_count == 1
+
+
+@respx.mock
+async def test_jwks_source_fetches_keys_right_after_boot(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Monotonic time counts from boot: a fresh host must still load the keys.
+    monkeypatch.setattr("snoska.infrastructure.identity.jwks.time.monotonic", lambda: 5.0)
+    jwks_url = f"{ISSUER}/protocol/openid-connect/certs"
+    respx.get(jwks_url).mock(return_value=httpx.Response(200, json={"keys": [FACTORY.public_jwk]}))
+    async with httpx.AsyncClient() as client:
+        source = JwksKeySource(client, jwks_url, min_refresh_interval=3600)
+        assert isinstance(await source.key(KEY_ID), jwt.PyJWK)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import math
 import time
 from typing import Any
 
@@ -33,23 +34,29 @@ class JwksKeySource:
         self._ttl = ttl_seconds
         self._min_interval = min_refresh_interval
         self._keys: dict[str, jwt.PyJWK] = {}
-        self._fetched_at = 0.0
+        # Monotonic time starts near zero after boot, so "never fetched" must
+        # not be encoded as 0.0: that would rate-limit the very first fetch.
+        self._fetched_at: float | None = None
         self._lock = asyncio.Lock()
 
     async def key(self, kid: str) -> jwt.PyJWK:
-        now = time.monotonic()
-        if kid in self._keys and now - self._fetched_at < self._ttl:
+        if kid in self._keys and self._age() < self._ttl:
             return self._keys[kid]
         async with self._lock:
-            now = time.monotonic()
-            stale = now - self._fetched_at >= self._ttl
+            age = self._age()
+            stale = age >= self._ttl
             missing = kid not in self._keys
-            if (stale or missing) and now - self._fetched_at >= self._min_interval:
+            if (stale or missing) and age >= self._min_interval:
                 await self._refresh()
         key = self._keys.get(kid)
         if key is None:
             raise AuthenticationError("token is signed with an unknown key")
         return key
+
+    def _age(self) -> float:
+        if self._fetched_at is None:
+            return math.inf
+        return time.monotonic() - self._fetched_at
 
     async def _refresh(self) -> None:
         try:
