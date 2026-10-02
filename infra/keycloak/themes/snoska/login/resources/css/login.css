@@ -90,8 +90,9 @@ svg {
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-  padding: calc(var(--space-4) + env(safe-area-inset-top)) max(var(--space-gutter), env(safe-area-inset-right))
-    var(--space-10) max(var(--space-gutter), env(safe-area-inset-left));
+  padding: calc(var(--space-4) + env(safe-area-inset-top))
+    max(var(--space-gutter), env(safe-area-inset-right)) var(--space-10)
+    max(var(--space-gutter), env(safe-area-inset-left));
 }
 
 .auth__brand {
@@ -137,7 +138,8 @@ svg {
 }
 
 .auth__showcase {
-  padding: var(--space-10) var(--space-gutter) calc(var(--space-12) + env(safe-area-inset-bottom));
+  padding: var(--space-10) var(--space-gutter)
+    calc(var(--space-12) + env(safe-area-inset-bottom));
   border-block-start: var(--border-width) solid var(--color-border);
   background: var(--color-surface-sunken);
 }
@@ -376,13 +378,13 @@ svg {
     transform var(--duration-instant) var(--ease-standard);
 }
 
-.button:active:not(:disabled) {
-  transform: translateY(var(--space-px));
-}
-
 .button:disabled {
   cursor: progress;
   opacity: 0.7;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(var(--space-px));
 }
 
 .button--primary {

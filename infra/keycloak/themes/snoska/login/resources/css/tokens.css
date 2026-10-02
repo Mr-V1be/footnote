@@ -108,7 +108,10 @@
   /* Elevation. */
   --shadow-sheet:
     light-dark(0 1px 2px rgb(29 32 37 / 6%), 0 1px 2px rgb(0 0 0 / 40%)),
-    light-dark(0 8px 28px -12px rgb(29 32 37 / 14%), 0 10px 30px -12px rgb(0 0 0 / 50%));
+    light-dark(
+      0 8px 28px -12px rgb(29 32 37 / 14%),
+      0 10px 30px -12px rgb(0 0 0 / 50%)
+    );
   --shadow-popover:
     0 1px 2px light-dark(rgb(29 32 37 / 8%), rgb(0 0 0 / 40%)),
     0 12px 32px -8px light-dark(rgb(29 32 37 / 18%), rgb(0 0 0 / 60%));
@@ -141,7 +144,9 @@
   /* A floating action keeps this distance from the screen edge; content
      scrolls clear of it by the clearance (add the bottom safe area). */
   --floating-offset: var(--space-4);
-  --floating-clearance: calc(var(--control-height-lg) + var(--floating-offset) + var(--space-6));
+  --floating-clearance: calc(
+    var(--control-height-lg) + var(--floating-offset) + var(--space-6)
+  );
 
   /* Measures of floating and centred elements. */
   --size-tooltip-max: 18rem;
