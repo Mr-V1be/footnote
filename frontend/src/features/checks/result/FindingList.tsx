@@ -12,8 +12,17 @@ export interface CardHandlers {
   onSelect: (id: string) => void;
   onReview: (item: NumberedFinding, review: ReviewStatus) => void;
   onLocate: (item: NumberedFinding) => void;
+  /** Scroll to the first place a document-wide finding covers. */
+  onLocatePlaces: (item: NumberedFinding) => void;
   onHover: (number: number | null) => void;
   activeNumber: number | null;
+}
+
+/** Where "show in text" takes a card: its marker, or the first of its places. */
+export function locateOf(item: NumberedFinding, handlers: CardHandlers): (() => void) | undefined {
+  if (item.footnote) return () => handlers.onLocate(item);
+  if (item.finding.places.length > 0) return () => handlers.onLocatePlaces(item);
+  return undefined;
 }
 
 /** Findings one under another, in the order given. */
@@ -45,7 +54,7 @@ export function FindingList({
             busy={handlers.busyId === item.finding.id}
             onSelect={() => handlers.onSelect(item.finding.id)}
             onReview={(review) => handlers.onReview(item, review)}
-            onLocate={item.footnote ? () => handlers.onLocate(item) : undefined}
+            onLocate={locateOf(item, handlers)}
           />
         </li>
       ))}

@@ -19,7 +19,9 @@ class _RuleSession:
 
     async def execute(self, check: CheckDefinition) -> CheckOutcome:
         rule = self._rules.get(check.rule or "")
-        return rule.evaluate(self._document.structure, RuleParams(check.code, check.params))
+        return rule.evaluate(
+            self._document.structure, RuleParams(check.code, check.params, check.spread)
+        )
 
 
 class DeterministicExecutor:

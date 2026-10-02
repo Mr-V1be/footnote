@@ -12,6 +12,7 @@ import {
   type FindingFilters,
   type NumberedFinding,
 } from "@/features/checks/findings";
+import type { Highlight } from "@/features/documents/viewer/footnotes";
 import { requisiteNotes } from "@/features/documents/viewer/requisites";
 import type { CheckReport, DocumentStructure } from "@/shared/api/types";
 
@@ -60,6 +61,14 @@ export function useReviewState(structure: DocumentStructure, report: CheckReport
     () => new Map((report?.checks ?? []).map((check) => [check.code, check])),
     [report],
   );
+  // An open finding about the whole document shows its places for as long
+  // as it stays open; nothing else is marked for it.
+  const highlights = useMemo((): readonly Highlight[] => {
+    if (mode !== "findings") return [];
+    const open = visible.find((item) => item.finding.id === selectedId);
+    if (!open || open.footnote) return [];
+    return open.finding.places.map((place) => ({ ...place, tone: open.finding.severity }));
+  }, [mode, visible, selectedId]);
 
   const select = useCallback(
     (id: string) => setSelectedId((current) => (current === id ? null : id)),
@@ -86,6 +95,7 @@ export function useReviewState(structure: DocumentStructure, report: CheckReport
     located: visible.filter((item) => item.footnote !== null),
     requisites,
     footnotes,
+    highlights,
     checks,
     counts: severityCounts(findings),
     tally: tally(report?.results ?? []),

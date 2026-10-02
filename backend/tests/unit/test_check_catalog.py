@@ -72,3 +72,28 @@ def test_an_inconsistent_catalogue_is_refused_at_load(
 ) -> None:
     with pytest.raises(CatalogError):
         load(write(tmp_path, *entries))
+
+
+def test_a_check_overrides_the_familys_spread_thresholds(tmp_path: Path) -> None:
+    (tmp_path / "checks.yaml").write_text(
+        HEADER.replace("checks:\n", "spread: {share: 0.6, min_places: 4}\nchecks:\n")
+        + ENTRY.format(code="a", rule="date_format", kind="order")
+        + ENTRY.format(code="b", rule="date_format", kind="order")
+        + "    spread: {max_local: 20}\n",
+        encoding="utf-8",
+    )
+    catalog = YamlCheckCatalog(tmp_path, DEFAULT_RULES, DOCUMENT_KINDS).load()
+    first, second = catalog.get("a").spread, catalog.get("b").spread
+    assert (first.share, first.min_places, first.max_local) == (0.6, 4, 8)
+    assert (second.share, second.min_places, second.max_local) == (0.6, 4, 20)
+
+
+def test_spread_thresholds_are_validated(tmp_path: Path) -> None:
+    (tmp_path / "checks.yaml").write_text(
+        HEADER
+        + ENTRY.format(code="a", rule="date_format", kind="order")
+        + "    spread: {share: 2}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(CatalogError, match="share"):
+        load(tmp_path)

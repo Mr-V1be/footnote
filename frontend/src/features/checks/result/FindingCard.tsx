@@ -1,6 +1,6 @@
 "use client";
 
-import { IconCrosshair, IconFileDescription } from "@tabler/icons-react";
+import { IconCrosshair, IconFileDescription, IconHighlight } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { useState, type Ref } from "react";
 
@@ -124,6 +124,12 @@ export function FindingCard({
           <Typeset text={text(finding.detail)} />
         </p>
       </button>
+      {expanded && !footnote && finding.places.length > 0 ? (
+        <p className={styles.places} role="status">
+          <IconHighlight stroke={1.75} aria-hidden />
+          {t("placesOpen", { count: finding.places.length })}
+        </p>
+      ) : null}
       {expanded ? (
         <div className={styles.body} id={`${id}-body`}>
           <Norm finding={finding} check={check} />
@@ -137,10 +143,10 @@ export function FindingCard({
           ) : null}
           <footer className={styles.foot}>
             <ReviewActions finding={finding} busy={busy} onReview={onReview} />
-            {footnote && onLocate ? (
+            {onLocate ? (
               <button type="button" className={styles.locate} onClick={onLocate}>
                 <IconCrosshair stroke={1.75} aria-hidden />
-                {t("showInText")}
+                {footnote ? t("showInText") : t("firstPlace")}
               </button>
             ) : null}
           </footer>

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from snoska.domain.checks.outcome import ResultStatus
-from snoska.domain.checks.rules.base import MAX_MARKED_PLACES, RuleParams
+from snoska.domain.checks.rules.base import RuleParams
 from snoska.domain.checks.rules.registry import DEFAULT_RULES
+from snoska.domain.checks.spread import SpreadPolicy
 from snoska.domain.documents.structure import (
     Alignment,
     Block,
@@ -68,7 +69,35 @@ def test_font_size_marks_each_place_or_counts_them_when_everywhere() -> None:
     outcome = evaluate("body_font_size", everywhere, min_pt=12, max_pt=14)
     [finding] = outcome.findings
     assert finding.detail.code == "font_size_widespread"
-    assert finding.detail.params["count"] == 8 > MAX_MARKED_PLACES
+    assert (finding.detail.params["count"], finding.detail.params["total"]) == (8, 8)
+    # About the document: nothing is marked in the text, the places wait to be shown.
+    assert finding.location is None
+    assert [place.block_ordinal for place in finding.places] == list(range(8))
+
+
+def font_sizes(*sizes: float) -> list[int]:
+    """How many findings the font size rule gives; 1 with places = document-wide."""
+    structure = DocumentStructure(blocks=tuple(body(i, size=size) for i, size in enumerate(sizes)))
+    outcome = evaluate("body_font_size", structure, min_pt=12, max_pt=14)
+    return [len(finding.places) for finding in outcome.findings]
+
+
+def test_offences_turn_document_wide_when_they_cover_most_of_the_text() -> None:
+    # Three paragraphs out of four: most of the text.
+    assert font_sizes(11, 11, 11, 14) == [3]
+    # Two out of three: below the minimum number of places, each is marked.
+    assert font_sizes(11, 11, 14) == [0, 0]
+    # A third of thirty paragraphs is a minority, but too many places to mark.
+    assert font_sizes(*([11] * 10 + [14] * 20)) == [10]
+
+
+def test_spread_thresholds_come_from_the_check() -> None:
+    structure = DocumentStructure(blocks=tuple(body(i, size=11) for i in range(4)))
+    strict = SpreadPolicy(share=0.9, min_places=5, max_local=10)
+    outcome = DEFAULT_RULES.get("body_font_size").evaluate(
+        structure, RuleParams("x", {"min_pt": 12, "max_pt": 14}, strict)
+    )
+    assert all(finding.location is not None for finding in outcome.findings)
 
 
 def test_scan_without_font_data_is_not_judged() -> None:

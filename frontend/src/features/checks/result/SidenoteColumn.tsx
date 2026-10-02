@@ -7,7 +7,7 @@ import type { CheckDefinition } from "@/shared/api/types";
 
 import type { NumberedFinding } from "../findings";
 import { FindingCard } from "./FindingCard";
-import type { CardHandlers } from "./FindingList";
+import { locateOf, type CardHandlers } from "./FindingList";
 import styles from "./result.module.css";
 
 /** Room between two notes in the margin, in pixels of layout. */
@@ -131,7 +131,7 @@ export function SidenoteColumn({
               busy={handlers.busyId === item.finding.id}
               onSelect={() => handlers.onSelect(item.finding.id)}
               onReview={(review) => handlers.onReview(item, review)}
-              onLocate={item.footnote ? () => handlers.onLocate(item) : undefined}
+              onLocate={locateOf(item, handlers)}
             />
           </li>
         );

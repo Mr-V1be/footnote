@@ -71,6 +71,8 @@ class Finding:
     reviewed_by: UUID | None
     reviewed_at: datetime | None
     revision: int
+    # For a finding about the whole document: the places it covers.
+    places: tuple[TextLocation, ...] = ()
 
     def set_review(self, status: ReviewStatus, actor: UUID, now: datetime) -> None:
         if status is self.review:

@@ -656,6 +656,8 @@ export type components = {
             recommendation: string;
             norm: components["schemas"]["NormOut"];
             location: components["schemas"]["LocationOut"] | null;
+            /** Places */
+            places: components["schemas"]["LocationOut"][];
             review: components["schemas"]["ReviewStatus"];
             /** Reviewedat */
             reviewedAt: string | null;

@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "measured_at": "2026-10-02T22:34:11+00:00",
-  "catalog_revision": "ff043634e2ee",
+  "measured_at": "2026-10-02T23:33:03+00:00",
+  "catalog_revision": "212ce86c2ca2",
   "model": null,
   "documents": [
     {
@@ -10,7 +10,7 @@
       "kind": "pd_policy",
       "pages": 8,
       "typical": true,
-      "parse_ms": 28,
+      "parse_ms": 22,
       "deterministic_ms": 2,
       "model_ms": null
     },
@@ -20,7 +20,7 @@
       "kind": "pd_policy",
       "pages": 1,
       "typical": false,
-      "parse_ms": 14,
+      "parse_ms": 10,
       "deterministic_ms": 1,
       "model_ms": null
     },
@@ -30,8 +30,8 @@
       "kind": "pd_policy",
       "pages": 1,
       "typical": false,
-      "parse_ms": 1520,
-      "deterministic_ms": 1,
+      "parse_ms": 1359,
+      "deterministic_ms": 0,
       "model_ms": null
     },
     {
@@ -40,8 +40,8 @@
       "kind": "regulation",
       "pages": 1,
       "typical": false,
-      "parse_ms": 15,
-      "deterministic_ms": 1,
+      "parse_ms": 8,
+      "deterministic_ms": 0,
       "model_ms": null
     },
     {
@@ -50,7 +50,7 @@
       "kind": "pd_consent",
       "pages": 1,
       "typical": false,
-      "parse_ms": 9,
+      "parse_ms": 8,
       "deterministic_ms": 0,
       "model_ms": null
     },
@@ -71,7 +71,7 @@
       "pages": 2,
       "typical": false,
       "parse_ms": 9,
-      "deterministic_ms": 0,
+      "deterministic_ms": 1,
       "model_ms": null
     },
     {
@@ -80,7 +80,7 @@
       "kind": "pd_assignment",
       "pages": 2,
       "typical": false,
-      "parse_ms": 17,
+      "parse_ms": 14,
       "deterministic_ms": 0,
       "model_ms": null
     },
@@ -100,7 +100,7 @@
       "kind": "order",
       "pages": 1,
       "typical": false,
-      "parse_ms": 6,
+      "parse_ms": 9,
       "deterministic_ms": 0,
       "model_ms": 0
     },
@@ -130,7 +130,7 @@
       "kind": "pd_assignment",
       "pages": 1,
       "typical": false,
-      "parse_ms": 11,
+      "parse_ms": 10,
       "deterministic_ms": 0,
       "model_ms": null
     },
@@ -140,7 +140,7 @@
       "kind": "order",
       "pages": 1,
       "typical": false,
-      "parse_ms": 10,
+      "parse_ms": 14,
       "deterministic_ms": 0,
       "model_ms": 0
     }

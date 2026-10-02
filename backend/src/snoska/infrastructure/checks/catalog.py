@@ -21,6 +21,7 @@ from snoska.domain.checks.catalog import (
 )
 from snoska.domain.checks.rules.base import RuleParams
 from snoska.domain.checks.rules.registry import RuleRegistry
+from snoska.domain.checks.spread import SpreadPolicy
 from snoska.domain.documents.kinds import DocumentKindRegistry, UnknownDocumentKindError
 
 REVISION_LENGTH = 12
@@ -60,6 +61,22 @@ def _brief(entry: Mapping[str, Any], code: str) -> ModelBrief | None:
         search=_text(raw, "search", code),
         keywords=tuple(keywords),
     )
+
+
+def _spread(raw: object, base: SpreadPolicy, where: str) -> SpreadPolicy:
+    """A family's default thresholds, overridden field by field by a check."""
+    if raw is None:
+        return base
+    if not isinstance(raw, dict) or not set(raw) <= {"share", "min_places", "max_local"}:
+        raise CatalogError(f"{where}: spread takes share, min_places and max_local")
+    try:
+        return SpreadPolicy(
+            share=float(raw.get("share", base.share)),
+            min_places=int(raw.get("min_places", base.min_places)),
+            max_local=int(raw.get("max_local", base.max_local)),
+        )
+    except (TypeError, ValueError) as exc:
+        raise CatalogError(f"{where}: {exc}") from exc
 
 
 class YamlCheckCatalog:
@@ -104,6 +121,9 @@ class YamlCheckCatalog:
             except UnknownDocumentKindError as exc:
                 raise CatalogError(f"{code}: unknown document kind {kind!r}") from exc
         params = entry.get("params") or {}
+        spread = _spread(
+            entry.get("spread"), _spread(data.get("spread"), SpreadPolicy(), code), code
+        )
         check = CheckDefinition(
             code=code,
             family=family.code,
@@ -117,7 +137,8 @@ class YamlCheckCatalog:
             rule=entry.get("rule"),
             params=params,
             brief=_brief(entry, code),
+            spread=spread,
         )
         if check.rule is not None:
-            self._rules.get(check.rule).validate(RuleParams(code, params))
+            self._rules.get(check.rule).validate(RuleParams(code, params, spread))
         return check

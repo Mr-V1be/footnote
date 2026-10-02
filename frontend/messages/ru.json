@@ -298,20 +298,20 @@
     "detail": {
       "margin": "{side, select, left {Левое} right {Правое} top {Верхнее} other {Нижнее}} поле — {value}\u00a0мм при минимуме {min}\u00a0мм{measured, select, true { (измерено по тексту)} other {}}.",
       "font_size": "Кегль {size, number}\u00a0пт.",
-      "font_size_widespread": "Кегль {size, number}\u00a0пт — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "font_size_widespread": "Кегль {size, number}\u00a0пт — в {count} из {total, plural, one {#\u00a0абзаца} few {#\u00a0абзацев} many {#\u00a0абзацев} other {#\u00a0абзаца}} основного текста.",
       "line_spacing": "Межстрочный интервал {value, number}.",
-      "line_spacing_widespread": "Межстрочный интервал {value, number} — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "line_spacing_widespread": "Межстрочный интервал {value, number} — в {count} из {total, plural, one {#\u00a0абзаца} few {#\u00a0абзацев} many {#\u00a0абзацев} other {#\u00a0абзаца}} основного текста.",
       "paragraph_indent": "Абзацный отступ {cm, number}\u00a0см.",
-      "paragraph_indent_widespread": "Абзацный отступ {cm, number}\u00a0см — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "paragraph_indent_widespread": "Абзацный отступ {cm, number}\u00a0см — в {count} из {total, plural, one {#\u00a0абзаца} few {#\u00a0абзацев} many {#\u00a0абзацев} other {#\u00a0абзаца}}.",
       "requisite_missing": "В документе не найден реквизит «{requisite}».",
       "signature_order": "«{name}» — фамилия стоит перед инициалами.",
       "date_format": "Дата «{value}» записана не по стандарту.",
-      "date_format_widespread": "Даты записаны не по стандарту в {count, plural, one {# месте} few {# местах} many {# местах} other {# места}}.",
+      "date_format_widespread": "Не по стандарту записаны {count} из {total, plural, one {#\u00a0даты} few {#\u00a0дат} many {#\u00a0дат} other {#\u00a0даты}}.",
       "numbering_roman": "Номер «{label}» записан римскими цифрами.",
-      "numbering_roman_widespread": "Нумерация не по стандарту в {count, plural, one {# пункте} few {# пунктах} many {# пунктах} other {# пункта}}.",
+      "numbering_roman_widespread": "Нумерация не по стандарту в {count} из {total, plural, one {#\u00a0пункта} few {#\u00a0пунктов} many {#\u00a0пунктов} other {#\u00a0пункта}}.",
       "numbering_depth": "Пункт «{label}» — {levels}-й уровень нумерации, допустимо не больше {max}.",
       "numbering_gap": "После предыдущего пункта ожидался номер {expected}, а стоит «{label}».",
-      "numbering_gap_widespread": "Пропуски или повторы в нумерации — {count, plural, one {# место} few {# места} many {# мест} other {# места}}."
+      "numbering_gap_widespread": "Пропуски или повторы в нумерации — {count} из {total, plural, one {#\u00a0номера} few {#\u00a0номеров} many {#\u00a0номеров} other {#\u00a0номера}}."
     },
     "status": {
       "unchecked": "Не проверен",
@@ -322,7 +322,10 @@
       "partial": "Проверено частично",
       "partialHint": "Замечаний нет, но {count, plural, one {#\u00a0проверка не выполнена} few {#\u00a0проверки не выполнены} many {#\u00a0проверок не выполнено} other {#\u00a0проверки не выполнено}} — подробности в документе."
     },
-    "noFindingsPartial": "Выполненные проверки замечаний не нашли, но часть проверок не выполнена."
+    "noFindingsPartial": "Выполненные проверки замечаний не нашли, но часть проверок не выполнена.",
+    "firstPlace": "К первому месту",
+    "placesCount": "{count, plural, one {#\u00a0место} few {#\u00a0места} many {#\u00a0мест} other {#\u00a0места}}",
+    "placesOpen": "{count, plural, one {#\u00a0место подсвечено} few {#\u00a0места подсвечены} many {#\u00a0мест подсвечены} other {#\u00a0места подсвечены}} в тексте, пока замечание открыто"
   },
   "families": {
     "formatting": "Оформление по ГОСТ Р 7.0.97-2016",

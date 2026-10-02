@@ -107,6 +107,9 @@ class FindingOut(ApiModel):
     recommendation: str
     norm: NormOut
     location: LocationOut | None
+    # A finding about the whole document lists the places it covers here;
+    # they are not marked in the text, only shown on request.
+    places: list[LocationOut]
     review: ReviewStatus
     reviewed_at: datetime | None
     revision: int
@@ -132,6 +135,7 @@ class FindingOut(ApiModel):
                 quote=quote,
             ),
             location=LocationOut.of(finding.location) if finding.location else None,
+            places=[LocationOut.of(place) for place in finding.places],
             review=finding.review,
             reviewed_at=finding.reviewed_at,
             revision=finding.revision,

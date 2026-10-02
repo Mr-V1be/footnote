@@ -7,23 +7,28 @@ import { Fragment, useMemo, type Ref } from "react";
 import type { DocumentStructure } from "@/shared/api/types";
 
 import { BlockView } from "./BlockView";
-import { footnotesByBlock, type Footnote } from "../footnotes";
+import { marksByBlock, NO_MARKS, type Footnote, type Highlight } from "../footnotes";
 import styles from "./sheet.module.css";
 
 const RECOGNISED = new Set(["pdf_ocr", "pdf_mixed"]);
 
-/** The document itself, on a sheet of paper, with footnote markers in the text. */
+/**
+ * The document itself, on a sheet of paper, with footnote markers in the
+ * text and, for a while, the places of an open document-wide finding.
+ */
 export function DocumentSheet({
   structure,
   footnotes,
+  highlights = [],
   sheetRef,
 }: {
   structure: DocumentStructure;
   footnotes: readonly Footnote[];
+  highlights?: readonly Highlight[];
   sheetRef?: Ref<HTMLElement>;
 }) {
   const t = useTranslations("viewer");
-  const byBlock = useMemo(() => footnotesByBlock(footnotes), [footnotes]);
+  const byBlock = useMemo(() => marksByBlock(footnotes, highlights), [footnotes, highlights]);
   const recognised = RECOGNISED.has(structure.version.method ?? "");
   return (
     <article ref={sheetRef} className={styles.sheet} lang="ru">
@@ -47,7 +52,7 @@ export function DocumentSheet({
                 <span>{t("page", { number: block.page ?? 0 })}</span>
               </div>
             ) : null}
-            <BlockView block={block} footnotes={byBlock.get(block.ordinal) ?? []} />
+            <BlockView block={block} marks={byBlock.get(block.ordinal) ?? NO_MARKS} />
           </Fragment>
         );
       })}

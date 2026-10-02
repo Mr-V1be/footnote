@@ -18,6 +18,7 @@ function finding(overrides: Partial<Finding>): Finding {
     recommendation: "",
     norm: { citation: "п. 5.10 ГОСТ Р 7.0.97-2016", actCode: null, anchor: null, quote: null },
     location: null,
+    places: [],
     review: "open",
     reviewedAt: null,
     revision: 1,

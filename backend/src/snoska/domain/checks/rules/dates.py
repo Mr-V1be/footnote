@@ -11,14 +11,24 @@ from snoska.domain.documents.structure import Block, DocumentStructure
 # day and month ranges and by the leading zeros a clause number never has.
 _NUMERIC = re.compile(r"(?<![\d.])(\d{1,2})([./-])(\d{1,2})\2(\d{4}|\d{2})(?![\d.]\d)")
 _ISO = re.compile(r"(?<![\d.])(\d{4})-(\d{2})-(\d{2})(?!\d)")
+# A date in words, the other standard spelling: 5 июня 2016 г.
+_WORDS = re.compile(
+    r"(?<!\d)«?\d{1,2}»?\s(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября"
+    r"|октября|ноября|декабря)\s\d{4}"
+)
 _DAYS = range(1, 32)
 _MONTHS = range(1, 13)
 _FULL_YEAR = 4
 
 
+def _is_date(match: re.Match[str]) -> bool:
+    day, _, month, _ = match.groups()
+    return int(day) in _DAYS and int(month) in _MONTHS
+
+
 def _numeric_offence(match: re.Match[str]) -> bool:
     day, separator, month, year = match.groups()
-    if int(day) not in _DAYS or int(month) not in _MONTHS:
+    if not _is_date(match):
         return False
     if separator != ".":
         return True
@@ -38,18 +48,20 @@ class DateFormatRule:
 
     def evaluate(self, structure: DocumentStructure, params: RuleParams) -> CheckOutcome:
         offences: list[Offence] = []
+        dates = 0
         for block in structure.blocks:
-            offences.extend(
-                self._offence(block, match)
-                for match in _NUMERIC.finditer(block.text)
-                if _numeric_offence(match)
-            )
-            offences.extend(
-                self._offence(block, match)
+            numeric = [match for match in _NUMERIC.finditer(block.text) if _is_date(match)]
+            iso = [
+                match
                 for match in _ISO.finditer(block.text)
                 if int(match.group(2)) in _MONTHS and int(match.group(3)) in _DAYS
+            ]
+            dates += len(numeric) + len(iso) + len(_WORDS.findall(block.text))
+            offences.extend(
+                self._offence(block, match) for match in numeric if _numeric_offence(match)
             )
-        return offences_outcome(offences, Detail.message("date_format_widespread"))
+            offences.extend(self._offence(block, match) for match in iso)
+        return offences_outcome(offences, dates, Detail.message("date_format_widespread"), params)
 
     @staticmethod
     def _offence(block: Block, match: re.Match[str]) -> Offence:

@@ -8,7 +8,7 @@ import { Typeset } from "@/shared/typography/Typeset";
 
 import type { NumberedFinding } from "../findings";
 import { FindingCard } from "./FindingCard";
-import type { CardHandlers } from "./FindingList";
+import { locateOf, type CardHandlers } from "./FindingList";
 import styles from "./result.module.css";
 
 /**
@@ -41,6 +41,7 @@ export function CompactFindingList({
                 busy={handlers.busyId === finding.id}
                 onSelect={() => handlers.onSelect(finding.id)}
                 onReview={(review) => handlers.onReview(item, review)}
+                onLocate={locateOf(item, handlers)}
               />
             </li>
           );
@@ -61,6 +62,11 @@ export function CompactFindingList({
               <span className={styles.compactTitle}>
                 <Typeset text={finding.title} />
               </span>
+              {finding.places.length > 0 ? (
+                <span className={styles.compactCount}>
+                  {t("placesCount", { count: finding.places.length })}
+                </span>
+              ) : null}
             </button>
           </li>
         );

@@ -25,3 +25,22 @@ describe("segmentText", () => {
     ]);
   });
 });
+
+describe("segmentText with highlighted places", () => {
+  it("shows places between footnotes but never over them", () => {
+    const place = (start: number, end: number) => ({
+      blockOrdinal: 0,
+      start,
+      end,
+      tone: "advice" as const,
+    });
+    const segments = segmentText(30, [note(1, 10, 14)], [place(0, 30), place(20, 25)]);
+    expect(segments.map(({ type, start, end }) => [type, start, end])).toEqual([
+      ["text", 0, 10],
+      ["mark", 10, 14],
+      ["text", 14, 20],
+      ["highlight", 20, 25],
+      ["text", 25, 30],
+    ]);
+  });
+});

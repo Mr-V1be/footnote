@@ -6,7 +6,7 @@ import { TypesetRuns } from "@/shared/typography/Typeset";
 import { typeset } from "@/shared/typography/typeset";
 
 import { useFootnotes } from "../FootnoteContext";
-import { anchors, segmentText, type Footnote } from "../footnotes";
+import { anchors, segmentText, type BlockMarks } from "../footnotes";
 import styles from "./sheet.module.css";
 
 /**
@@ -14,18 +14,27 @@ import styles from "./sheet.module.css";
  * text is typeset once as a whole, so a number or a date stays unbroken even
  * where a mark begins in the middle of it.
  */
-export function InlineText({ text, footnotes }: { text: string; footnotes: readonly Footnote[] }) {
+export function InlineText({ text, marks }: { text: string; marks: BlockMarks }) {
   const { active, setActive, revealCard } = useFootnotes();
   const value = useMemo(() => typeset(text), [text]);
-  if (footnotes.length === 0) return <TypesetRuns value={value} />;
+  if (marks.footnotes.length === 0 && marks.highlights.length === 0) {
+    return <TypesetRuns value={value} />;
+  }
   return (
     <>
-      {segmentText(value.text.length, footnotes).map((segment, index) => {
+      {segmentText(value.text.length, marks.footnotes, marks.highlights).map((segment, index) => {
         if (segment.type === "text") {
           return (
             <span key={index}>
               <TypesetRuns value={value} start={segment.start} end={segment.end} />
             </span>
+          );
+        }
+        if (segment.type === "highlight") {
+          return (
+            <mark key={index} data-tone={segment.tone} className={`${styles.mark} ${styles.place}`}>
+              <TypesetRuns value={value} start={segment.start} end={segment.end} />
+            </mark>
           );
         }
         const { number, tone, label } = segment.footnote;

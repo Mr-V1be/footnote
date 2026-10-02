@@ -77,6 +77,7 @@ def findings_of(
             recommendation=draft.recommendation or check.recommendation,
             norm=_norm(executed),
             location=draft.location,
+            places=draft.places,
             fingerprint=fingerprint(check.code, quoted(structure, draft.location)),
             review=ReviewStatus.OPEN,
             reviewed_by=None,

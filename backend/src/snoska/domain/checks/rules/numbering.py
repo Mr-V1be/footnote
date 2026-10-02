@@ -54,7 +54,9 @@ class ArabicNumberingRule:
                         ),
                     )
                 )
-        return offences_outcome(offences, Detail.message("numbering_roman_widespread"))
+        return offences_outcome(
+            offences, len(numbered), Detail.message("numbering_roman_widespread"), params
+        )
 
 
 class NumberingSequenceRule:
@@ -99,4 +101,6 @@ class NumberingSequenceRule:
                     )
                 )
             last[(scope, parent)] = number
-        return offences_outcome(offences, Detail.message("numbering_gap_widespread"))
+        return offences_outcome(
+            offences, len(paths), Detail.message("numbering_gap_widespread"), params
+        )

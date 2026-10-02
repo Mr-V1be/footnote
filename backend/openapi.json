@@ -3357,6 +3357,13 @@
               }
             ]
           },
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/LocationOut"
+            },
+            "type": "array",
+            "title": "Places"
+          },
           "review": {
             "$ref": "#/components/schemas/ReviewStatus"
           },
@@ -3388,6 +3395,7 @@
           "recommendation",
           "norm",
           "location",
+          "places",
           "review",
           "reviewedAt",
           "revision"

@@ -122,6 +122,8 @@ findings = Table(
     Column("block_ordinal", Integer, nullable=True),
     Column("span_start", Integer, nullable=True),
     Column("span_end", Integer, nullable=True),
+    # Places a finding about the whole document covers, shown on request.
+    Column("places", JSONB, nullable=False, server_default="[]"),
     Column("fingerprint", Text, nullable=False),
     Column("review", Text, nullable=False),
     Column("reviewed_by", Uuid, nullable=True),

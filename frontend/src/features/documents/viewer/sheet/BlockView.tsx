@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 
 import type { Block } from "@/shared/api/types";
 
-import { anchors, type Footnote } from "../footnotes";
+import { anchors, type BlockMarks } from "../footnotes";
 import { InlineText } from "./InlineText";
 import styles from "./sheet.module.css";
 import { TableView } from "./TableView";
@@ -46,7 +46,7 @@ function alignment(block: Block): string | undefined {
   return block.paragraph?.alignment ?? undefined;
 }
 
-export function BlockView({ block, footnotes }: { block: Block; footnotes: readonly Footnote[] }) {
+export function BlockView({ block, marks }: { block: Block; marks: BlockMarks }) {
   const id = anchors.block(block.ordinal);
   const lowConfidence = block.confidence !== null && block.confidence < LOW_CONFIDENCE;
   switch (block.kind) {
@@ -63,7 +63,7 @@ export function BlockView({ block, footnotes }: { block: Block; footnotes: reado
           data-level={block.level ?? 1}
         >
           {block.label ? <span className={styles.headingLabel}>{block.label}</span> : null}
-          <InlineText text={block.text} footnotes={footnotes} />
+          <InlineText text={block.text} marks={marks} />
         </Tag>
       );
     }
@@ -73,13 +73,13 @@ export function BlockView({ block, footnotes }: { block: Block; footnotes: reado
           <span className={styles.listLabel}>{block.label}</span>
           <div className={styles.measure} data-align={alignment(block)}>
             <p className={`${styles.listText} ${lowConfidence ? styles.uncertain : ""}`}>
-              <InlineText text={block.text} footnotes={footnotes} />
+              <InlineText text={block.text} marks={marks} />
             </p>
           </div>
         </div>
       );
     case "table":
-      return <TableView id={id} block={block} footnotes={footnotes} />;
+      return <TableView id={id} block={block} marks={marks} />;
     case "paragraph":
       return (
         <div
@@ -89,7 +89,7 @@ export function BlockView({ block, footnotes }: { block: Block; footnotes: reado
           data-align={alignment(block)}
         >
           <p className={lowConfidence ? styles.uncertain : undefined}>
-            <InlineText text={block.text} footnotes={footnotes} />
+            <InlineText text={block.text} marks={marks} />
           </p>
         </div>
       );

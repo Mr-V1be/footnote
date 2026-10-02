@@ -9,6 +9,12 @@ family: formatting
 rank: 1
 standard: ГОСТ Р 7.0.97-2016
 
+# When one rule is broken in most elements of a kind — more than `share` of
+# them and at least `min_places`, or in more than `max_local` places — the
+# finding is about the document as a whole: the places are counted and shown
+# on request, not marked one by one. A check may override any of the three.
+spread: {share: 0.5, min_places: 3, max_local: 8}
+
 kind_groups:
   all: &all [pd_policy, pd_consent, pd_assignment, contract, regulation, order, other]
   # Organisational documents that carry the full set of requisites.

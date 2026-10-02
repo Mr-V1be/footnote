@@ -12,6 +12,7 @@ from snoska.domain.checks.outcome import (
     FindingKind,
     TextLocation,
 )
+from snoska.domain.checks.spread import MAX_PLACES, SpreadPolicy
 from snoska.domain.documents.structure import (
     Alignment,
     Block,
@@ -36,17 +37,21 @@ LAYOUT_REQUISITES = frozenset(
         RequisiteKind.ACCESS_RESTRICTION,
     }
 )
-# Up to this many places get a marker each; beyond it the problem is
-# document-wide and one finding at the first place says how many there are.
-MAX_MARKED_PLACES = 5
 
 
 class RuleParams:
-    """Typed access to a rule's parameters from the catalogue."""
+    """Typed access to a rule's parameters from the catalogue, and to the
+    check's policy for offences spread over the document."""
 
-    def __init__(self, check_code: str, values: Mapping[str, object]) -> None:
+    def __init__(
+        self,
+        check_code: str,
+        values: Mapping[str, object],
+        spread: SpreadPolicy | None = None,
+    ) -> None:
         self._code = check_code
         self._values = values
+        self.spread = spread or SpreadPolicy()
 
     def number(self, name: str) -> float:
         value = self._values.get(name)
@@ -108,26 +113,28 @@ def whole_block(block: Block) -> TextLocation:
     return TextLocation(block.ordinal, 0, len(block.text))
 
 
-def offences_outcome(offences: Iterable[Offence], widespread: Detail) -> CheckOutcome:
-    """A finding per offending place, or one finding when the problem is everywhere.
+def offences_outcome(
+    offences: Iterable[Offence], population: int, widespread: Detail, params: RuleParams
+) -> CheckOutcome:
+    """A finding per offending place, or one finding about the whole document
+    when the offences cover most of the ``population`` of elements judged
+    (see SpreadPolicy).
 
     ``widespread`` describes the document-wide case; it receives the number
-    of places as the ``count`` parameter.
+    of places as ``count`` and the population as ``total``. Its places are
+    kept on the finding, in reading order, to be shown on request.
     """
     listed = list(offences)
     if not listed:
         return CheckOutcome.passed()
-    if len(listed) > MAX_MARKED_PLACES:
-        first = listed[0]
+    if params.spread.is_widespread(len(listed), population):
         detail = Detail.message(
-            widespread.code or "", **{**widespread.params, "count": len(listed)}
+            widespread.code or "",
+            **{**widespread.params, "count": len(listed), "total": population},
         )
+        places = tuple(offence.location or whole_block(offence.block) for offence in listed)
         return CheckOutcome.violation(
-            FindingDraft(
-                kind=FindingKind.VIOLATION,
-                detail=detail,
-                location=first.location or whole_block(first.block),
-            )
+            FindingDraft(kind=FindingKind.VIOLATION, detail=detail, places=places[:MAX_PLACES])
         )
     return CheckOutcome.violation(
         *(

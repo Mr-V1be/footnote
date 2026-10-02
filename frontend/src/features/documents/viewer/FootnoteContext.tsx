@@ -13,6 +13,8 @@ interface FootnoteState {
   setActive: (number: number | null) => void;
   /** Bring the marked text into view. */
   revealMark: (number: number) => void;
+  /** Bring a block of the document into view. */
+  revealBlock: (ordinal: number) => void;
   /** Bring the margin card into view (opens the panel where it is hidden). */
   revealCard: (number: number) => void;
 }
@@ -44,6 +46,7 @@ export function FootnoteProvider({
 }) {
   const [active, setActive] = useState<number | null>(null);
   const revealMark = useCallback((number: number) => scrollAndFlash(anchors.mark(number)), []);
+  const revealBlock = useCallback((ordinal: number) => scrollAndFlash(anchors.block(ordinal)), []);
   const revealCard = useCallback(
     (number: number) => {
       const place = onRevealCard(number);
@@ -58,8 +61,8 @@ export function FootnoteProvider({
     [onRevealCard],
   );
   const value = useMemo(
-    () => ({ active, setActive, revealMark, revealCard }),
-    [active, revealMark, revealCard],
+    () => ({ active, setActive, revealMark, revealBlock, revealCard }),
+    [active, revealMark, revealBlock, revealCard],
   );
   return <FootnoteContext value={value}>{children}</FootnoteContext>;
 }

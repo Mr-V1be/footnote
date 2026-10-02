@@ -38,7 +38,7 @@ function useCardHandlers(
   onLocated: () => void,
 ): CardHandlers {
   const review = useFindingReview(organization, documentId, version);
-  const { active, setActive, revealMark } = useFootnotes();
+  const { active, setActive, revealMark, revealBlock } = useFootnotes();
   return useMemo(
     () => ({
       selectedId: state.selectedId,
@@ -53,8 +53,14 @@ function useCardHandlers(
         onLocated();
         window.requestAnimationFrame(() => revealMark(number));
       },
+      onLocatePlaces: (item) => {
+        const first = item.finding.places[0];
+        if (!first) return;
+        onLocated();
+        window.requestAnimationFrame(() => revealBlock(first.blockOrdinal));
+      },
     }),
-    [state.selectedId, state.select, review, active, setActive, revealMark, onLocated],
+    [state.selectedId, state.select, review, active, setActive, revealMark, revealBlock, onLocated],
   );
 }
 
@@ -127,7 +133,12 @@ function Workspace({
           <OutlineNav entries={structure.outline} />
         </aside>
         <div className={styles.sheetColumn}>
-          <DocumentSheet structure={structure} footnotes={state.footnotes} sheetRef={setSheet} />
+          <DocumentSheet
+            structure={structure}
+            footnotes={state.footnotes}
+            highlights={state.highlights}
+            sheetRef={setSheet}
+          />
         </div>
         {margin ? (
           <aside className={styles.marginColumn} aria-label={t("checks.findings")}>

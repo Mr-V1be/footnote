@@ -4,6 +4,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from snoska.domain.checks.spread import SpreadPolicy
 from snoska.domain.shared.errors import NotFoundError
 
 
@@ -108,6 +109,8 @@ class CheckDefinition:
     rule: str | None = None
     params: Mapping[str, object] = field(default_factory=dict)
     brief: ModelBrief | None = None
+    # When a rule's offences become one remark about the whole document.
+    spread: SpreadPolicy = field(default_factory=SpreadPolicy)
 
     def __post_init__(self) -> None:
         if not self.kinds:

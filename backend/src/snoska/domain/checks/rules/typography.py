@@ -51,7 +51,9 @@ class BodyFontSizeRule:
             Offence(block, Detail.message("font_size", size=size)) for block, size in offending
         ]
         common = _most_common([size for _, size in offending])
-        return offences_outcome(offences, Detail.message("font_size_widespread", size=common))
+        return offences_outcome(
+            offences, len(known), Detail.message("font_size_widespread", size=common), params
+        )
 
 
 class LineSpacingRule:
@@ -79,7 +81,9 @@ class LineSpacingRule:
             for block, value in offending
         ]
         common = _most_common([value for _, value in offending])
-        return offences_outcome(offences, Detail.message("line_spacing_widespread", value=common))
+        return offences_outcome(
+            offences, len(known), Detail.message("line_spacing_widespread", value=common), params
+        )
 
 
 class ParagraphIndentRule:
@@ -113,7 +117,9 @@ class ParagraphIndentRule:
             for block, indent in offending
         ]
         common = _most_common([_centimetres(indent) for _, indent in offending])
-        return offences_outcome(offences, Detail.message("paragraph_indent_widespread", cm=common))
+        return offences_outcome(
+            offences, len(known), Detail.message("paragraph_indent_widespread", cm=common), params
+        )
 
 
 def _centimetres(millimetres: float) -> float:

@@ -72,13 +72,20 @@ class FindingDraft:
     """A finding as a check produces it, before it is stored.
 
     ``location`` is None when the finding concerns the document as a whole,
-    for example a required element that is not there at all.
+    for example a required element that is not there at all. Such a finding
+    may still list the ``places`` it covers (a font size broken in most
+    paragraphs): they are not marked in the text, only shown on request.
     """
 
     kind: FindingKind
     detail: Detail
     location: TextLocation | None = None
     recommendation: str | None = None
+    places: tuple[TextLocation, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.places and self.location is not None:
+            raise ValueError("a finding on one place does not list other places")
 
 
 @dataclass(frozen=True, slots=True)
