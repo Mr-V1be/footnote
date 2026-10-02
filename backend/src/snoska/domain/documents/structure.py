@@ -145,14 +145,47 @@ class DocumentStructure:
     requisites: tuple[Requisite, ...] = ()
 
     def outline(self) -> tuple[OutlineEntry, ...]:
-        """Navigation tree derived from headings; never stored separately."""
-        return tuple(
-            OutlineEntry(
-                block_ordinal=block.ordinal,
-                level=block.level or 1,
-                label=block.label,
-                text=block.text,
-            )
-            for block in self.blocks
-            if block.kind is BlockKind.HEADING
-        )
+        """Navigation tree derived from headings; never stored separately.
+
+        A document title is often set as two lines — the document type and
+        what it is about («ПОЛИТИКА» / «в отношении обработки персональных
+        данных»). The second line continues the first, so both make one entry.
+        """
+        entries: list[OutlineEntry] = []
+        previous: Block | None = None
+        for block in self.blocks:
+            if block.kind is not BlockKind.HEADING:
+                previous = None
+                continue
+            if previous is not None and entries and _continues_title(previous, block):
+                head = entries[-1]
+                entries[-1] = OutlineEntry(
+                    block_ordinal=head.block_ordinal,
+                    level=head.level,
+                    label=head.label,
+                    text=f"{_title_word(head.text)} {block.text}",
+                )
+            else:
+                entries.append(
+                    OutlineEntry(
+                        block_ordinal=block.ordinal,
+                        level=block.level or 1,
+                        label=block.label,
+                        text=block.text,
+                    )
+                )
+            previous = block
+        return tuple(entries)
+
+
+def _continues_title(previous: Block, block: Block) -> bool:
+    """An unnumbered heading that starts in lower case continues the one above."""
+    first = block.text[:1]
+    return previous.label is None and block.label is None and first.isalpha() and first.islower()
+
+
+def _title_word(text: str) -> str:
+    """A title set in capitals as a single word reads as a word in a sentence."""
+    if text.isalpha() and text.isupper() and len(text) > 1:
+        return text[0] + text[1:].lower()
+    return text

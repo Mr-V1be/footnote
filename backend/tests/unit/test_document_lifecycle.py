@@ -7,6 +7,7 @@ import pytest
 
 from snoska.domain.documents.document import Document, InvalidTitleError, title_from_filename
 from snoska.domain.documents.formats import SUPPORTED_FORMATS, UnsupportedFormatError
+from snoska.domain.documents.structure import Block, BlockKind, DocumentStructure
 from snoska.domain.documents.version import (
     DocumentVersion,
     ExtractionMethod,
@@ -101,3 +102,31 @@ def test_format_requires_extension_and_signature(filename: str, head: bytes, exp
 def test_mismatched_files_are_rejected(filename: str, head: bytes) -> None:
     with pytest.raises(UnsupportedFormatError):
         SUPPORTED_FORMATS.detect(filename, head)
+
+
+def _heading(ordinal: int, text: str, label: str | None = None) -> Block:
+    return Block(ordinal=ordinal, kind=BlockKind.HEADING, text=text, level=1, label=label)
+
+
+def test_outline_joins_a_title_and_its_continuation_line() -> None:
+    structure = DocumentStructure(
+        blocks=(
+            _heading(0, "ПОЛИТИКА"),
+            _heading(1, "в отношении обработки персональных данных"),
+            Block(ordinal=2, kind=BlockKind.PARAGRAPH, text="г. Москва"),
+            _heading(3, "Общие положения", label="1."),
+            _heading(4, "Основные понятия", label="2."),
+        )
+    )
+    assert [(entry.block_ordinal, entry.text) for entry in structure.outline()] == [
+        (0, "Политика в отношении обработки персональных данных"),
+        (3, "Общие положения"),
+        (4, "Основные понятия"),
+    ]
+
+
+def test_outline_keeps_a_document_type_apart_from_a_capitalised_title() -> None:
+    structure = DocumentStructure(
+        blocks=(_heading(0, "ПРИКАЗ"), _heading(1, "Об утверждении Политики"))
+    )
+    assert [entry.text for entry in structure.outline()] == ["ПРИКАЗ", "Об утверждении Политики"]
