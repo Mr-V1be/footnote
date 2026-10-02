@@ -22,7 +22,7 @@ os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
 
 from snoska.api.app import create_app
 from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import BACKEND_ROOT, Settings
+from snoska.bootstrap.settings import BACKEND_ROOT, Settings, StorageBackend
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
 from snoska.infrastructure.persistence.vector_index import ensure_space
@@ -51,8 +51,12 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     base = Settings()
     assert base.database.name.endswith("_test"), "integration tests need a dedicated database"
     keycloak = base.keycloak.model_copy(update={"url": ISSUER.removesuffix("/realms/snoska")})
+    # Files of a test run stay in a temporary directory, whatever the stand uses.
     storage = base.storage.model_copy(
-        update={"storage_root": Path(tmp_path_factory.mktemp("blobs"))}
+        update={
+            "storage_backend": StorageBackend.LOCAL,
+            "storage_root": Path(tmp_path_factory.mktemp("blobs")),
+        }
     )
     return base.model_copy(update={"keycloak": keycloak, "storage": storage})
 

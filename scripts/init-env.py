@@ -15,7 +15,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / ".env.example"
 TARGET = ROOT / ".env"
-OPTIONAL = frozenset({"SNOSKA_OPENAI_BASE_URL", "SNOSKA_OPENAI_API_KEY", "SNOSKA_OTLP_ENDPOINT"})
+# Provider settings the owner fills in; they stay empty rather than random.
+OPTIONAL_PREFIXES = ("SNOSKA_LLM_", "SNOSKA_EMBEDDING_", "SNOSKA_OTLP_", "SNOSKA_PAYMENTS_LIVE_")
+OPTIONAL = frozenset({"SNOSKA_S3_REGION"})
 SECRET_BYTES = 24
 SESSION_SECRET_BYTES = 32
 _ASSIGNMENT = re.compile(r"^([A-Z0-9_]+)=(.*)$")
@@ -35,7 +37,8 @@ def main() -> int:
             continue
         key, default = match.groups()
         value = current.get(key) or default
-        if not value and key not in OPTIONAL:
+        optional = key in OPTIONAL or key.startswith(OPTIONAL_PREFIXES)
+        if not value and not optional:
             size = SESSION_SECRET_BYTES if key == "SNOSKA_SESSION_SECRET" else SECRET_BYTES
             value = secrets.token_urlsafe(size)
         lines.append(f"{key}={value}")

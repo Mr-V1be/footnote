@@ -182,10 +182,24 @@ class ObservabilitySettings(BaseSettings):
     otlp_endpoint: str | None = None
 
 
+class StorageBackend(StrEnum):
+    LOCAL = "local"
+    S3 = "s3"
+
+
 class StorageSettings(BaseSettings):
+    """Where files are kept: a local directory or an S3-compatible store."""
+
     model_config = _config("SNOSKA_")
 
+    storage_backend: StorageBackend = StorageBackend.LOCAL
     storage_root: Path = Path("var/blobs")
+    s3_endpoint: str = "127.0.0.1:46340"
+    s3_access_key: SecretStr = SecretStr("")
+    s3_secret_key: SecretStr = SecretStr("")
+    s3_bucket: str = "snoska"
+    s3_secure: bool = False
+    s3_region: str | None = None
 
     @property
     def blob_root(self) -> Path:

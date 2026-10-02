@@ -32,6 +32,7 @@ from snoska.application.tenancy.platform import PlatformTenantQueries
 from snoska.application.tenancy.workspaces import WorkspaceQueries
 from snoska.bootstrap.providers import AiAdapters, build_ai_adapters
 from snoska.bootstrap.settings import ChecksSettings, Settings
+from snoska.bootstrap.storage import build_blob_storage
 from snoska.domain.checks.catalog import CheckCatalog, CheckMethod
 from snoska.domain.checks.rules.registry import DEFAULT_RULES
 from snoska.domain.documents.formats import SUPPORTED_FORMATS
@@ -61,7 +62,7 @@ from snoska.infrastructure.persistence.database import DatabaseConfig, create_en
 from snoska.infrastructure.persistence.health import DatabaseHealth
 from snoska.infrastructure.persistence.run_feed import PgRunChangeFeed
 from snoska.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
-from snoska.infrastructure.storage.filesystem import FileSystemBlobStorage
+from snoska.infrastructure.storage.health import StorageHealth
 from snoska.infrastructure.system.clock import SystemClock
 from snoska.ports.ai import Embedder, LanguageModel
 from snoska.ports.corpus_source import CorpusSource
@@ -168,7 +169,7 @@ async def build_container(
 
     clock = SystemClock()
     uow = SqlUnitOfWorkFactory(engine)
-    blobs = FileSystemBlobStorage(settings.storage.blob_root)
+    blobs = build_blob_storage(settings.storage)
     directory = KeycloakAdminClient(
         http,
         KeycloakAdminConfig(
@@ -248,7 +249,7 @@ async def build_container(
         verifier=verifier,
         provisioning=directory,
         ai=ai,
-        health_checks=(DatabaseHealth(engine),),
+        health_checks=(DatabaseHealth(engine), StorageHealth(blobs)),
         job_handlers={
             PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(
                 uow, blobs, parsers, clock, follow_up=scheduler

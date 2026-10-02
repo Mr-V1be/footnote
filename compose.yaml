@@ -98,6 +98,28 @@ services:
       retries: 30
       start_period: 30s
 
+  # S3-compatible object storage for uploads and generated files. MinIO no
+  # longer publishes its own images; Chainguard builds the official source
+  # and publishes the current release under `latest`.
+  minio:
+    image: chainguard/minio:latest
+    restart: unless-stopped
+    command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${SNOSKA_S3_ACCESS_KEY:?set SNOSKA_S3_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${SNOSKA_S3_SECRET_KEY:?set SNOSKA_S3_SECRET_KEY in .env}
+    ports:
+      - "127.0.0.1:${SNOSKA_MINIO_PORT:-46340}:9000"
+      - "127.0.0.1:${SNOSKA_MINIO_CONSOLE_PORT:-46341}:9001"
+    volumes:
+      - miniodata:/data
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
   mailpit:
     image: axllent/mailpit:v1.31.3
     restart: unless-stopped
@@ -117,3 +139,4 @@ networks:
 volumes:
   pgdata:
   redisdata:
+  miniodata:
