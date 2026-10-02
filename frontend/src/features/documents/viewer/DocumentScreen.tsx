@@ -146,6 +146,7 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   const parsed =
     structure.data && structure.data.version.status === "parsed" ? structure.data : null;
   const outline = parsed?.outline ?? [];
+  const pending = !structure.data || isProcessing(structure.data.version.status);
   const download =
     version !== null ? originalFileUrl(organization, document.id, version) : undefined;
 
@@ -304,13 +305,13 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
         <div className={styles.workspace}>
           <aside className={styles.outlineColumn} aria-label={t("viewer.outline")}>
             <h2 className={styles.columnTitle}>{t("viewer.outline")}</h2>
-            <OutlineNav entries={outline} />
+            <OutlineNav entries={outline} pending={pending} />
           </aside>
           <div className={styles.sheetColumn}>{sheetContent()}</div>
           <aside className={styles.panelColumn} aria-label={t("viewer.requisites")}>
             <section className={styles.panelSection}>
               <h2 className={styles.columnTitle}>{t("viewer.requisites")}</h2>
-              <FootnoteList footnotes={footnotes} />
+              <FootnoteList footnotes={footnotes} pending={pending} />
             </section>
             {parsed ? (
               <section className={styles.panelSection}>
@@ -330,7 +331,7 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
             title={t("viewer.outline")}
             closeLabel={t("common.close")}
           >
-            <OutlineNav entries={outline} onNavigate={() => setPanel(null)} />
+            <OutlineNav entries={outline} pending={pending} onNavigate={() => setPanel(null)} />
           </DrawerContent>
         </Drawer>
         <Drawer open={panel === "notes"} onOpenChange={(open) => setPanel(open ? "notes" : null)}>
@@ -339,7 +340,7 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
             title={t("viewer.requisites")}
             closeLabel={t("common.close")}
           >
-            <FootnoteList footnotes={footnotes} onLocate={() => setPanel(null)} />
+            <FootnoteList footnotes={footnotes} pending={pending} onLocate={() => setPanel(null)} />
             {parsed ? (
               <section className={styles.drawerSection}>
                 <h2 className={styles.columnTitle}>{t("viewer.details")}</h2>

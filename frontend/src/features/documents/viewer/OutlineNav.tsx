@@ -40,14 +40,19 @@ function useCurrentSection(entries: readonly OutlineEntry[]): number | null {
 
 export function OutlineNav({
   entries,
+  pending = false,
   onNavigate,
 }: {
   entries: readonly OutlineEntry[];
+  /** The version is still being parsed: nothing is known yet. */
+  pending?: boolean;
   onNavigate?: () => void;
 }) {
   const t = useTranslations("viewer");
   const current = useCurrentSection(entries);
-  if (entries.length === 0) return <p className={styles.empty}>{t("noOutline")}</p>;
+  if (entries.length === 0) {
+    return <p className={styles.empty}>{t(pending ? "afterParsing" : "noOutline")}</p>;
+  }
   return (
     <nav aria-label={t("outline")}>
       <ol className={styles.outline}>

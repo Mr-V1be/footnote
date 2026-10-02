@@ -10,14 +10,21 @@ import styles from "./panels.module.css";
 /** Margin notes: one card per marker in the text. */
 export function FootnoteList({
   footnotes,
+  pending = false,
   onLocate,
 }: {
   footnotes: readonly Footnote[];
+  /** The version is still being parsed: nothing is known yet. */
+  pending?: boolean;
   onLocate?: () => void;
 }) {
   const t = useTranslations();
   const { active, setActive, revealMark } = useFootnotes();
-  if (footnotes.length === 0) return <p className={styles.empty}>{t("viewer.noRequisites")}</p>;
+  if (footnotes.length === 0) {
+    return (
+      <p className={styles.empty}>{t(pending ? "viewer.afterParsing" : "viewer.noRequisites")}</p>
+    );
+  }
   return (
     <ol className={styles.footnotes} aria-label={t("viewer.footnotes")}>
       {footnotes.map(({ number, requisite }) => (
