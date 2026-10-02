@@ -20,20 +20,41 @@ class Zone(StrEnum):
     ANYWHERE = "anywhere"
 
 
+# A date or a number that belongs to a cited act ("Федерального закона от
+# 27.07.2006 № 152-ФЗ") is the act's requisite, not the document's.
+_ACT_BEFORE_DATE = re.compile(
+    r"(?:закон[а-я]*|кодекс[а-я]*|указ[а-я]*|постановлени[а-я]*)"
+    r"(?:\s+Российской\s+Федерации)?\s+от\s*$",
+    re.IGNORECASE,
+)
+_ACT_NUMBER = re.compile(r"\d+-Ф?К?З$")
+
+
 @dataclass(frozen=True, slots=True)
 class PatternDetector:
-    """Finds one requisite kind by a pattern within a document zone."""
+    """Finds one requisite kind by a pattern within a document zone.
+
+    ``not_after`` rejects a match that the text before it marks as something
+    else; ``not_value`` rejects a match by its own value.
+    """
 
     kind: RequisiteKind
     zone: Zone
     pattern: re.Pattern[str]
     first_only: bool = True
     group: int | str = 0
+    not_after: re.Pattern[str] | None = None
+    not_value: re.Pattern[str] | None = None
 
     def find(self, block: Block) -> Iterable[tuple[int, int, str]]:
         for match in self.pattern.finditer(block.text):
             start, end = match.span(self.group)
-            yield start, end, match.group(self.group)
+            value = match.group(self.group)
+            if self.not_after is not None and self.not_after.search(block.text[:start]):
+                continue
+            if self.not_value is not None and self.not_value.search(value):
+                continue
+            yield start, end, value
             if self.first_only:
                 return
 
@@ -67,14 +88,19 @@ DEFAULT_DETECTORS: tuple[PatternDetector, ...] = (
     PatternDetector(
         kind=RequisiteKind.DATE,
         zone=Zone.HEADER,
+        # Any spelling of a date counts as the requisite; whether the spelling
+        # follows the standard is a check of its own.
         pattern=re.compile(
-            rf"(?<!\d)(?:\d{{2}}\.\d{{2}}\.\d{{4}}|«?\d{{1,2}}»?\s(?:{_MONTHS})\s\d{{4}})(?:\s?г\.)?"
+            rf"(?<![\d.])(?:\d{{1,2}}\.\d{{1,2}}\.\d{{4}}|\d{{4}}-\d{{2}}-\d{{2}}"
+            rf"|«?\d{{1,2}}»?\s(?:{_MONTHS})\s\d{{4}})(?:\s?г\.)?(?![\d.]\d)"
         ),
+        not_after=_ACT_BEFORE_DATE,
     ),
     PatternDetector(
         kind=RequisiteKind.REGISTRATION_NUMBER,
         zone=Zone.HEADER,
         pattern=re.compile(r"№\s?([0-9A-Za-zА-Яа-яЁё][0-9A-Za-zА-Яа-яЁё/\-.]{0,30})"),
+        not_value=_ACT_NUMBER,
     ),
     PatternDetector(
         kind=RequisiteKind.PLACE,

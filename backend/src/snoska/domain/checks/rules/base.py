@@ -12,12 +12,30 @@ from snoska.domain.checks.outcome import (
     FindingKind,
     TextLocation,
 )
-from snoska.domain.documents.structure import Alignment, Block, BlockKind, DocumentStructure
+from snoska.domain.documents.structure import (
+    Alignment,
+    Block,
+    BlockKind,
+    DocumentStructure,
+    RequisiteKind,
+)
 
 # Body text: what a reader reads as running text. Short lines (requisites,
 # signatures, captions) and centred or right-aligned blocks are layout, not body.
 BODY_MIN_CHARS = 60
 BODY_KINDS = frozenset({BlockKind.PARAGRAPH, BlockKind.LIST_ITEM})
+# Requisites the standard lays out by rules of their own (from the left
+# margin, without a paragraph indent), however long their text is.
+LAYOUT_REQUISITES = frozenset(
+    {
+        RequisiteKind.TITLE,
+        RequisiteKind.APPROVAL_STAMP,
+        RequisiteKind.ATTACHMENT_NOTE,
+        RequisiteKind.SIGNATURE,
+        RequisiteKind.EXECUTOR_NOTE,
+        RequisiteKind.ACCESS_RESTRICTION,
+    }
+)
 # Up to this many places get a marker each; beyond it the problem is
 # document-wide and one finding at the first place says how many there are.
 MAX_MARKED_PLACES = 5
@@ -78,7 +96,12 @@ def is_body(block: Block) -> bool:
 
 
 def body_blocks(structure: DocumentStructure) -> list[Block]:
-    return [block for block in structure.blocks if is_body(block)]
+    layout = {
+        requisite.block_ordinal
+        for requisite in structure.requisites
+        if requisite.kind in LAYOUT_REQUISITES
+    }
+    return [block for block in structure.blocks if is_body(block) and block.ordinal not in layout]
 
 
 def whole_block(block: Block) -> TextLocation:

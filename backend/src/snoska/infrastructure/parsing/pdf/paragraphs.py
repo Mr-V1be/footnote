@@ -116,8 +116,22 @@ def strip_furniture(pages: Sequence[PageContent]) -> list[PageContent]:
     return cleaned
 
 
+def _center(line: TextLine) -> float:
+    return (line.x0 + line.x1) / 2
+
+
+def _leaves_set_off_block(previous: TextLine, line: TextLine, geometry: BodyGeometry) -> bool:
+    """A block set off to the right (an approval stamp) ends where a line starts
+    elsewhere and is not centred with it: the title below a stamp is a block
+    of its own even when no extra space separates them."""
+    set_off = previous.x0 > geometry.left + RIGHT_ALIGNED_MIN_OFFSET
+    moved = abs(line.x0 - previous.x0) > INDENT_MIN
+    return set_off and moved and abs(_center(line) - _center(previous)) > CENTER_TOLERANCE
+
+
 def _starts_paragraph(previous: TextLine, line: TextLine, geometry: BodyGeometry) -> bool:
-    if line.top - previous.top > geometry.pitch * PARAGRAPH_GAP_RATIO:
+    gap = line.top - previous.top > geometry.pitch * PARAGRAPH_GAP_RATIO
+    if gap or _leaves_set_off_block(previous, line, geometry):
         return True
     if _sized(line) and _sized(previous):
         if abs(magnitude(line) - magnitude(previous)) > MAGNITUDE_CHANGE:

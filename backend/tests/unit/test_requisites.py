@@ -59,3 +59,41 @@ def test_body_text_after_numbered_sections_is_not_a_header() -> None:
         ),
     ]
     assert RequisiteKind.ORGANIZATION_NAME not in kinds(RequisiteDetector().detect(blocks))
+
+
+def test_a_date_in_any_spelling_is_the_date_requisite() -> None:
+    # The spelling is judged by the date format check, not by the detector.
+    for text, value in (
+        ("Редакция от 1.2.2026", "1.2.2026"),
+        ("2026-02-03", "2026-02-03"),
+        ("«5» июня 2026 г.", "«5» июня 2026 г."),
+    ):
+        assert kinds(RequisiteDetector().detect(blocks(text)))[RequisiteKind.DATE] == value
+
+
+def test_a_standard_number_is_not_a_date() -> None:
+    found = RequisiteDetector().detect(blocks("По ГОСТ Р 7.0.97-2016 и пункту 1.12.2026.1"))
+    assert RequisiteKind.DATE not in kinds(found)
+
+
+def test_the_date_and_number_of_a_cited_act_are_not_the_documents() -> None:
+    found = kinds(
+        RequisiteDetector().detect(
+            blocks(
+                "ПРИКАЗ",
+                "Во исполнение Федерального закона от 27.07.2006 № 152-ФЗ ПРИКАЗЫВАЮ:",
+            )
+        )
+    )
+    assert RequisiteKind.DATE not in found
+    assert RequisiteKind.REGISTRATION_NUMBER not in found
+
+
+def test_an_approval_by_order_carries_the_documents_date() -> None:
+    found = kinds(
+        RequisiteDetector().detect(
+            blocks("УТВЕРЖДЕНА", "приказом генерального директора от 12.01.2026 № 3-ОД")
+        )
+    )
+    assert found[RequisiteKind.DATE] == "12.01.2026"
+    assert found[RequisiteKind.REGISTRATION_NUMBER] == "№ 3-ОД"
