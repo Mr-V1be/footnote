@@ -1,0 +1,21 @@
+# Normative acts tracked by the corpus.
+#
+# `sources` holds the document reference per source adapter. `snapshot` is a
+# copy of the portal page bundled for offline seeding; refresh it with
+# `snoska corpus snapshot <code>`. The text of federal laws is an official
+# document and is not an object of copyright (Civil Code of the Russian
+# Federation, art. 1259 part 6).
+acts:
+  - code: 152-fz
+    kind: federal_law
+    short_title: 152-ФЗ
+    title: О персональных данных
+    adopted_on: 2006-07-27
+    sources:
+      # Document number in «Законодательство России», pravo.gov.ru.
+      pravo_ips: "102108261"
+    snapshot:
+      file: snapshots/152-fz.pravo-ips.html.gz
+      source: pravo_ips
+      revision: "38"
+      retrieved_at: 2026-10-02T16:45:00+00:00
