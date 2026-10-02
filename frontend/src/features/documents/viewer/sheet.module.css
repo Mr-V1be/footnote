@@ -14,7 +14,10 @@
   font-size: var(--text-lg);
   line-height: var(--leading-document);
   overflow-wrap: break-word;
+  text-align: start;
+  text-wrap: pretty;
   hyphens: auto;
+  hyphenate-limit-chars: 6 3 3;
 }
 
 @media (width >= 48rem) {
@@ -45,8 +48,9 @@
   margin-block-start: var(--space-0-5);
 }
 
-.paragraph,
+.paragraph p,
 .listText {
+  margin: 0;
   white-space: pre-line;
 }
 
@@ -56,8 +60,33 @@
   text-indent: min(calc(var(--indent-first) * var(--sheet-scale)), 30%);
 }
 
+/*
+ * Alignment on screen. Centred and right-aligned lines keep their position.
+ * Justified source text is set ragged right with hyphenation and is only
+ * justified where the line is long enough for even word spacing: each block
+ * is a size container, so its own measure (after indents) decides.
+ */
+.measure {
+  container-type: inline-size;
+}
+
+.sheet [data-align="center"] {
+  text-align: center;
+}
+
+.sheet [data-align="right"] {
+  text-align: end;
+}
+
+@container (inline-size >= 62ch) {
+  .measure[data-align="justify"] > p {
+    text-align: justify;
+  }
+}
+
 .heading {
   margin-block: var(--space-6) var(--space-3);
+  hyphens: manual;
   font-size: var(--text-document-heading);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
@@ -178,7 +207,7 @@
   hyphens: auto;
 }
 
-.paragraph[id]:global(.isFlashing),
+.paragraph:global(.isFlashing),
 .listItem:global(.isFlashing),
 .heading:global(.isFlashing) {
   background: var(--color-highlight);

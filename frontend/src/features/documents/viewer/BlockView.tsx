@@ -18,11 +18,11 @@ const MIN_FIRST_LINE_INDENT_MM = -20;
 const MAX_LEFT_INDENT_MM = 120;
 
 /**
- * Source formatting is mirrored so the reader sees the document as written.
- * Indents only apply to left-aligned and justified text: in centred lines
- * the measured offset is the centring itself.
+ * Source indents are mirrored so the reader sees the document as written.
+ * They only apply to left-aligned and justified text: in centred lines the
+ * measured offset is the centring itself.
  */
-function formatStyle(block: Block): CSSProperties {
+function indentStyle(block: Block): CSSProperties {
   const paragraph = block.paragraph;
   const indented = paragraph?.alignment !== "center" && paragraph?.alignment !== "right";
   const first = indented
@@ -35,8 +35,15 @@ function formatStyle(block: Block): CSSProperties {
     "--indent-first": `${first}mm`,
     "--indent-left": `${left}mm`,
     "--list-level": block.kind === "list_item" ? (block.level ?? 0) : 0,
-    textAlign: paragraph?.alignment === "justify" ? "justify" : (paragraph?.alignment ?? undefined),
   } as CSSProperties;
+}
+
+/**
+ * The source alignment is kept as data: the sheet decides how to set it on
+ * screen (justified text falls back to ragged right on a short measure).
+ */
+function alignment(block: Block): string | undefined {
+  return block.paragraph?.alignment ?? undefined;
 }
 
 export function BlockView({ block, footnotes }: { block: Block; footnotes: readonly Footnote[] }) {
@@ -51,7 +58,8 @@ export function BlockView({ block, footnotes }: { block: Block; footnotes: reado
         <Tag
           id={id}
           className={styles.heading}
-          style={formatStyle(block)}
+          style={indentStyle(block)}
+          data-align={alignment(block)}
           data-level={block.level ?? 1}
         >
           {block.label ? <span className={styles.headingLabel}>{block.label}</span> : null}
@@ -61,24 +69,29 @@ export function BlockView({ block, footnotes }: { block: Block; footnotes: reado
     }
     case "list_item":
       return (
-        <div id={id} className={styles.listItem} style={formatStyle(block)}>
+        <div id={id} className={styles.listItem} style={indentStyle(block)}>
           <span className={styles.listLabel}>{block.label}</span>
-          <p className={`${styles.listText} ${lowConfidence ? styles.uncertain : ""}`}>
-            <InlineText text={block.text} footnotes={footnotes} />
-          </p>
+          <div className={styles.measure} data-align={alignment(block)}>
+            <p className={`${styles.listText} ${lowConfidence ? styles.uncertain : ""}`}>
+              <InlineText text={block.text} footnotes={footnotes} />
+            </p>
+          </div>
         </div>
       );
     case "table":
       return <TableView id={id} block={block} footnotes={footnotes} />;
     case "paragraph":
       return (
-        <p
+        <div
           id={id}
-          className={`${styles.paragraph} ${lowConfidence ? styles.uncertain : ""}`}
-          style={formatStyle(block)}
+          className={`${styles.paragraph} ${styles.measure}`}
+          style={indentStyle(block)}
+          data-align={alignment(block)}
         >
-          <InlineText text={block.text} footnotes={footnotes} />
-        </p>
+          <p className={lowConfidence ? styles.uncertain : undefined}>
+            <InlineText text={block.text} footnotes={footnotes} />
+          </p>
+        </div>
       );
   }
 }
