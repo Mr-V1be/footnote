@@ -1,7 +1,7 @@
 "use client";
 
 import { IconAlertTriangle, IconCategory, IconSearchOff, IconUpload } from "@tabler/icons-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -50,6 +50,8 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
       fetchDocumentPage(api, organization, workspace, filters.applied, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (page) => page.nextCursor,
+    // While a new filter loads, the previous results stay in place, dimmed.
+    placeholderData: keepPreviousData,
     refetchInterval: (query) => (anyProcessing(query.state.data) ? PROCESSING_POLL_MS : false),
   });
 
@@ -107,8 +109,7 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
     if (items.length === 0) {
       return (
         <StatePanel
-          icon={<FootnoteIllustration />}
-          tone="bare"
+          illustration={<FootnoteIllustration />}
           title={t("emptyTitle")}
           description={canUpload ? t("emptyDescription") : t("emptyReadOnly")}
           action={
@@ -126,7 +127,10 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
       );
     }
     return (
-      <>
+      <div
+        className={list.isPlaceholderData ? styles.stale : undefined}
+        aria-busy={list.isPlaceholderData}
+      >
         <DocumentList items={items} organization={organization} />
         {list.hasNextPage ? (
           <div className={styles.more}>
@@ -139,7 +143,7 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
             </Button>
           </div>
         ) : null}
-      </>
+      </div>
     );
   }
 

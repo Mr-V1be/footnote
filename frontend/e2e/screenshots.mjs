@@ -85,10 +85,12 @@ const SCREENS = [
     name: "03-documents-loading",
     user: "orlov",
     run: async (page) => {
-      await page.goto(`${BASE}/o/${ORG}/w/main/documents`, { waitUntil: "networkidle" });
-      await page.route("**/bff/api/v1/organizations/*/workspaces/*/documents**", () => {});
-      await page.getByRole("searchbox").fill("политика");
-      await page.waitForTimeout(600);
+      const id = await documentIdByTitle(page, "Договор поручения");
+      await page.goto(`${BASE}/o/${ORG}/documents/${id}`, { waitUntil: "networkidle" });
+      // Hold the server response of the list so its loading skeleton stays visible.
+      await page.route(`**/o/${ORG}/w/main/documents**`, () => {});
+      await page.getByRole("link", { name: "К документам" }).click();
+      await page.getByLabel("К документам").or(page.locator("[aria-busy=true]")).first().waitFor();
     },
   },
   {
@@ -100,11 +102,11 @@ const SCREENS = [
         route.fulfill({
           status: 503,
           contentType: "application/problem+json",
-          body: '{"code":"dependency_unavailable","status":503,"title":"x"}',
+          body: '{"code":"dependency_unavailable","status":503,"title":"Service Unavailable"}',
         }),
       );
       await page.getByRole("searchbox").fill("договор");
-      await page.getByRole("alert").waitFor({ timeout: 15_000 });
+      await page.getByText("Не удалось загрузить документы").waitFor({ timeout: 20_000 });
     },
   },
   {

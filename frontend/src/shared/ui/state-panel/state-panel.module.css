@@ -38,11 +38,6 @@
   color: var(--color-ink);
 }
 
-.bare {
-  inline-size: auto;
-  block-size: auto;
-}
-
 .title {
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);

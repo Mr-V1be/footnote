@@ -1,8 +1,17 @@
 .screen {
   display: grid;
-  place-items: center;
+  grid-template-rows: auto 1fr;
   min-block-size: 100dvh;
-  padding: var(--space-gutter);
+  padding: var(--space-5) var(--space-gutter);
+}
+
+.brand {
+  display: flex;
+  justify-content: center;
+}
+
+.screen > section {
+  align-self: center;
 }
 
 .actions {
