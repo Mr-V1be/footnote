@@ -1,0 +1,34 @@
+import "server-only";
+
+import { createClient } from "redis";
+
+import { serverConfig } from "./config";
+
+function connect() {
+  const config = serverConfig();
+  const client = createClient({
+    socket: {
+      host: config.SNOSKA_REDIS_HOST,
+      port: config.SNOSKA_REDIS_PORT,
+      connectTimeout: 5000,
+    },
+    password: config.SNOSKA_REDIS_PASSWORD || undefined,
+  });
+  client.on("error", (error: unknown) => {
+    console.error(JSON.stringify({ event: "redis.error", error: String(error) }));
+  });
+  return client.connect();
+}
+
+type RedisClient = Awaited<ReturnType<typeof connect>>;
+
+const globalForRedis = globalThis as typeof globalThis & { snoskaRedis?: Promise<RedisClient> };
+
+/** One connection per server process, reused across requests and hot reloads. */
+export function redis(): Promise<RedisClient> {
+  const existing = globalForRedis.snoskaRedis;
+  if (existing) return existing;
+  const created = connect();
+  globalForRedis.snoskaRedis = created;
+  return created;
+}
