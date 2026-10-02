@@ -1,0 +1,31 @@
+.track {
+  position: relative;
+  overflow: hidden;
+  block-size: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-soft);
+}
+
+.bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--progress);
+  border-radius: inherit;
+  background: var(--color-ink);
+  transition: inline-size var(--duration-base) var(--ease-standard);
+}
+
+.indeterminate {
+  animation: slide var(--duration-loop) var(--ease-standard) infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(300%);
+  }
+}

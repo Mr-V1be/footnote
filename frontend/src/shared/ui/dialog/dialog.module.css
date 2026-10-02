@@ -1,0 +1,124 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-overlay);
+  background: var(--color-overlay);
+  animation: fade var(--duration-base) var(--ease-standard);
+}
+
+.content {
+  position: fixed;
+  z-index: var(--layer-overlay);
+  display: flex;
+  flex-direction: column;
+  inset-inline: 0;
+  inset-block-end: 0;
+  max-block-size: 92dvh;
+  padding-block-end: env(safe-area-inset-bottom);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-popover);
+  animation: rise var(--duration-slow) var(--ease-standard);
+}
+
+.content:focus-visible {
+  outline: none;
+}
+
+@media (width >= 40rem) {
+  .content {
+    inset: 50% auto auto 50%;
+    inline-size: min(var(--size-dialog), calc(100vw - 2 * var(--space-gutter)));
+    max-block-size: 86dvh;
+    padding-block-end: 0;
+    border-radius: var(--radius-lg);
+    transform: translate(-50%, -50%);
+    animation: pop var(--duration-base) var(--ease-standard);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+.heading {
+  display: grid;
+  flex: 1;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.description {
+  color: var(--color-text-secondary);
+}
+
+.close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--control-height-md);
+  block-size: var(--control-height-md);
+  margin: calc(-1 * var(--space-1-5));
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.close:hover {
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+}
+
+.close svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+
+.body {
+  overflow-y: auto;
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-divider);
+}
+
+@media (width >= 40rem) {
+  .footer {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+}

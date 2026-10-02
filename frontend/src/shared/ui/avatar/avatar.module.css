@@ -1,0 +1,22 @@
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--color-ink-soft);
+  color: var(--color-ink);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.md {
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  font-size: var(--text-xs);
+}
+
+.sm {
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+  font-size: var(--text-2xs);
+}

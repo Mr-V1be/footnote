@@ -1,0 +1,37 @@
+.skeleton {
+  display: block;
+  inline-size: var(--skeleton-width);
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-soft) 0%,
+    var(--color-surface-sunken) 50%,
+    var(--color-neutral-soft) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer var(--duration-loop) linear infinite;
+}
+
+.line {
+  block-size: var(--skeleton-height, 0.75em);
+  border-radius: var(--radius-xs);
+}
+
+.block {
+  block-size: var(--skeleton-height, var(--space-16));
+  border-radius: var(--radius-md);
+}
+
+.circle {
+  block-size: var(--skeleton-width);
+  border-radius: var(--radius-full);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}

@@ -1,0 +1,62 @@
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.input {
+  inline-size: 100%;
+  block-size: var(--control-height-md);
+  padding-inline: var(--space-8) var(--space-8);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--text-md);
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.input:focus-visible {
+  border-color: var(--color-ink);
+  outline: none;
+  box-shadow: 0 0 0 var(--space-px) var(--color-ink);
+}
+
+.clear {
+  position: absolute;
+  inset-inline-end: var(--space-1);
+  display: grid;
+  place-items: center;
+  inline-size: var(--control-height-sm);
+  block-size: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text-tertiary);
+}
+
+.clear:hover {
+  color: var(--color-text);
+}
+
+.clear svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}

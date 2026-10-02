@@ -1,0 +1,24 @@
+.square {
+  padding: 0;
+  aspect-ratio: 1;
+}
+
+.square svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+
+.md {
+  inline-size: var(--control-height-md);
+}
+
+.sm {
+  inline-size: var(--control-height-sm);
+}
+
+@media (pointer: coarse) {
+  .square {
+    min-inline-size: var(--tap-target);
+    min-block-size: var(--tap-target);
+  }
+}

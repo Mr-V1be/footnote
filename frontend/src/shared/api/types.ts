@@ -1,0 +1,26 @@
+import type { components } from "./schema";
+
+type Schemas = components["schemas"];
+
+export type Me = Schemas["MeOut"];
+export type Membership = Schemas["MembershipOut"];
+export type Organization = Schemas["OrganizationOut"];
+export type Workspace = Schemas["WorkspaceOut"];
+export type Catalog = Schemas["CatalogOut"];
+export type DocumentKind = Schemas["DocumentKindOut"];
+export type DocumentListItem = Schemas["DocumentListItemOut"];
+export type DocumentPage = Schemas["DocumentPageOut"];
+export type DocumentDetails = Schemas["DocumentOut"];
+export type DocumentVersion = Schemas["VersionOut"];
+export type DocumentStructure = Schemas["StructureOut"];
+export type Block = Schemas["BlockOut"];
+export type Requisite = Schemas["RequisiteOut"];
+export type OutlineEntry = Schemas["OutlineEntryOut"];
+export type PageSetup = Schemas["PageSetupOut"];
+export type ParseStatus = Schemas["ParseStatus"];
+export type ParseFailureCode = Schemas["ParseFailureCode"];
+export type ExtractionMethod = Schemas["ExtractionMethod"];
+export type RequisiteKind = Schemas["RequisiteKind"];
+export type Permission = Schemas["Permission"];
+export type UploadResult = Schemas["UploadOut"];
+export type Problem = Schemas["Problem"];

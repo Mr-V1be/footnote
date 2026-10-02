@@ -1,0 +1,18 @@
+.content {
+  z-index: var(--layer-popover);
+  max-inline-size: var(--size-tooltip-max);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  box-shadow: var(--shadow-popover);
+  animation: appear var(--duration-fast) var(--ease-standard);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
