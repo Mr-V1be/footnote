@@ -29,6 +29,7 @@ def _member(name: str, org: OrganizationProfile, role: str) -> MemberIdentity:
 
 ALICE = _member("alice", ORG_A, "owner")
 OLGA = _member("olga", ORG_A, "observer")
+EVA = _member("eva", ORG_A, "executor")
 BOB = _member("bob", ORG_B, "owner")
 
 

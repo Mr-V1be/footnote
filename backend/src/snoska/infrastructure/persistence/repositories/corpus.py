@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import re
 from collections.abc import Collection, Mapping, Sequence
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import RowMapping, cast, func, insert, literal_column, select, text, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -17,22 +15,16 @@ from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.corpus.units import NormUnit, UnitKind
 from snoska.infrastructure.persistence.tables.corpus import (
     corpus_editions,
+    edition_indexes,
+    embedding_spaces,
     legal_acts,
     norm_embeddings,
     norm_units,
 )
+from snoska.infrastructure.persistence.vector_index import comparable_type, space_predicate
 from snoska.ports.corpus_repositories import ActOverview, NormSearchHit
 
 _INSERT_BATCH = 500
-# Space codes are interpolated into SQL so the planner can match the partial
-# HNSW index of the space; only this shape is ever accepted.
-_SPACE_CODE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,62}$")
-
-
-def _space_predicate(space: EmbeddingSpace) -> str:
-    if not _SPACE_CODE.fullmatch(space.code):
-        raise ValueError(f"invalid embedding space code {space.code!r}")
-    return f"space_code = '{space.code}'"
 
 
 def _act(row: RowMapping) -> LegalAct:
@@ -217,6 +209,33 @@ class SqlCorpusRepository:
         row = result.mappings().first()
         return _unit(row) if row else None
 
+    async def units_by_anchors(
+        self, edition_id: UUID, anchors: Collection[str]
+    ) -> Sequence[NormUnit]:
+        if not anchors:
+            return []
+        result = await self._connection.execute(
+            select(norm_units)
+            .where(norm_units.c.edition_id == edition_id, norm_units.c.anchor.in_(list(anchors)))
+            .order_by(norm_units.c.ordinal)
+        )
+        return [_unit(row) for row in result.mappings()]
+
+    async def units_by_ids(self, unit_ids: Collection[UUID]) -> Sequence[NormUnit]:
+        if not unit_ids:
+            return []
+        result = await self._connection.execute(
+            select(norm_units).where(norm_units.c.id.in_(list(unit_ids)))
+        )
+        return [_unit(row) for row in result.mappings()]
+
+    async def get_edition(self, edition_id: UUID) -> Edition | None:
+        result = await self._connection.execute(
+            select(corpus_editions).where(corpus_editions.c.id == edition_id)
+        )
+        row = result.mappings().first()
+        return _edition(row) if row else None
+
     async def missing_embeddings(self, space: EmbeddingSpace, hashes: Collection[str]) -> set[str]:
         if not hashes:
             return set()
@@ -247,10 +266,55 @@ class SqlCorpusRepository:
         )
         await self._connection.execute(statement.on_conflict_do_nothing())
 
+    async def space_registered(self, space: EmbeddingSpace) -> bool:
+        registered = await self._connection.scalar(
+            select(embedding_spaces.c.dimensions).where(embedding_spaces.c.code == space.code)
+        )
+        return registered is not None and int(registered) == space.dimensions
+
+    async def is_indexed(self, edition_id: UUID, space: EmbeddingSpace) -> bool:
+        found = await self._connection.scalar(
+            select(func.count())
+            .select_from(edition_indexes)
+            .where(
+                edition_indexes.c.edition_id == edition_id,
+                edition_indexes.c.space_code == space.code,
+            )
+        )
+        return bool(found)
+
+    async def mark_indexed(self, edition_id: UUID, space: EmbeddingSpace, now: datetime) -> None:
+        await self._connection.execute(
+            pg_insert(edition_indexes)
+            .values(edition_id=edition_id, space_code=space.code, ready_at=now)
+            .on_conflict_do_nothing()
+        )
+
+    async def indexed_active_editions(self, space: EmbeddingSpace, act_code: str | None) -> int:
+        statement = (
+            select(func.count())
+            .select_from(corpus_editions)
+            .join(
+                edition_indexes,
+                (edition_indexes.c.edition_id == corpus_editions.c.id)
+                & (edition_indexes.c.space_code == space.code),
+            )
+            .where(corpus_editions.c.status == EditionStatus.ACTIVE.value)
+        )
+        if act_code is not None:
+            statement = statement.where(corpus_editions.c.act_code == act_code)
+        return int(await self._connection.scalar(statement) or 0)
+
+    async def active_editions(self) -> Sequence[Edition]:
+        result = await self._connection.execute(
+            select(corpus_editions).where(corpus_editions.c.status == EditionStatus.ACTIVE.value)
+        )
+        return [_edition(row) for row in result.mappings()]
+
     async def search(
         self, space: EmbeddingSpace, vector: Sequence[float], *, act_code: str | None, limit: int
     ) -> Sequence[NormSearchHit]:
-        embedding = cast(norm_embeddings.c.embedding, Vector(space.dimensions))
+        embedding = cast(norm_embeddings.c.embedding, comparable_type(space))
         distance = embedding.cosine_distance(list(vector)).label("distance")
         editions = corpus_editions
         statement = (
@@ -258,8 +322,13 @@ class SqlCorpusRepository:
             .select_from(norm_embeddings)
             .join(norm_units, norm_units.c.embedding_sha256 == norm_embeddings.c.content_sha256)
             .join(editions, editions.c.id == norm_units.c.edition_id)
+            .join(
+                edition_indexes,
+                (edition_indexes.c.edition_id == editions.c.id)
+                & (edition_indexes.c.space_code == space.code),
+            )
             .where(
-                text(_space_predicate(space)),
+                text(space_predicate(space, "norm_embeddings")),
                 editions.c.status == EditionStatus.ACTIVE.value,
             )
             .order_by(literal_column("distance"))

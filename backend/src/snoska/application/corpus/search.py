@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from snoska.domain.shared.errors import ValidationError
+from snoska.domain.shared.errors import InvalidStateError, ValidationError
 from snoska.ports.ai import Embedder
 from snoska.ports.corpus_repositories import NormSearchHit
 from snoska.ports.unit_of_work import UnitOfWorkFactory
@@ -14,6 +14,12 @@ MAX_RESULTS = 50
 
 class EmptyQueryError(ValidationError):
     code = "empty_query"
+
+
+class CorpusNotIndexedError(InvalidStateError):
+    """No edition in force is indexed for the configured embedding model yet."""
+
+    code = "corpus_not_indexed"
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,8 +40,13 @@ class NormSearch:
         text = query.text.strip()[:QUERY_MAX_LENGTH]
         if not text:
             raise EmptyQueryError("query is empty")
+        space = self._embedder.space
+        async with self._uow_factory.for_platform() as uow:
+            indexed = await uow.corpus.indexed_active_editions(space, query.act_code)
+        if not indexed:
+            raise CorpusNotIndexedError(f"no edition in force is indexed in space {space.code!r}")
         [vector] = await self._embedder.embed([text])
-        self._embedder.space.validate(vector)
+        space.validate(vector)
         async with self._uow_factory.for_platform() as uow:
             return await uow.corpus.search(
                 self._embedder.space,

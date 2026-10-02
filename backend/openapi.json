@@ -1272,6 +1272,739 @@
         }
       }
     },
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks": {
+      "post": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Request Check",
+        "description": "Check the version again with the current catalogue (or join a pending run).",
+        "operationId": "request_check",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Number"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks/latest": {
+      "get": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Latest Check",
+        "description": "The latest run of the version with its results and findings; null if never checked.",
+        "operationId": "latest_check",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Number"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CheckReportOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Latest Check"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organization}/check-runs/{run_id}": {
+      "get": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Get Run",
+        "operationId": "get_run",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organization}/check-runs/{run_id}/events": {
+      "get": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Run Events",
+        "description": "Progress of a run as server-sent events: `run` on every change, `end` when settled.",
+        "operationId": "run_events",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-sent run events",
+            "content": {
+              "text/event-stream": {}
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organization}/findings/{finding_id}": {
+      "patch": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Review Finding",
+        "description": "Accept, reject, mark fixed or reopen a finding (optimistic concurrency by revision).",
+        "operationId": "review_finding",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Finding Id"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindingOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checks/catalog": {
+      "get": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Check Catalog",
+        "description": "Every check the product runs, what it requires and what it cites.",
+        "operationId": "check_catalog",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckCatalogOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/corpus/acts": {
       "get": {
         "tags": [
@@ -1892,6 +2625,188 @@
         ],
         "title": "CatalogOut"
       },
+      "CheckCatalogOut": {
+        "properties": {
+          "revision": {
+            "type": "string",
+            "title": "Revision"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/FamilyOut"
+            },
+            "type": "array",
+            "title": "Families"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "models": {
+            "$ref": "#/components/schemas/ModelsOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "revision",
+          "families",
+          "checks",
+          "models"
+        ],
+        "title": "CheckCatalogOut"
+      },
+      "CheckMethod": {
+        "type": "string",
+        "enum": [
+          "deterministic",
+          "model"
+        ],
+        "title": "CheckMethod",
+        "description": "How a check reaches its verdict."
+      },
+      "CheckOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "family": {
+            "type": "string",
+            "title": "Family"
+          },
+          "method": {
+            "$ref": "#/components/schemas/CheckMethod"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Kinds"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "requirement": {
+            "type": "string",
+            "title": "Requirement"
+          },
+          "citations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Citations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "family",
+          "method",
+          "severity",
+          "kinds",
+          "title",
+          "requirement",
+          "citations"
+        ],
+        "title": "CheckOut",
+        "description": "A check of the registry as the product describes it."
+      },
+      "CheckReportOut": {
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/RunOut"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResultOut"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/FindingOut"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run",
+          "results",
+          "findings",
+          "checks"
+        ],
+        "title": "CheckReportOut"
+      },
+      "DetailOut": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Params"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "params",
+          "text"
+        ],
+        "title": "DetailOut",
+        "description": "Either a message code with parameters (translated by the client) or\ntext written by the language model."
+      },
       "DocumentFormatOut": {
         "properties": {
           "code": {
@@ -2007,6 +2922,16 @@
               }
             ],
             "title": "Createdbyname"
+          },
+          "check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2022,7 +2947,8 @@
           "format",
           "sizeBytes",
           "pageCount",
-          "createdByName"
+          "createdByName",
+          "check"
         ],
         "title": "DocumentListItemOut"
       },
@@ -2192,6 +3118,110 @@
         ],
         "title": "ExtractionMethod"
       },
+      "FamilyOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "rank"
+        ],
+        "title": "FamilyOut"
+      },
+      "FindingKind": {
+        "type": "string",
+        "enum": [
+          "violation",
+          "review"
+        ],
+        "title": "FindingKind"
+      },
+      "FindingOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "checkCode": {
+            "type": "string",
+            "title": "Checkcode"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FindingKind"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/DetailOut"
+          },
+          "recommendation": {
+            "type": "string",
+            "title": "Recommendation"
+          },
+          "norm": {
+            "$ref": "#/components/schemas/NormOut"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LocationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "reviewedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewedat"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "checkCode",
+          "kind",
+          "severity",
+          "title",
+          "detail",
+          "recommendation",
+          "norm",
+          "location",
+          "review",
+          "reviewedAt",
+          "revision"
+        ],
+        "title": "FindingOut"
+      },
       "FontOut": {
         "properties": {
           "family": {
@@ -2247,6 +3277,29 @@
         ],
         "title": "LayoutSource",
         "description": "Where page geometry came from: declared by the file or measured from ink."
+      },
+      "LocationOut": {
+        "properties": {
+          "blockOrdinal": {
+            "type": "integer",
+            "title": "Blockordinal"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "blockOrdinal",
+          "start",
+          "end"
+        ],
+        "title": "LocationOut"
       },
       "MeOut": {
         "properties": {
@@ -2335,6 +3388,93 @@
           "permissions"
         ],
         "title": "MembershipOut"
+      },
+      "ModelsOut": {
+        "properties": {
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
+          },
+          "languageModel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languagemodel"
+          },
+          "embeddingModel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embeddingmodel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configured",
+          "languageModel",
+          "embeddingModel"
+        ],
+        "title": "ModelsOut",
+        "description": "Whether model checks can run: a model API is configured and the corpus\nis searchable with its embedding model."
+      },
+      "NormOut": {
+        "properties": {
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          },
+          "actCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actcode"
+          },
+          "anchor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          }
+        },
+        "type": "object",
+        "required": [
+          "citation",
+          "actCode",
+          "anchor",
+          "quote"
+        ],
+        "title": "NormOut"
       },
       "NormUnitOut": {
         "properties": {
@@ -2688,6 +3828,9 @@
         "enum": [
           "documents.read",
           "documents.upload",
+          "checks.run",
+          "findings.decide",
+          "findings.resolve",
           "corpus.read",
           "platform.tenants.read"
         ],
@@ -2784,6 +3927,270 @@
         ],
         "title": "RequisiteOut"
       },
+      "ResultOut": {
+        "properties": {
+          "checkCode": {
+            "type": "string",
+            "title": "Checkcode"
+          },
+          "method": {
+            "$ref": "#/components/schemas/CheckMethod"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ResultStatus"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/LocationOut"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "errorCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorcode"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "durationMs": {
+            "type": "integer",
+            "title": "Durationms"
+          },
+          "citation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Citation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkCode",
+          "method",
+          "status",
+          "evidence",
+          "errorCode",
+          "attempts",
+          "durationMs",
+          "citation"
+        ],
+        "title": "ResultOut"
+      },
+      "ResultStatus": {
+        "type": "string",
+        "enum": [
+          "passed",
+          "violation",
+          "needs_review",
+          "not_applicable",
+          "error"
+        ],
+        "title": "ResultStatus",
+        "description": "The verdict of one check on one document version."
+      },
+      "ReviewIn": {
+        "properties": {
+          "review": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "review",
+          "revision"
+        ],
+        "title": "ReviewIn"
+      },
+      "ReviewStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "accepted",
+          "rejected",
+          "fixed"
+        ],
+        "title": "ReviewStatus",
+        "description": "What the team decided about a finding."
+      },
+      "RunFailureCode": {
+        "type": "string",
+        "enum": [
+          "version_not_parsed",
+          "internal_error"
+        ],
+        "title": "RunFailureCode",
+        "description": "Stable reasons a whole run could not finish (single checks fail on their own)."
+      },
+      "RunOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Documentid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Versionid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finishedat"
+          },
+          "failureCode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunFailureCode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "catalogRevision": {
+            "type": "string",
+            "title": "Catalogrevision"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "documentId",
+          "versionId",
+          "status",
+          "total",
+          "done",
+          "createdAt",
+          "startedAt",
+          "finishedAt",
+          "failureCode",
+          "catalogRevision",
+          "revision"
+        ],
+        "title": "RunOut"
+      },
+      "RunStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "completed",
+          "failed"
+        ],
+        "title": "RunStatus"
+      },
+      "RunSummaryOut": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Runid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "critical": {
+            "type": "integer",
+            "title": "Critical"
+          },
+          "important": {
+            "type": "integer",
+            "title": "Important"
+          },
+          "advice": {
+            "type": "integer",
+            "title": "Advice"
+          },
+          "reviews": {
+            "type": "integer",
+            "title": "Reviews"
+          }
+        },
+        "type": "object",
+        "required": [
+          "runId",
+          "status",
+          "total",
+          "done",
+          "critical",
+          "important",
+          "advice",
+          "reviews"
+        ],
+        "title": "RunSummaryOut",
+        "description": "The latest run of a document's latest version, for lists."
+      },
       "SearchHitOut": {
         "properties": {
           "unit": {
@@ -2828,6 +4235,15 @@
           "hits"
         ],
         "title": "SearchResultOut"
+      },
+      "Severity": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "important",
+          "advice"
+        ],
+        "title": "Severity"
       },
       "StructureOut": {
         "properties": {

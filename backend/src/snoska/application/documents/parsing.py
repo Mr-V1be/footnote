@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Protocol
 from uuid import UUID
 
 import structlog
@@ -11,13 +12,19 @@ from snoska.ports.blob_storage import BlobStorage
 from snoska.ports.clock import Clock
 from snoska.ports.document_parsing import DocumentParseError, DocumentParserRegistry
 from snoska.ports.jobs import JobPayload
-from snoska.ports.unit_of_work import UnitOfWorkFactory
+from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
 
 log = structlog.get_logger(__name__)
 
 # On the last delivery the queue will make, an unexpected failure is recorded
 # as final so the version never stays in PARSING forever.
 MAX_PARSE_ATTEMPTS = PARSE_DOCUMENT_VERSION.max_retries + 1
+
+
+class ParsedVersionFollowUp(Protocol):
+    """What happens next to a parsed version, in the transaction that parsed it."""
+
+    async def on_parsed(self, uow: UnitOfWork, version: DocumentVersion) -> None: ...
 
 
 class ParseDocumentVersion:
@@ -33,11 +40,13 @@ class ParseDocumentVersion:
         blobs: BlobStorage,
         parsers: DocumentParserRegistry,
         clock: Clock,
+        follow_up: ParsedVersionFollowUp | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._blobs = blobs
         self._parsers = parsers
         self._clock = clock
+        self._follow_up = follow_up
 
     async def __call__(self, payload: JobPayload) -> None:
         organization_id = UUID(payload["organization_id"])
@@ -78,6 +87,8 @@ class ParseDocumentVersion:
             await uow.structures.replace(version_id, structure)
             locked.complete(summary, self._clock.now())
             await uow.versions.save(locked)
+            if self._follow_up is not None:
+                await self._follow_up.on_parsed(uow, locked)
             await uow.commit()
         bound.info("document.parsed", blocks=summary.block_count, method=summary.method)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from enum import StrEnum
 from pathlib import Path
 from urllib.parse import quote
@@ -7,6 +8,7 @@ from urllib.parse import quote
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.observability.tracing import TracingExporter
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -16,8 +18,13 @@ BYTES_PER_MEGABYTE = 1024 * 1024
 
 
 def _config(prefix: str) -> SettingsConfigDict:
+    # Empty values in .env mean "not set": the default applies.
     return SettingsConfigDict(
-        env_prefix=prefix, env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore"
+        env_prefix=prefix,
+        env_file=ENV_FILE,
+        env_file_encoding="utf-8",
+        extra="ignore",
+        env_ignore_empty=True,
     )
 
 
@@ -75,21 +82,75 @@ class DirectorySettings(BaseSettings):
 
 
 class AiProvider(StrEnum):
-    OLLAMA = "ollama"
+    # No model API configured: model checks report "model not connected".
+    NONE = "none"
+    # Any server implementing the OpenAI chat completions and embeddings API.
     OPENAI_COMPATIBLE = "openai_compatible"
 
 
+_SPACE_UNSAFE = re.compile(r"[^a-z0-9]+")
+_SPACE_CODE_LIMIT = 40
+
+
 class AiSettings(BaseSettings):
+    """Models run only behind an external API; nothing runs on this machine."""
+
     model_config = _config("SNOSKA_")
 
-    ai_provider: AiProvider = AiProvider.OLLAMA
-    ollama_url: str = "http://127.0.0.1:46340"
-    llm_model: str = "qwen3.5:9b"
-    embedding_model: str = "bge-m3:567m"
-    embedding_space: str = "bge-m3"
-    openai_base_url: str = ""
-    openai_api_key: SecretStr = SecretStr("")
-    request_timeout_seconds: float = 180.0
+    ai_provider: AiProvider = AiProvider.NONE
+    llm_base_url: str = ""
+    llm_api_key: SecretStr = SecretStr("")
+    llm_model: str = ""
+    # Embeddings may come from another endpoint; empty values reuse the LLM's.
+    embedding_base_url: str = ""
+    embedding_api_key: SecretStr = SecretStr("")
+    embedding_model: str = ""
+    # Vector size the embedding model returns; it names the vector space.
+    embedding_dimensions: int = 0
+    request_timeout_seconds: float = 120.0
+
+    def embedding_space(self) -> EmbeddingSpace:
+        """The vector space of the configured model: vectors of different
+        models or sizes are never compared, so each has its own space."""
+        if not self.embedding_model or self.embedding_dimensions <= 0:
+            return EmbeddingSpace(code=UNCONFIGURED_SPACE, dimensions=0)
+        slug = _SPACE_UNSAFE.sub("-", self.embedding_model.lower()).strip("-")
+        return EmbeddingSpace(
+            code=f"{slug[:_SPACE_CODE_LIMIT]}-{self.embedding_dimensions}",
+            dimensions=self.embedding_dimensions,
+        )
+
+    def require_api(self) -> None:
+        missing = [
+            name
+            for name, value in (
+                ("SNOSKA_LLM_BASE_URL", self.llm_base_url),
+                ("SNOSKA_LLM_MODEL", self.llm_model),
+                ("SNOSKA_EMBEDDING_MODEL", self.embedding_model),
+            )
+            if not value
+        ]
+        if self.embedding_dimensions <= 0:
+            missing.append("SNOSKA_EMBEDDING_DIMENSIONS")
+        if missing:
+            raise ValueError(f"the openai_compatible provider needs {', '.join(missing)}")
+
+
+UNCONFIGURED_SPACE = "none"
+
+
+class ChecksSettings(BaseSettings):
+    model_config = _config("SNOSKA_CHECKS_")
+
+    catalog_dir: Path = BACKEND_ROOT / "data" / "checks"
+    # Model checks running at once; match the model server's parallel slots.
+    model_concurrency: int = 2
+    # Passages of the document shown to the model for one requirement.
+    fragments: int = 8
+    # Provisions found by meaning, besides those the check names.
+    related_norms: int = 1
+    # Answers asked for one check before it is reported as failed.
+    max_attempts: int = 3
 
 
 class ApiSettings(BaseSettings):
@@ -146,6 +207,7 @@ class Settings(BaseSettings):
     keycloak: KeycloakSettings = Field(default_factory=KeycloakSettings)
     directory: DirectorySettings = Field(default_factory=DirectorySettings)
     ai: AiSettings = Field(default_factory=AiSettings)
+    checks: ChecksSettings = Field(default_factory=ChecksSettings)
     api: ApiSettings = Field(default_factory=ApiSettings)
     worker: WorkerSettings = Field(default_factory=WorkerSettings)
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)

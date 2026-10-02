@@ -25,15 +25,25 @@ from snoska.bootstrap.container import Container, Overrides, build_container
 from snoska.bootstrap.settings import BACKEND_ROOT, Settings
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from tests.support.fakes import FakeDirectory, HashEmbedder
+from snoska.infrastructure.persistence.vector_index import ensure_space
+from tests.support.fakes import FakeDirectory, HashEmbedder, RecordedLanguageModel
 from tests.support.scenario import ORG_A, ORG_B
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
+    "findings, check_results, check_runs, text_embeddings, edition_indexes, "
     "document_blocks, document_structures, document_versions, documents, workspaces, "
     "organizations, user_profiles, outbox_messages, norm_embeddings, norm_units, "
     "corpus_editions, legal_acts"
 )
+# A small space for the deterministic test embedder, registered like any model's.
+TEST_SPACE = EmbeddingSpace("test-hash-64", 64)
+# Verdicts of the recorded language model by words of a check's question.
+RECORDED_VERDICTS = {
+    "трансграничную передачу": "absent",
+    "уничтожения персональных данных": "partial",
+    "права субъекта": "uncertain",
+}
 
 
 @pytest.fixture(scope="session")
@@ -65,6 +75,15 @@ def migrated(alembic_config: Config, settings: Settings) -> None:
 
 
 @pytest.fixture(autouse=True)
+async def test_space(migrated: None, settings: Settings) -> None:
+    engine = create_engine(_owner(settings))
+    try:
+        await ensure_space(engine, TEST_SPACE)
+    finally:
+        await engine.dispose()
+
+
+@pytest.fixture(autouse=True)
 async def clean_database(settings: Settings) -> None:
     engine = create_engine(_owner(settings))
     async with engine.begin() as connection:
@@ -84,7 +103,8 @@ async def container(settings: Settings, tokens: TokenFactory) -> AsyncIterator[C
         overrides=Overrides(
             key_source=StaticKeys(tokens),
             directory=FakeDirectory([ORG_A, ORG_B]),
-            embedder=HashEmbedder(EmbeddingSpace("bge-m3", 1024)),
+            embedder=HashEmbedder(TEST_SPACE),
+            language_model=RecordedLanguageModel(RECORDED_VERDICTS),
         ),
     )
     yield built

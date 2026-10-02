@@ -43,7 +43,8 @@ async def test_uploaded_document_is_parsed_in_background(
     assert queued.json()["version"]["status"] == "queued"
     assert queued.json()["blocks"] == []
 
-    assert await run_jobs(container) == 1
+    # Parsing, then the checks it schedules for the parsed version.
+    assert await run_jobs(container) == 2
     parsed = (
         await api.get(
             f"{BASE}/documents/{document_id}/versions/1/structure", headers=auth(tokens, ALICE)

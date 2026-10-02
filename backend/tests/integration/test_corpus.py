@@ -8,7 +8,7 @@ from alembic import command
 from alembic.config import Config
 
 from snoska.application.corpus.sync import SyncOutcome
-from snoska.application.shared.jobs import EMBED_CORPUS_EDITION
+from snoska.application.shared.jobs import INDEX_CORPUS_EDITION
 from snoska.bootstrap.container import Container
 from snoska.domain.corpus.assembly import embedding_texts_for
 from tests.support.scenario import ALICE, auth, run_jobs
@@ -17,7 +17,7 @@ from tests.support.tokens import TokenFactory
 pytestmark = pytest.mark.integration
 
 
-async def test_snapshot_is_ingested_once_embedded_and_searchable(
+async def test_snapshot_is_ingested_once_served_and_searchable_once_indexed(
     api: httpx.AsyncClient, container: Container, tokens: TokenFactory
 ) -> None:
     first = await container.corpus_sync.sync("152-fz", "snapshot")
@@ -26,11 +26,14 @@ async def test_snapshot_is_ingested_once_embedded_and_searchable(
     assert first.unit_count > 300
 
     acts = (await api.get("/api/v1/corpus/acts", headers=auth(tokens, ALICE))).json()
-    assert acts[0]["edition"] is None, "an edition is not served before it is embedded"
+    assert acts[0]["edition"]["sourceRevision"] == first.source_revision, "served at once"
+    unindexed = await api.get(
+        "/api/v1/corpus/search", params={"q": "согласие"}, headers=auth(tokens, ALICE)
+    )
+    assert unindexed.status_code == 409
+    assert unindexed.json()["code"] == "corpus_not_indexed", "never searched half-indexed"
 
     assert await run_jobs(container) == 1
-    acts = (await api.get("/api/v1/corpus/acts", headers=auth(tokens, ALICE))).json()
-    assert acts[0]["edition"]["sourceRevision"] == first.source_revision
 
     units = (await api.get("/api/v1/corpus/acts/152-fz/units", headers=auth(tokens, ALICE))).json()
     clause = next(u for u in units["units"] if u["anchor"] == "st-18.1/ch-1/p-2")
@@ -58,11 +61,12 @@ async def _passage_of(container: Container, unit_id: str) -> str:
     return embedding_texts_for(content.units)[unit.embedding_sha256]
 
 
-async def test_embedding_job_is_idempotent(container: Container) -> None:
+async def test_indexing_job_is_idempotent(container: Container) -> None:
     result = await container.corpus_sync.sync("152-fz", "snapshot")
-    handler = container.job_handlers[EMBED_CORPUS_EDITION.name]
+    handler = container.job_handlers[INDEX_CORPUS_EDITION.name]
     await handler({"edition_id": str(result.edition_id)})
     await handler({"edition_id": str(result.edition_id)})
+    assert await container.corpus_indexing.index(result.edition_id) == 0, "nothing left to embed"
     [overview] = await container.corpus.acts()
     assert overview.active_edition is not None
     assert overview.active_edition.id == result.edition_id

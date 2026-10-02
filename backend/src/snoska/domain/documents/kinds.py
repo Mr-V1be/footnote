@@ -39,10 +39,11 @@ DOCUMENT_KINDS = DocumentKindRegistry(
     [
         DocumentKind(code="pd_policy", rank=0),
         DocumentKind(code="pd_consent", rank=1),
-        DocumentKind(code="contract", rank=2),
-        DocumentKind(code="regulation", rank=3),
-        DocumentKind(code="order", rank=4),
-        DocumentKind(code="other", rank=5),
+        DocumentKind(code="pd_assignment", rank=2),
+        DocumentKind(code="contract", rank=3),
+        DocumentKind(code="regulation", rank=4),
+        DocumentKind(code="order", rank=5),
+        DocumentKind(code="other", rank=6),
     ],
     default="other",
 )

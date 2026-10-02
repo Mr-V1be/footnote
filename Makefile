@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate models corpus seed setup api worker web gate demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate demo-documents stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -22,16 +22,16 @@ down: ## Stop the infrastructure containers (data is kept)
 migrate: ## Apply database migrations
 	$(BACKEND) snoska db migrate
 
-models: ## Start Ollama on the project port and pull the models
-	scripts/ollama-setup.sh
+corpus: ## Ingest 152-FZ from the bundled snapshot
+	$(BACKEND) snoska corpus sync --source snapshot
 
-corpus: ## Ingest 152-FZ from the bundled snapshot and embed it
-	$(BACKEND) snoska corpus sync --source snapshot --embed
+index: ## Embed the corpus with the configured embedding API (after setting a model)
+	$(BACKEND) snoska corpus reindex
 
 seed: ## Provision demo organizations, members and documents
 	$(BACKEND) snoska demo seed
 
-setup: env up migrate models corpus seed ## Everything needed for a first run
+setup: env up migrate corpus seed ## Everything needed for a first run
 
 api: ## Run the API on :46301
 	$(BACKEND) snoska api
@@ -48,6 +48,5 @@ gate: ## Lint, typecheck, tests and source limits
 demo-documents: ## Rebuild the demo documents (needs LibreOffice)
 	backend/.venv/bin/python scripts/demo/build_documents.py
 
-stop: ## Stop Ollama and the containers
-	-scripts/ollama-setup.sh stop
+stop: ## Stop the containers
 	$(COMPOSE) stop

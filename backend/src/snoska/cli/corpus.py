@@ -7,8 +7,7 @@ import httpx
 import typer
 
 from snoska.application.corpus.search import NormSearchQuery
-from snoska.application.shared.jobs import EMBED_CORPUS_EDITION
-from snoska.cli.support import container_scope, settings_for_cli
+from snoska.cli.support import container_scope, owner_engine, settings_for_cli
 from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
 from snoska.infrastructure.corpus_sources.pravo_ips import (
     SOURCE_CODE,
@@ -16,6 +15,7 @@ from snoska.infrastructure.corpus_sources.pravo_ips import (
     PravoIpsConfig,
     edition_from_html,
 )
+from snoska.infrastructure.persistence.vector_index import drop_spaces_except, ensure_space
 from snoska.infrastructure.system.clock import SystemClock
 
 app = typer.Typer(help="Corpus of norms.", no_args_is_help=True)
@@ -27,9 +27,11 @@ DEFAULT_ACT = "152-fz"
 def sync(
     act: str = DEFAULT_ACT,
     source: str = typer.Option("snapshot", help="snapshot | pravo_ips"),
-    embed: bool = typer.Option(False, help="Embed right away instead of via the worker."),
 ) -> None:
-    """Ingest the current redaction of an act as a new edition."""
+    """Ingest the current redaction of an act as the edition in force.
+
+    The edition is indexed for search by the worker, or by `reindex`.
+    """
 
     async def run() -> None:
         async with container_scope(settings_for_cli()) as container:
@@ -38,10 +40,38 @@ def sync(
                 f"{result.act_code}: {result.outcome} edition={result.edition_id} "
                 f"revision={result.source_revision} units={result.unit_count}"
             )
-            if embed:
-                handler = container.job_handlers[EMBED_CORPUS_EDITION.name]
-                await handler({"edition_id": str(result.edition_id)})
-                typer.echo("embedded and activated")
+
+    asyncio.run(run())
+
+
+@app.command()
+def reindex(
+    prune: bool = typer.Option(False, help="Drop vectors and indexes of other models."),
+) -> None:
+    """Embed the editions in force with the configured embedding model.
+
+    Registers the model's vector space with its search index (as the schema
+    owner), embeds what is missing and marks each edition searchable. Run it
+    after configuring or changing the embedding model or its vector size.
+    """
+
+    async def run() -> None:
+        settings = settings_for_cli()
+        space = settings.ai.embedding_space()
+        if space.dimensions <= 0:
+            raise typer.BadParameter("configure SNOSKA_EMBEDDING_MODEL and _DIMENSIONS first")
+        engine = owner_engine(settings)
+        try:
+            await ensure_space(engine, space)
+            if prune:
+                dropped = await drop_spaces_except(engine, space)
+                typer.echo(f"dropped spaces: {', '.join(dropped) or 'none'}")
+        finally:
+            await engine.dispose()
+        async with container_scope(settings) as container:
+            embedded = await container.corpus_indexing.reindex_active()
+        for edition_id, count in embedded.items():
+            typer.echo(f"edition {edition_id}: indexed in {space.code}, {count} passages embedded")
 
     asyncio.run(run())
 

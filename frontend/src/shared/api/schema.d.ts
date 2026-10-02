@@ -155,6 +155,123 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request Check
+         * @description Check the version again with the current catalogue (or join a pending run).
+         */
+        post: operations["request_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Latest Check
+         * @description The latest run of the version with its results and findings; null if never checked.
+         */
+        get: operations["latest_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/check-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run */
+        get: operations["get_run"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/check-runs/{run_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run Events
+         * @description Progress of a run as server-sent events: `run` on every change, `end` when settled.
+         */
+        get: operations["run_events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/findings/{finding_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Review Finding
+         * @description Accept, reject, mark fixed or reopen a finding (optimistic concurrency by revision).
+         */
+        patch: operations["review_finding"];
+        trace?: never;
+    };
+    "/api/v1/checks/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Catalog
+         * @description Every check the product runs, what it requires and what it cites.
+         */
+        get: operations["check_catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/corpus/acts": {
         parameters: {
             query?: never;
@@ -289,6 +406,67 @@ export type components = {
             /** Maxuploadbytes */
             maxUploadBytes: number;
         };
+        /** CheckCatalogOut */
+        CheckCatalogOut: {
+            /** Revision */
+            revision: string;
+            /** Families */
+            families: components["schemas"]["FamilyOut"][];
+            /** Checks */
+            checks: components["schemas"]["CheckOut"][];
+            models: components["schemas"]["ModelsOut"];
+        };
+        /**
+         * CheckMethod
+         * @description How a check reaches its verdict.
+         * @enum {string}
+         */
+        CheckMethod: "deterministic" | "model";
+        /**
+         * CheckOut
+         * @description A check of the registry as the product describes it.
+         */
+        CheckOut: {
+            /** Code */
+            code: string;
+            /** Family */
+            family: string;
+            method: components["schemas"]["CheckMethod"];
+            severity: components["schemas"]["Severity"];
+            /** Kinds */
+            kinds: string[];
+            /** Title */
+            title: string;
+            /** Requirement */
+            requirement: string;
+            /** Citations */
+            citations: string[];
+        };
+        /** CheckReportOut */
+        CheckReportOut: {
+            run: components["schemas"]["RunOut"];
+            /** Results */
+            results: components["schemas"]["ResultOut"][];
+            /** Findings */
+            findings: components["schemas"]["FindingOut"][];
+            /** Checks */
+            checks: components["schemas"]["CheckOut"][];
+        };
+        /**
+         * DetailOut
+         * @description Either a message code with parameters (translated by the client) or
+         *     text written by the language model.
+         */
+        DetailOut: {
+            /** Code */
+            code: string | null;
+            /** Params */
+            params: {
+                [key: string]: string | number;
+            };
+            /** Text */
+            text: string | null;
+        };
         /** DocumentFormatOut */
         DocumentFormatOut: {
             /** Code */
@@ -338,6 +516,7 @@ export type components = {
             pageCount: number | null;
             /** Createdbyname */
             createdByName: string | null;
+            check: components["schemas"]["RunSummaryOut"] | null;
         };
         /** DocumentOut */
         DocumentOut: {
@@ -405,6 +584,42 @@ export type components = {
          * @enum {string}
          */
         ExtractionMethod: "docx" | "pdf_text" | "pdf_ocr" | "pdf_mixed";
+        /** FamilyOut */
+        FamilyOut: {
+            /** Code */
+            code: string;
+            /** Rank */
+            rank: number;
+        };
+        /**
+         * FindingKind
+         * @enum {string}
+         */
+        FindingKind: "violation" | "review";
+        /** FindingOut */
+        FindingOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Checkcode */
+            checkCode: string;
+            kind: components["schemas"]["FindingKind"];
+            severity: components["schemas"]["Severity"];
+            /** Title */
+            title: string;
+            detail: components["schemas"]["DetailOut"];
+            /** Recommendation */
+            recommendation: string;
+            norm: components["schemas"]["NormOut"];
+            location: components["schemas"]["LocationOut"] | null;
+            review: components["schemas"]["ReviewStatus"];
+            /** Reviewedat */
+            reviewedAt: string | null;
+            /** Revision */
+            revision: number;
+        };
         /** FontOut */
         FontOut: {
             /** Family */
@@ -424,6 +639,15 @@ export type components = {
          * @enum {string}
          */
         LayoutSource: "declared" | "measured";
+        /** LocationOut */
+        LocationOut: {
+            /** Blockordinal */
+            blockOrdinal: number;
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+        };
         /** MeOut */
         MeOut: {
             /**
@@ -451,6 +675,30 @@ export type components = {
             roles: string[];
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
+        };
+        /**
+         * ModelsOut
+         * @description Whether model checks can run: a model API is configured and the corpus
+         *     is searchable with its embedding model.
+         */
+        ModelsOut: {
+            /** Configured */
+            configured: boolean;
+            /** Languagemodel */
+            languageModel: string | null;
+            /** Embeddingmodel */
+            embeddingModel: string | null;
+        };
+        /** NormOut */
+        NormOut: {
+            /** Citation */
+            citation: string;
+            /** Actcode */
+            actCode: string | null;
+            /** Anchor */
+            anchor: string | null;
+            /** Quote */
+            quote: string | null;
         };
         /** NormUnitOut */
         NormUnitOut: {
@@ -557,7 +805,7 @@ export type components = {
          *     Roles grant permissions; code never checks role names directly.
          * @enum {string}
          */
-        Permission: "documents.read" | "documents.upload" | "corpus.read" | "platform.tenants.read";
+        Permission: "documents.read" | "documents.upload" | "checks.run" | "findings.decide" | "findings.resolve" | "corpus.read" | "platform.tenants.read";
         /**
          * Problem
          * @description RFC 9457 problem details with a stable machine-readable ``code``.
@@ -595,6 +843,113 @@ export type components = {
             /** Value */
             value: string;
         };
+        /** ResultOut */
+        ResultOut: {
+            /** Checkcode */
+            checkCode: string;
+            method: components["schemas"]["CheckMethod"];
+            status: components["schemas"]["ResultStatus"];
+            /** Evidence */
+            evidence: components["schemas"]["LocationOut"][];
+            /** Errorcode */
+            errorCode: string | null;
+            /** Attempts */
+            attempts: number;
+            /** Durationms */
+            durationMs: number;
+            /** Citation */
+            citation: string | null;
+        };
+        /**
+         * ResultStatus
+         * @description The verdict of one check on one document version.
+         * @enum {string}
+         */
+        ResultStatus: "passed" | "violation" | "needs_review" | "not_applicable" | "error";
+        /** ReviewIn */
+        ReviewIn: {
+            review: components["schemas"]["ReviewStatus"];
+            /** Revision */
+            revision: number;
+        };
+        /**
+         * ReviewStatus
+         * @description What the team decided about a finding.
+         * @enum {string}
+         */
+        ReviewStatus: "open" | "accepted" | "rejected" | "fixed";
+        /**
+         * RunFailureCode
+         * @description Stable reasons a whole run could not finish (single checks fail on their own).
+         * @enum {string}
+         */
+        RunFailureCode: "version_not_parsed" | "internal_error";
+        /** RunOut */
+        RunOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Documentid
+             * Format: uuid
+             */
+            documentId: string;
+            /**
+             * Versionid
+             * Format: uuid
+             */
+            versionId: string;
+            status: components["schemas"]["RunStatus"];
+            /** Total */
+            total: number;
+            /** Done */
+            done: number;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Startedat */
+            startedAt: string | null;
+            /** Finishedat */
+            finishedAt: string | null;
+            failureCode: components["schemas"]["RunFailureCode"] | null;
+            /** Catalogrevision */
+            catalogRevision: string;
+            /** Revision */
+            revision: number;
+        };
+        /**
+         * RunStatus
+         * @enum {string}
+         */
+        RunStatus: "queued" | "running" | "completed" | "failed";
+        /**
+         * RunSummaryOut
+         * @description The latest run of a document's latest version, for lists.
+         */
+        RunSummaryOut: {
+            /**
+             * Runid
+             * Format: uuid
+             */
+            runId: string;
+            status: components["schemas"]["RunStatus"];
+            /** Total */
+            total: number;
+            /** Done */
+            done: number;
+            /** Critical */
+            critical: number;
+            /** Important */
+            important: number;
+            /** Advice */
+            advice: number;
+            /** Reviews */
+            reviews: number;
+        };
         /** SearchHitOut */
         SearchHitOut: {
             unit: components["schemas"]["NormUnitOut"];
@@ -608,6 +963,11 @@ export type components = {
             /** Hits */
             hits: components["schemas"]["SearchHitOut"][];
         };
+        /**
+         * Severity
+         * @enum {string}
+         */
+        Severity: "critical" | "important" | "advice";
         /** StructureOut */
         StructureOut: {
             version: components["schemas"]["VersionOut"];
@@ -1501,6 +1861,525 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    request_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                number: number;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    latest_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                number: number;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckReportOut"] | null;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_run: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    run_events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server-sent run events */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    review_finding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    check_catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckCatalogOut"];
                 };
             };
             /** @description Unauthorized */

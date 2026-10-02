@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
+from snoska.api.schemas.checks import RunSummaryOut
 from snoska.api.schemas.common import ApiModel
 from snoska.api.schemas.tenancy import WorkspaceOut
 from snoska.application.documents.queries import DocumentDetails
@@ -21,6 +22,7 @@ from snoska.domain.documents.version import (
     ParseFailureCode,
     ParseStatus,
 )
+from snoska.ports.checks.repositories import RunSummary
 from snoska.ports.document_repositories import DocumentListItem
 
 
@@ -37,9 +39,10 @@ class DocumentListItemOut(ApiModel):
     size_bytes: int
     page_count: int | None
     created_by_name: str | None
+    check: RunSummaryOut | None
 
     @classmethod
-    def of(cls, item: DocumentListItem) -> DocumentListItemOut:
+    def of(cls, item: DocumentListItem, check: RunSummary | None) -> DocumentListItemOut:
         return cls(
             id=item.id,
             title=item.title,
@@ -53,6 +56,7 @@ class DocumentListItemOut(ApiModel):
             size_bytes=item.latest_size_bytes,
             page_count=item.latest_page_count,
             created_by_name=item.created_by_name,
+            check=RunSummaryOut.of(check) if check is not None else None,
         )
 
 

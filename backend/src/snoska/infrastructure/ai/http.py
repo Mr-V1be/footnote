@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
 import httpx
 import structlog
 
-from snoska.ports.ai import AiProviderError
+from snoska.ports.ai import AiProviderError, ModelOutputError
 
 log = structlog.get_logger(__name__)
 
@@ -27,20 +27,29 @@ class HttpPolicy:
         return httpx.Timeout(self.read_timeout, connect=self.connect_timeout)
 
 
+# Recognises a failure that repeating the same request cannot fix.
+FailureClassifier = Callable[[httpx.Response], AiProviderError | None]
+
+
 async def post_json(
     client: httpx.AsyncClient,
     path: str,
     payload: Mapping[str, Any],
     policy: HttpPolicy,
+    classify: FailureClassifier | None = None,
 ) -> dict[str, Any]:
     """POST with retries on transport errors and transient statuses.
 
     Model calls are pure functions of their input, so repeating them is safe.
+    ``classify`` lets an adapter name failures that a retry would only repeat.
     """
     last_error: Exception | None = None
     for attempt in range(1, policy.attempts + 1):
         try:
             response = await client.post(path, json=payload)
+            permanent = classify(response) if classify is not None and response.is_error else None
+            if permanent is not None:
+                raise permanent
             if response.status_code in _RETRYABLE_STATUS:
                 raise httpx.HTTPStatusError(
                     f"transient status {response.status_code}",
@@ -68,6 +77,6 @@ def ensure_json_object(text: str) -> None:
     try:
         value = json.loads(text)
     except ValueError as exc:
-        raise AiProviderError("model answer is not valid JSON") from exc
+        raise ModelOutputError("model answer is not valid JSON") from exc
     if not isinstance(value, dict):
-        raise AiProviderError("model answer is not a JSON object")
+        raise ModelOutputError("model answer is not a JSON object")

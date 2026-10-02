@@ -12,6 +12,15 @@ class AiProviderError(Exception):
     """The model provider failed or is unreachable; the call may be retried."""
 
 
+class ModelNotConfiguredError(AiProviderError):
+    """No model API is configured for this installation: nothing to retry."""
+
+
+class ModelOutputError(AiProviderError):
+    """The provider answered, but not in the form the request demanded
+    (e.g. no JSON object for a structured request). Asking again can help."""
+
+
 class Embedder(Protocol):
     space: EmbeddingSpace
     model: str

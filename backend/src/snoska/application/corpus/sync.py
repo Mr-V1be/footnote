@@ -7,7 +7,7 @@ from uuid import UUID
 
 import structlog
 
-from snoska.application.shared.jobs import EMBED_CORPUS_EDITION
+from snoska.application.shared.jobs import INDEX_CORPUS_EDITION
 from snoska.domain.corpus.acts import Edition, EditionStatus
 from snoska.domain.corpus.assembly import assemble_edition, edition_content_hash
 from snoska.domain.shared.errors import NotFoundError
@@ -42,8 +42,8 @@ class CorpusSync:
     """Fetches the current redaction of an act and stores it as a new edition.
 
     Editions are immutable: an unchanged source is a no-op (matched by a hash
-    of the normative content), a changed one becomes a new edition that is
-    activated once its units are embedded.
+    of the normative content), a changed one becomes the edition in force
+    right away and is indexed for search in the background.
     """
 
     def __init__(
@@ -91,10 +91,16 @@ class CorpusSync:
             )
             assembled = assemble_edition(edition.id, tracked.act, fetched.units, new_id)
             await uow.corpus.add_edition(edition, assembled.units)
+            previous = await uow.corpus.active_edition(act_code)
+            if previous is not None:
+                previous.supersede()
+                await uow.corpus.save_edition(previous)
+            edition.activate(self._clock.now())
+            await uow.corpus.save_edition(edition)
             await uow.outbox.add(
                 OutboxMessage(
                     id=new_id(),
-                    job_name=EMBED_CORPUS_EDITION.name,
+                    job_name=INDEX_CORPUS_EDITION.name,
                     payload={"edition_id": str(edition.id)},
                     created_at=self._clock.now(),
                 )

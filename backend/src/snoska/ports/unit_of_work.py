@@ -5,6 +5,12 @@ from typing import Protocol, Self
 from uuid import UUID
 
 from snoska.domain.shared.errors import ConflictError
+from snoska.ports.checks.embeddings import EmbeddingCache
+from snoska.ports.checks.repositories import (
+    CheckResultRepository,
+    CheckRunRepository,
+    FindingRepository,
+)
 from snoska.ports.corpus_repositories import CorpusRepository
 from snoska.ports.document_repositories import (
     DocumentRepository,
@@ -54,6 +60,20 @@ class UnitOfWork(Protocol):
 
     @property
     def outbox(self) -> OutboxRepository: ...
+
+    @property
+    def check_runs(self) -> CheckRunRepository: ...
+
+    @property
+    def check_results(self) -> CheckResultRepository: ...
+
+    @property
+    def findings(self) -> FindingRepository: ...
+
+    @property
+    def embeddings(self) -> EmbeddingCache:
+        """Vectors of the tenant's passages; only in a tenant unit of work."""
+        ...
 
     async def commit(self) -> None: ...
 

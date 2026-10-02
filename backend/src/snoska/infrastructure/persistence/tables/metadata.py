@@ -25,4 +25,8 @@ TENANT_TABLES: tuple[str, ...] = (
     "document_versions",
     "document_structures",
     "document_blocks",
+    "check_runs",
+    "check_results",
+    "findings",
+    "text_embeddings",
 )

@@ -7,11 +7,17 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncTransaction
 
+from snoska.infrastructure.persistence.repositories.checks import (
+    SqlCheckResultRepository,
+    SqlCheckRunRepository,
+    SqlFindingRepository,
+)
 from snoska.infrastructure.persistence.repositories.corpus import SqlCorpusRepository
 from snoska.infrastructure.persistence.repositories.documents import (
     SqlDocumentRepository,
     SqlDocumentVersionRepository,
 )
+from snoska.infrastructure.persistence.repositories.embeddings import SqlTextEmbeddingRepository
 from snoska.infrastructure.persistence.repositories.outbox import SqlOutboxRepository
 from snoska.infrastructure.persistence.repositories.structures import (
     SqlDocumentStructureRepository,
@@ -41,6 +47,10 @@ class SqlUnitOfWork:
     structures: SqlDocumentStructureRepository
     corpus: SqlCorpusRepository
     outbox: SqlOutboxRepository
+    check_runs: SqlCheckRunRepository
+    check_results: SqlCheckResultRepository
+    findings: SqlFindingRepository
+    embeddings: SqlTextEmbeddingRepository
 
     def __init__(self, engine: AsyncEngine, tenant_id: UUID | None) -> None:
         self._engine = engine
@@ -63,6 +73,10 @@ class SqlUnitOfWork:
         self.structures = SqlDocumentStructureRepository(connection)
         self.corpus = SqlCorpusRepository(connection)
         self.outbox = SqlOutboxRepository(connection)
+        self.check_runs = SqlCheckRunRepository(connection)
+        self.check_results = SqlCheckResultRepository(connection)
+        self.findings = SqlFindingRepository(connection)
+        self.embeddings = SqlTextEmbeddingRepository(connection, self._tenant_id)
         return self
 
     async def commit(self) -> None:

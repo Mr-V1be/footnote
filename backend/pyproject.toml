@@ -77,6 +77,10 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "PLR0915", "ARG001"]
 "migrations/**" = ["E501", "S608"]
+# Strategies of one interface: not every rule or executor needs every argument.
+"src/snoska/domain/checks/rules/*.py" = ["ARG002"]
+"src/snoska/application/checks/*.py" = ["ARG002"]
+"src/snoska/infrastructure/ai/unconfigured.py" = ["ARG002"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"

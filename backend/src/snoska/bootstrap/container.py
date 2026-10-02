@@ -6,7 +6,15 @@ from dataclasses import dataclass
 import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from snoska.application.corpus.embedding import EmbedCorpusEdition
+from snoska.application.checks.deterministic import DeterministicExecutor
+from snoska.application.checks.engine import CheckEngine
+from snoska.application.checks.job import RunChecks
+from snoska.application.checks.legal.executor import LegalCheckSettings, LegalExecutor
+from snoska.application.checks.norms import NormLibrary
+from snoska.application.checks.progress import RunProgress
+from snoska.application.checks.scheduling import CheckScheduler
+from snoska.application.checks.service import CheckService
+from snoska.application.corpus.indexing import IndexCorpusEdition
 from snoska.application.corpus.queries import CorpusQueries
 from snoska.application.corpus.search import NormSearch
 from snoska.application.corpus.sync import CorpusSync
@@ -14,18 +22,21 @@ from snoska.application.documents.catalog import CatalogQuery
 from snoska.application.documents.parsing import ParseDocumentVersion
 from snoska.application.documents.queries import DocumentQueries
 from snoska.application.documents.upload import DocumentUploads, UploadLimits
-from snoska.application.shared.jobs import EMBED_CORPUS_EDITION, PARSE_DOCUMENT_VERSION
+from snoska.application.shared.jobs import INDEX_CORPUS_EDITION, PARSE_DOCUMENT_VERSION, RUN_CHECKS
 from snoska.application.shared.outbox_relay import OutboxRelay
 from snoska.application.tenancy.access import DefaultWorkspace, TenantAccessService
 from snoska.application.tenancy.platform import PlatformTenantQueries
 from snoska.application.tenancy.workspaces import WorkspaceQueries
 from snoska.bootstrap.providers import AiAdapters, build_ai_adapters
-from snoska.bootstrap.settings import Settings
+from snoska.bootstrap.settings import ChecksSettings, Settings
+from snoska.domain.checks.catalog import CheckCatalog, CheckMethod
+from snoska.domain.checks.rules.registry import DEFAULT_RULES
 from snoska.domain.documents.formats import SUPPORTED_FORMATS
 from snoska.domain.documents.kinds import DOCUMENT_KINDS
 from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.tenancy.access import AccessPolicy
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
+from snoska.infrastructure.checks.catalog import YamlCheckCatalog
 from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
 from snoska.infrastructure.corpus_sources.pravo_ips import (
     PravoIpsClient,
@@ -42,18 +53,43 @@ from snoska.infrastructure.parsing.ocr.tesseract import TesseractConfig, Tessera
 from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
 from snoska.infrastructure.parsing.registry import ParserRegistry
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from snoska.infrastructure.persistence.embedding_spaces import load_embedding_space
 from snoska.infrastructure.persistence.health import DatabaseHealth
+from snoska.infrastructure.persistence.run_feed import PgRunChangeFeed
 from snoska.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
 from snoska.infrastructure.storage.filesystem import FileSystemBlobStorage
 from snoska.infrastructure.system.clock import SystemClock
-from snoska.ports.ai import Embedder
+from snoska.ports.ai import Embedder, LanguageModel
 from snoska.ports.corpus_source import CorpusSource
 from snoska.ports.health import HealthCheck
 from snoska.ports.identity import IdentityProvisioning, OrganizationDirectory, TokenVerifier
 from snoska.ports.jobs import JobHandler, JobPublisher
 
 HTTP_TIMEOUT_SECONDS = 30.0
+
+
+def load_check_catalog(settings: ChecksSettings) -> CheckCatalog:
+    return YamlCheckCatalog(settings.catalog_dir, DEFAULT_RULES, DOCUMENT_KINDS).load()
+
+
+def check_engine(
+    settings: ChecksSettings, embedder: Embedder, model: LanguageModel, norms: NormLibrary
+) -> CheckEngine:
+    return CheckEngine(
+        {
+            CheckMethod.DETERMINISTIC: DeterministicExecutor(DEFAULT_RULES),
+            CheckMethod.MODEL: LegalExecutor(
+                embedder,
+                model,
+                norms,
+                LegalCheckSettings(
+                    concurrency=settings.model_concurrency,
+                    fragments=settings.fragments,
+                    related_norms=settings.related_norms,
+                    max_attempts=settings.max_attempts,
+                ),
+            ),
+        }
+    )
 
 
 def app_database(settings: Settings) -> DatabaseConfig:
@@ -77,6 +113,7 @@ class Overrides:
     key_source: KeySource | None = None
     directory: OrganizationDirectory | None = None
     embedder: Embedder | None = None
+    language_model: LanguageModel | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,8 +128,11 @@ class Container:
     documents: DocumentQueries
     catalog: CatalogQuery
     corpus_sync: CorpusSync
+    corpus_indexing: IndexCorpusEdition
     corpus: CorpusQueries
     norm_search: NormSearch
+    checks: CheckService
+    check_progress: RunProgress
     platform: PlatformTenantQueries
     verifier: TokenVerifier
     provisioning: IdentityProvisioning
@@ -112,8 +152,7 @@ async def build_container(
     engine = create_engine(app_database(settings))
     http = httpx.AsyncClient(timeout=HTTP_TIMEOUT_SECONDS)
     try:
-        space = await load_embedding_space(engine, settings.ai.embedding_space)
-        ai = build_ai_adapters(settings.ai, space)
+        ai = build_ai_adapters(settings.ai)
     except BaseException:
         await http.aclose()
         await engine.dispose()
@@ -147,8 +186,15 @@ async def build_container(
     )
     limits = UploadLimits(max_bytes=settings.max_upload_bytes)
     embedder = overrides.embedder or ai.embedder
+    language_model = overrides.language_model or ai.language_model
+    check_catalog = load_check_catalog(settings.checks)
+    norms = NormLibrary(uow)
+    scheduler = CheckScheduler(check_catalog, clock)
+    run_feed = PgRunChangeFeed(app_database(settings))
+    corpus_indexing = IndexCorpusEdition(uow, embedder, clock)
 
     async def close() -> None:
+        await run_feed.close()
         await ai.close()
         await http.aclose()
         await engine.dispose()
@@ -171,16 +217,29 @@ async def build_container(
         documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS, RequisiteDetector()),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),
         corpus_sync=CorpusSync(uow, catalog, sources, clock),
+        corpus_indexing=corpus_indexing,
         corpus=CorpusQueries(uow),
         norm_search=NormSearch(uow, embedder),
+        checks=CheckService(uow, check_catalog, scheduler, norms, clock),
+        check_progress=RunProgress(uow, run_feed),
         platform=PlatformTenantQueries(uow),
         verifier=verifier,
         provisioning=directory,
         ai=ai,
         health_checks=(DatabaseHealth(engine),),
         job_handlers={
-            PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(uow, blobs, parsers, clock),
-            EMBED_CORPUS_EDITION.name: EmbedCorpusEdition(uow, embedder, clock),
+            PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(
+                uow, blobs, parsers, clock, follow_up=scheduler
+            ),
+            INDEX_CORPUS_EDITION.name: corpus_indexing,
+            RUN_CHECKS.name: RunChecks(
+                uow,
+                check_catalog,
+                check_engine(settings.checks, embedder, language_model, norms),
+                RequisiteDetector(),
+                clock,
+                language_model.model,
+            ),
         },
         relay=OutboxRelay(uow, publisher, clock) if publisher is not None else None,
         close=close,

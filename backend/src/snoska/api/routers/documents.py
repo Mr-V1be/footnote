@@ -55,8 +55,13 @@ async def list_documents(
         after=decode_cursor(cursor) if cursor else None,
         limit=limit,
     )
+    checks = await container.checks.summaries(
+        access, [item.latest_version_id for item in page.items]
+    )
     return DocumentPageOut(
-        items=[DocumentListItemOut.of(item) for item in page.items],
+        items=[
+            DocumentListItemOut.of(item, checks.get(item.latest_version_id)) for item in page.items
+        ],
         next_cursor=encode_cursor(page.next_cursor) if page.next_cursor else None,
     )
 

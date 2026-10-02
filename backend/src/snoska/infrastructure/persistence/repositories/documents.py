@@ -169,6 +169,7 @@ class SqlDocumentRepository:
         statement = (
             select(
                 documents,
+                latest.c.id.label("latest_version_id"),
                 latest.c.status,
                 latest.c.failure_code,
                 latest.c.format_code,
@@ -198,6 +199,7 @@ class SqlDocumentRepository:
                 created_at=row["created_at"],
                 updated_at=row["updated_at"],
                 latest_version_number=row["latest_version_number"],
+                latest_version_id=row["latest_version_id"],
                 latest_status=ParseStatus(row["status"]),
                 latest_failure_code=(
                     ParseFailureCode(row["failure_code"]) if row["failure_code"] else None

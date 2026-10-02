@@ -66,3 +66,15 @@ def citation_of(path: Sequence[PathStep], act_short_title: str) -> str:
         parts.append(f"{prefix} {number}")
     parts.append(act_short_title)
     return " ".join(parts)
+
+
+# A point of a list reads only together with the lead-in of its part
+# («Согласие … должно включать: … 4) цель обработки»).
+_LEAD_IN_KINDS = frozenset({UnitKind.CLAUSE, UnitKind.SUBCLAUSE})
+
+
+def provision_text(unit_kind: UnitKind, text: str, parent_text: str | None) -> str:
+    """A provision as it is quoted to a reader or a model."""
+    if unit_kind in _LEAD_IN_KINDS and parent_text:
+        return f"{parent_text} … {text}"
+    return text

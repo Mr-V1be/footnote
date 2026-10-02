@@ -22,6 +22,7 @@ class DocumentListItem:
     created_at: datetime
     updated_at: datetime
     latest_version_number: int
+    latest_version_id: UUID
     latest_status: ParseStatus
     latest_failure_code: ParseFailureCode | None
     latest_format_code: str

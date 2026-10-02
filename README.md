@@ -6,7 +6,7 @@
 
 ## Быстрый старт
 
-Нужны Docker с Compose, Python 3.13 и [uv](https://docs.astral.sh/uv/), Node 24 и pnpm 10, Tesseract с русским языком (`tesseract-ocr-rus`), Ollama. Для пересборки демо-документов — LibreOffice.
+Нужны Docker с Compose, Python 3.13 и [uv](https://docs.astral.sh/uv/), Node 24 и pnpm 10, Tesseract с русским языком (`tesseract-ocr-rus`). Для пересборки демо-документов — LibreOffice. Нейросети на машине не запускаются: языковая модель и эмбеддинги подключаются только через внешний OpenAI-совместимый API.
 
 ```bash
 make env            # .env со случайными секретами
@@ -14,8 +14,7 @@ make up             # PostgreSQL + pgvector, Redis, Keycloak, Mailpit
 cd backend && uv sync && cd ..
 cd frontend && pnpm install && cd ..
 make migrate        # схема БД
-make models         # Ollama на порту проекта, модели qwen3.5:9b и bge-m3
-make corpus         # 152-ФЗ из снимка портала + эмбеддинги
+make corpus         # 152-ФЗ из снимка портала
 make seed           # демо-организации, участники и документы
 
 # в отдельных терминалах
@@ -24,7 +23,11 @@ make worker         # фоновые задачи и отправка outbox
 make web            # http://localhost:46300
 ```
 
-`make stop` останавливает Ollama и контейнеры.
+`make stop` останавливает контейнеры.
+
+### Модели
+
+Проверки оформления работают сразу. Юридические проверки по 152-ФЗ выполняет языковая модель через внешний API: укажите в `.env` `SNOSKA_AI_PROVIDER=openai_compatible`, адрес и ключ (`SNOSKA_LLM_BASE_URL`, `SNOSKA_LLM_API_KEY`), модели (`SNOSKA_LLM_MODEL`, `SNOSKA_EMBEDDING_MODEL`) и размер векторов (`SNOSKA_EMBEDDING_DIMENSIONS`), затем выполните `make index` — корпус получит векторы новой модели. Без этого юридические проверки отмечаются как «модель не подключена».
 
 ### Порты (диапазон 46300–46399)
 
@@ -38,7 +41,6 @@ make web            # http://localhost:46300
 | 46320 | Keycloak 26.8 (realm `snoska`)           |
 | 46330 | Mailpit, веб-интерфейс                   |
 | 46331 | Mailpit, SMTP                            |
-| 46340 | Ollama                                   |
 
 ### Демо-доступы
 
@@ -60,7 +62,7 @@ backend/src/snoska/
                    OCR, LanguageModel, Embedder, источники корпуса, identity
   application/     сценарии: загрузка, разбор, запросы, синхронизация и эмбеддинги корпуса
   infrastructure/  адаптеры: PostgreSQL (RLS), Dramatiq/Redis, python-docx, pdfplumber,
-                   Tesseract, Ollama и OpenAI-совместимый API, Keycloak, pravo.gov.ru
+                   Tesseract, OpenAI-совместимый API моделей, Keycloak, pravo.gov.ru
   bootstrap/       корень композиции и настройки
   api/ worker/ cli/  точки входа
 frontend/src/

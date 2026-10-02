@@ -93,7 +93,8 @@ embedding_spaces = Table(
 
 # Vectors are keyed by the hash of the embedded passage, so unchanged text is
 # shared across editions. The column has no fixed dimension; every space gets
-# a partial HNSW index over a cast to its dimension (created by migrations).
+# a partial HNSW index over a cast to its dimension, created when the space is
+# registered (`snoska corpus reindex`).
 norm_embeddings = Table(
     "norm_embeddings",
     metadata,
@@ -102,4 +103,22 @@ norm_embeddings = Table(
     Column("embedding", Vector(), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False),
     PrimaryKeyConstraint("space_code", "content_sha256"),
+)
+
+# An edition is searchable in a space once every passage of it has a vector
+# there. Search never sees an edition that is indexed only in part.
+edition_indexes = Table(
+    "edition_indexes",
+    metadata,
+    Column(
+        "edition_id", Uuid, ForeignKey("corpus_editions.id", ondelete="CASCADE"), nullable=False
+    ),
+    Column(
+        "space_code",
+        Text,
+        ForeignKey("embedding_spaces.code", ondelete="CASCADE"),
+        nullable=False,
+    ),
+    Column("ready_at", DateTime(timezone=True), nullable=False),
+    PrimaryKeyConstraint("edition_id", "space_code"),
 )

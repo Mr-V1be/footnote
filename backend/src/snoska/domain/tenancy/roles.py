@@ -37,13 +37,18 @@ class RoleCatalog:
 
 
 _READER = frozenset({Permission.DOCUMENTS_READ, Permission.CORPUS_READ})
-_CONTRIBUTOR = _READER | {Permission.DOCUMENTS_UPLOAD}
+_EXECUTOR = _READER | {
+    Permission.DOCUMENTS_UPLOAD,
+    Permission.CHECKS_RUN,
+    Permission.FINDINGS_RESOLVE,
+}
+_LAWYER = _EXECUTOR | {Permission.FINDINGS_DECIDE}
 
 ORGANIZATION_ROLES = RoleCatalog(
     [
-        RoleDefinition(code="owner", rank=0, permissions=_CONTRIBUTOR),
-        RoleDefinition(code="lawyer", rank=1, permissions=_CONTRIBUTOR),
-        RoleDefinition(code="executor", rank=2, permissions=_CONTRIBUTOR),
+        RoleDefinition(code="owner", rank=0, permissions=_LAWYER),
+        RoleDefinition(code="lawyer", rank=1, permissions=_LAWYER),
+        RoleDefinition(code="executor", rank=2, permissions=_EXECUTOR),
         RoleDefinition(code="observer", rank=3, permissions=_READER),
     ]
 )
