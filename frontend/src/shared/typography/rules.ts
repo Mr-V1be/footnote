@@ -15,7 +15,7 @@ export interface TypographicRule {
 /** No letter or digit right before / after the match: a whole-word boundary that works for Cyrillic. */
 const START = String.raw`(?<![\p{L}\p{N}])`;
 const END = String.raw`(?![\p{L}\p{N}])`;
-const CODE = String.raw`[\p{L}\p{N}]+(?:[-‐‑–/.][\p{L}\p{N}]+)*`;
+const CODE = String.raw`[\p{L}\p{N}]+(?:[-\u2010\u2011\u2013/.][\p{L}\p{N}]+)*`;
 const NUMBER = String.raw`\p{N}+(?:[.,]\p{N}+)*`;
 const MONTHS = "января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря";
 /** Structural units of a legal act or a document: «п. 2», «ч. 1», «ст. 18.1», «разд. 3». */
@@ -35,7 +35,7 @@ export const TYPOGRAPHIC_RULES: readonly TypographicRule[] = [
   // «ГОСТ Р 7.0.97-2016».
   rule("standard", String.raw`${START}ГОСТ(?:\s+Р)?(?:\s+ИСО(?:\/МЭК)?)?\s+${NUMBER}(?:-\p{N}+)?`),
   // Codes with a hyphen or a slash and a digit: «7-ОД», «152-ФЗ», «15/2026».
-  rule("code", String.raw`${START}\p{N}+(?:[-‐‑–/]\p{L}+|[-‐‑–/]\p{N}+)+${END}`),
+  rule("code", String.raw`${START}\p{N}+(?:[-\u2010\u2011\u2013/]\p{L}+|[-\u2010\u2011\u2013/]\p{N}+)+${END}`),
   // «14.01.2026», «14.01.2026 г.».
   rule("date", String.raw`${START}\p{N}{1,2}\.\p{N}{1,2}\.\p{N}{2,4}(?:\s?гг?\.)?`),
   // «3 февраля 2026 г.», ««03» февраля 2026 года».

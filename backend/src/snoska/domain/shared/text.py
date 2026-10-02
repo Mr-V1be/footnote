@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-_WHITESPACE = re.compile(r"[\s   ]+")
+_WHITESPACE = re.compile(r"[\s\u00a0\u2007\u202f]+")
 
 
 def normalize_whitespace(value: str) -> str:

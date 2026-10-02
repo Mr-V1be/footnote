@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { typeset, typesetRuns } from "./typeset";
 
-const NBSP = " ";
+const NBSP = "\u00a0";
 
 /** Visible form: no-break spaces as «_», unbreakable runs in brackets. */
 function show(text: string): string {

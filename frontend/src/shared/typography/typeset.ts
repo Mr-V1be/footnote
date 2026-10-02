@@ -21,9 +21,9 @@ export interface TypesetRun {
   readonly keep: boolean;
 }
 
-const NO_BREAK_SPACE = " ";
+const NO_BREAK_SPACE = "\u00a0";
 const SPACE = " ";
-const BREAKABLE_PUNCTUATION = /[-‐–/]/u;
+const BREAKABLE_PUNCTUATION = /[-\u2010\u2013/]/u;
 
 function mergeRanges(ranges: TextRange[]): TextRange[] {
   const sorted = ranges.toSorted((a, b) => a.start - b.start || a.end - b.end);
