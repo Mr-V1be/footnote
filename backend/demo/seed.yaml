@@ -86,3 +86,14 @@ organizations:
         kind: pd_consent
         title: Согласие работника на обработку ПДн
         uploaded_by: vorontsova@rechnoy-port.example
+
+  # A tenant that has just joined: no documents yet.
+  - alias: sokolova
+    name: ИП Соколова Екатерина Викторовна
+    domain: sokolova.example
+    members:
+      - email: sokolova@sokolova.example
+        first_name: Екатерина
+        last_name: Соколова
+        password: Snoska-Demo-2026
+        role: owner
