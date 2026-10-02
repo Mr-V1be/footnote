@@ -1,0 +1,88 @@
+# Demo stand: organizations, members and documents.
+#
+# Everything here is fictional. The passwords are demo credentials for the
+# test roles of the demo stand only. Apply with `snoska demo seed`; the
+# command is idempotent (Keycloak objects are ensured, uploads are keyed).
+
+platform_admin:
+  email: operator@snoska.example
+  first_name: Ольга
+  last_name: Платонова
+  password: Snoska-Demo-2026
+  realm_role: platform-admin
+
+organizations:
+  - alias: polyarnaya-zvezda
+    name: ООО «Полярная звезда»
+    domain: polyarnaya-zvezda.example
+    members:
+      - email: kovaleva@polyarnaya-zvezda.example
+        first_name: Анна
+        last_name: Ковалёва
+        password: Snoska-Demo-2026
+        role: owner
+      - email: orlov@polyarnaya-zvezda.example
+        first_name: Михаил
+        last_name: Орлов
+        password: Snoska-Demo-2026
+        role: lawyer
+      - email: smirnova@polyarnaya-zvezda.example
+        first_name: Дарья
+        last_name: Смирнова
+        password: Snoska-Demo-2026
+        role: executor
+      - email: belov@polyarnaya-zvezda.example
+        first_name: Игорь
+        last_name: Белов
+        password: Snoska-Demo-2026
+        role: observer
+    documents:
+      - file: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx
+        kind: regulation
+        title: Положение об обработке персональных данных работников
+        uploaded_by: smirnova@polyarnaya-zvezda.example
+      - file: documents/polyarnaya-zvezda/dogovor-porucheniya-15-2026.pdf
+        kind: contract
+        title: Договор поручения обработки ПДн № 15/2026
+        uploaded_by: orlov@polyarnaya-zvezda.example
+      - file: documents/polyarnaya-zvezda/prikaz-7-od.pdf
+        kind: order
+        title: Приказ № 7-ОД об утверждении политики
+        uploaded_by: smirnova@polyarnaya-zvezda.example
+      - file: documents/polyarnaya-zvezda/soglasie-pokupatelya.docx
+        kind: pd_consent
+        title: Согласие покупателя на обработку ПДн
+        uploaded_by: orlov@polyarnaya-zvezda.example
+      - file: documents/polyarnaya-zvezda/politika-obrabotki-pd.docx
+        kind: pd_policy
+        title: Политика в отношении обработки персональных данных
+        uploaded_by: orlov@polyarnaya-zvezda.example
+    # New versions of documents uploaded above, in order.
+    versions:
+      - document: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx
+        file: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov-red2.docx
+        uploaded_by: orlov@polyarnaya-zvezda.example
+
+  - alias: rechnoy-port
+    name: АО «Речной порт»
+    domain: rechnoy-port.example
+    members:
+      - email: vorontsova@rechnoy-port.example
+        first_name: Елена
+        last_name: Воронцова
+        password: Snoska-Demo-2026
+        role: owner
+      - email: lebedev@rechnoy-port.example
+        first_name: Сергей
+        last_name: Лебедев
+        password: Snoska-Demo-2026
+        role: lawyer
+    documents:
+      - file: documents/rechnoy-port/politika-pd.pdf
+        kind: pd_policy
+        title: Политика обработки персональных данных
+        uploaded_by: lebedev@rechnoy-port.example
+      - file: documents/rechnoy-port/soglasie-rabotnika.docx
+        kind: pd_consent
+        title: Согласие работника на обработку ПДн
+        uploaded_by: vorontsova@rechnoy-port.example
