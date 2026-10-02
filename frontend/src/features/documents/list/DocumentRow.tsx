@@ -10,6 +10,7 @@ import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 import { FileTypeIcon } from "../FileTypeIcon";
 import { StatusBadge } from "../StatusBadge";
 import styles from "./document-list.module.css";
+import { Typeset } from "@/shared/typography/Typeset";
 
 export function DocumentRow({
   item,
@@ -27,7 +28,7 @@ export function DocumentRow({
         <FileTypeIcon format={item.format} className={styles.fileIcon} />
         <div className={styles.titleText}>
           <Link href={`/o/${organization}/documents/${item.id}`} className={styles.title}>
-            {item.title}
+            <Typeset text={item.title} />
           </Link>
           <span className={styles.secondary}>
             {item.createdByName ? (

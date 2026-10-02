@@ -5,8 +5,10 @@ export interface Footnote {
   requisite: Requisite;
 }
 
+/** A slice [start, end) of block text: plain, or marked by a footnote. */
 export type Segment =
-  { type: "text"; text: string } | { type: "mark"; text: string; footnote: Footnote };
+  | { type: "text"; start: number; end: number }
+  | { type: "mark"; start: number; end: number; footnote: Footnote };
 
 /** Footnotes are numbered in reading order, as markers appear in the text. */
 export function numberFootnotes(requisites: readonly Requisite[]): Footnote[] {
@@ -30,17 +32,17 @@ export function footnotesByBlock(footnotes: readonly Footnote[]): Map<number, Fo
  * not nested: a span that starts inside the previous one is left unmarked
  * and keeps only its card in the margin.
  */
-export function segmentText(text: string, footnotes: readonly Footnote[]): Segment[] {
+export function segmentText(length: number, footnotes: readonly Footnote[]): Segment[] {
   const segments: Segment[] = [];
   let cursor = 0;
   for (const footnote of footnotes) {
     const { start, end } = footnote.requisite;
-    if (start < cursor || end > text.length || start >= end) continue;
-    if (start > cursor) segments.push({ type: "text", text: text.slice(cursor, start) });
-    segments.push({ type: "mark", text: text.slice(start, end), footnote });
+    if (start < cursor || end > length || start >= end) continue;
+    if (start > cursor) segments.push({ type: "text", start: cursor, end: start });
+    segments.push({ type: "mark", start, end, footnote });
     cursor = end;
   }
-  if (cursor < text.length) segments.push({ type: "text", text: text.slice(cursor) });
+  if (cursor < length) segments.push({ type: "text", start: cursor, end: length });
   return segments;
 }
 

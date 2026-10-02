@@ -47,6 +47,8 @@ if [[ "$SCOPE" == all || "$SCOPE" == frontend ]]; then
   pnpm run --silent lint:styles
   step "frontend: prettier"
   pnpm run --silent format:check
+  step "frontend: unit tests"
+  pnpm run --silent test
 fi
 
 printf '\n\033[1;32m✔ gate passed (%s)\033[0m\n' "$SCOPE"

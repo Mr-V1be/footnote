@@ -7,6 +7,7 @@ import type { OutlineEntry } from "@/shared/api/types";
 
 import { anchors } from "./footnotes";
 import styles from "./panels.module.css";
+import { Typeset } from "@/shared/typography/Typeset";
 
 /** Offset below which a heading counts as the current section. */
 const CURRENT_SECTION_OFFSET_PX = 140;
@@ -73,7 +74,9 @@ export function OutlineNav({
               }}
             >
               {entry.label ? <span className={styles.outlineLabel}>{entry.label}</span> : null}
-              <span className={styles.outlineText}>{entry.text}</span>
+              <span className={styles.outlineText}>
+                <Typeset text={entry.text} />
+              </span>
             </a>
           </li>
         ))}

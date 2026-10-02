@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useFootnotes } from "./FootnoteContext";
 import { anchors, type Footnote } from "./footnotes";
 import styles from "./panels.module.css";
+import { Typeset } from "@/shared/typography/Typeset";
 
 /** Margin notes: one card per marker in the text. */
 export function FootnoteList({
@@ -40,7 +41,9 @@ export function FootnoteList({
           </span>
           <div className={styles.footnoteBody}>
             <span className={styles.footnoteKind}>{t(`requisites.${requisite.kind}`)}</span>
-            <span className={styles.footnoteValue}>{requisite.value}</span>
+            <span className={styles.footnoteValue}>
+              <Typeset text={requisite.value} />
+            </span>
           </div>
           <button
             type="button"
