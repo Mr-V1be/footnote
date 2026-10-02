@@ -42,7 +42,7 @@ organizations:
         title: Положение об обработке персональных данных работников
         uploaded_by: smirnova@polyarnaya-zvezda.example
       - file: documents/polyarnaya-zvezda/dogovor-porucheniya-15-2026.pdf
-        kind: contract
+        kind: pd_assignment
         title: Договор поручения обработки ПДн № 15/2026
         uploaded_by: orlov@polyarnaya-zvezda.example
       - file: documents/polyarnaya-zvezda/prikaz-7-od.pdf
@@ -86,6 +86,44 @@ organizations:
         kind: pd_consent
         title: Согласие работника на обработку ПДн
         uploaded_by: vorontsova@rechnoy-port.example
+
+  # A chain of cafés whose documents are drafts with typical slips: the
+  # flawed half of the reference set (reference/labels.yaml lists them).
+  - alias: zarya
+    name: ООО «Заря»
+    domain: zarya.example
+    members:
+      - email: ershov@zarya.example
+        first_name: Константин
+        last_name: Ершов
+        password: Snoska-Demo-2026
+        role: owner
+      - email: polyakova@zarya.example
+        first_name: Нина
+        last_name: Полякова
+        password: Snoska-Demo-2026
+        role: lawyer
+    documents:
+      - file: reference/prikaz-zarya.docx
+        kind: order
+        title: Приказ о назначении ответственного за ПДн гостей
+        uploaded_by: ershov@zarya.example
+      - file: reference/poruchenie-oblachnye-resheniya.docx
+        kind: pd_assignment
+        title: Договор поручения № 17 с ООО «Облачные решения»
+        uploaded_by: polyakova@zarya.example
+      - file: reference/soglasie-zarya.docx
+        kind: pd_consent
+        title: Согласие участника программы лояльности
+        uploaded_by: polyakova@zarya.example
+      - file: reference/polozhenie-zarya.docx
+        kind: regulation
+        title: Положение об обработке персональных данных гостей
+        uploaded_by: polyakova@zarya.example
+      - file: reference/politika-zarya.docx
+        kind: pd_policy
+        title: Политика обработки персональных данных
+        uploaded_by: polyakova@zarya.example
 
   # A tenant that has just joined: no documents yet.
   - alias: sokolova
