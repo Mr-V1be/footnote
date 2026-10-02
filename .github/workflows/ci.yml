@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.7-pg18-trixie
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-superuser
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      # Throwaway credentials of the CI database service.
+      POSTGRES_USER: postgres
+      PGHOST: localhost
+      PGPASSWORD: ci-superuser
+      SNOSKA_DB_OWNER_PASSWORD: ci-owner
+      SNOSKA_DB_APP_PASSWORD: ci-app
+      KEYCLOAK_DB_PASSWORD: ci-keycloak
+      SNOSKA_DB_HOST: localhost
+      SNOSKA_DB_PORT: "5432"
+      SNOSKA_DB_NAME: snoska_test
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tesseract with Russian data
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-rus
+      - name: Database roles and extensions
+        run: bash infra/postgres/initdb/10-snoska.sh
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Python environment
+        working-directory: backend
+        run: uv sync --frozen
+      - name: Gate
+        run: scripts/gate.sh backend
+
+  frontend:
+    name: Frontend gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      - name: Gate
+        run: scripts/gate.sh frontend
+      - name: Production build
+        working-directory: frontend
+        run: pnpm build
