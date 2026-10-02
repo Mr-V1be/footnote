@@ -51,7 +51,7 @@
 
   /* Typography. */
   --font-ui: var(--font-plex-sans), system-ui, sans-serif;
-  --font-document: var(--font-literata), "Times New Roman", serif;
+  --font-document: var(--font-plex-serif), "Times New Roman", serif;
   --font-code: var(--font-plex-mono), ui-monospace, monospace;
 
   --text-2xs: 0.6875rem;

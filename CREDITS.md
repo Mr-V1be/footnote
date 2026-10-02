@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | IBM Plex Sans | интерфейс | Google Fonts (через `next/font`, файлы раздаются с нашего сервера) | SIL Open Font License 1.1 |
 | IBM Plex Mono | номера, коды, ссылки сносок | Google Fonts | SIL Open Font License 1.1 |
-| Literata | текст документов | Google Fonts | SIL Open Font License 1.1 |
+| IBM Plex Serif | текст документов, знак продукта | Google Fonts | SIL Open Font License 1.1 |
 
 ## Иконки и графика
 

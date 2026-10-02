@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Literata } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { cookies } from "next/headers";
 import { getLocale, getMessages, getNow, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -21,10 +21,11 @@ const mono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   display: "swap",
 });
-const serif = Literata({
+const serif = IBM_Plex_Serif({
   subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
-  variable: "--font-literata",
+  variable: "--font-plex-serif",
   display: "swap",
 });
 
