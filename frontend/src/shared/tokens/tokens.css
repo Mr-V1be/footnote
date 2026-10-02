@@ -131,6 +131,7 @@
   --panel-width: 20rem;
   --outline-width: 15rem;
   --topbar-height: 3.5rem;
+  --topbar-offset: calc(var(--topbar-height) + env(safe-area-inset-top));
   --content-max: 72rem;
   --sheet-max: 47rem;
   --sheet-padding: 3.5rem;
