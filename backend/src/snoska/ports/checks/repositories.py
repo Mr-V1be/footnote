@@ -13,7 +13,8 @@ from snoska.domain.checks.run import CheckRun, RunStatus
 
 @dataclass(frozen=True, slots=True)
 class RunSummary:
-    """Read projection of a run for lists: progress and open findings by severity."""
+    """Read projection of a run for lists: progress, open findings by severity
+    and the checks that produced no verdict (so "no findings" is not overstated)."""
 
     run_id: UUID
     document_id: UUID
@@ -23,6 +24,7 @@ class RunSummary:
     done: int
     open_by_severity: Mapping[Severity, int] = field(default_factory=dict)
     open_reviews: int = 0
+    not_performed: int = 0
 
 
 class CheckRunRepository(Protocol):

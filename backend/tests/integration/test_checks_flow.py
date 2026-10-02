@@ -170,9 +170,14 @@ async def test_without_a_model_api_model_checks_say_so_and_rules_still_run(
     try:
         async with httpx.AsyncClient(transport=transport, base_url="http://api.test") as api:
             _, report = await checked_policy(api, unconfigured, tokens)
+            listed = await api.get(f"{BASE}/workspaces/main/documents", headers=auth(tokens, ALICE))
     finally:
         await unconfigured.close()
     errors = {r["errorCode"] for r in report["results"] if r["method"] == "model"}
     rules = {r["status"] for r in report["results"] if r["method"] == "deterministic"}
     assert errors == {"model_not_configured"}
     assert "error" not in rules
+    # The list does not call the document clean: the model checks did not run.
+    [summary] = [item["check"] for item in listed.json()["items"]]
+    assert summary["notPerformed"] == len([r for r in report["results"] if r["status"] == "error"])
+    assert summary["notPerformed"] > 0

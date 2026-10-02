@@ -237,6 +237,15 @@ class SqlCheckRunRepository:
             .order_by(check_runs.c.version_id, check_runs.c.created_at.desc())
             .subquery("latest")
         )
+        not_performed = (
+            select(func.count())
+            .where(
+                check_results.c.run_id == latest.c.id,
+                check_results.c.status == ResultStatus.ERROR.value,
+            )
+            .scalar_subquery()
+            .label("not_performed")
+        )
         counts = await self._connection.execute(
             select(
                 latest.c.id,
@@ -245,6 +254,7 @@ class SqlCheckRunRepository:
                 latest.c.status,
                 latest.c.total,
                 latest.c.done,
+                not_performed,
                 findings.c.kind,
                 findings.c.severity,
                 func.count(findings.c.id).label("count"),
@@ -292,6 +302,7 @@ class SqlCheckRunRepository:
                 done=row["done"],
                 open_by_severity=severities.get(version_id, {}),
                 open_reviews=reviews.get(version_id, 0),
+                not_performed=row["not_performed"],
             )
             for version_id, row in rows.items()
         }

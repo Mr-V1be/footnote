@@ -248,6 +248,8 @@ class RunSummaryOut(ApiModel):
     important: int
     advice: int
     reviews: int
+    # Checks of the run that gave no verdict (e.g. no model connected).
+    not_performed: int
 
     @classmethod
     def of(cls, summary: RunSummary) -> RunSummaryOut:
@@ -261,4 +263,5 @@ class RunSummaryOut(ApiModel):
             important=counts.get(Severity.IMPORTANT, 0),
             advice=counts.get(Severity.ADVICE, 0),
             reviews=summary.open_reviews,
+            not_performed=summary.not_performed,
         )

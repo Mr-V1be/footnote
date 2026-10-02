@@ -1054,6 +1054,8 @@ export type components = {
             advice: number;
             /** Reviews */
             reviews: number;
+            /** Notperformed */
+            notPerformed: number;
         };
         /** SearchHitOut */
         SearchHitOut: {

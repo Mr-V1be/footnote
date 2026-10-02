@@ -4501,6 +4501,10 @@
           "reviews": {
             "type": "integer",
             "title": "Reviews"
+          },
+          "notPerformed": {
+            "type": "integer",
+            "title": "Notperformed"
           }
         },
         "type": "object",
@@ -4512,7 +4516,8 @@
           "critical",
           "important",
           "advice",
-          "reviews"
+          "reviews",
+          "notPerformed"
         ],
         "title": "RunSummaryOut",
         "description": "The latest run of a document's latest version, for lists."
