@@ -7,7 +7,7 @@ from model import DemoDocument, PageSetup, Para, Style, Table, paras
 ORG = "ООО «Полярная звезда»"
 
 CONSENT = DemoDocument(
-    path="polyarnaya-zvezda/soglasie-pokupatelya.docx",
+    path="documents/polyarnaya-zvezda/soglasie-pokupatelya.docx",
     page=PageSetup(size=12),
     elements=(
         Para("СОГЛАСИЕ", Style.TITLE),
@@ -43,7 +43,7 @@ CONSENT = DemoDocument(
 )
 
 ORDER = DemoDocument(
-    path="polyarnaya-zvezda/prikaz-7-od.pdf",
+    path="documents/polyarnaya-zvezda/prikaz-7-od.pdf",
     output="scan",
     page=PageSetup(margin_left=25, margin_right=12),
     elements=(
@@ -79,7 +79,7 @@ ORDER = DemoDocument(
 )
 
 CONTRACT = DemoDocument(
-    path="polyarnaya-zvezda/dogovor-porucheniya-15-2026.pdf",
+    path="documents/polyarnaya-zvezda/dogovor-porucheniya-15-2026.pdf",
     output="pdf",
     page=PageSetup(size=12, margin_left=25),
     elements=(
@@ -163,7 +163,7 @@ _REGULATION_BODY = (
 )
 
 REGULATION_V1 = DemoDocument(
-    path="polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx",
+    path="documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx",
     page=PageSetup(font="Arial", size=12),
     elements=(
         Para("ПОЛОЖЕНИЕ", Style.TITLE),
@@ -173,7 +173,7 @@ REGULATION_V1 = DemoDocument(
 )
 
 REGULATION_V2 = DemoDocument(
-    path="polyarnaya-zvezda/polozhenie-o-pd-rabotnikov-red2.docx",
+    path="documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov-red2.docx",
     elements=(
         *paras(Style.RIGHT, "УТВЕРЖДЕНО", "приказом от 20.02.2026 № 12-ОД"),
         Para("ПОЛОЖЕНИЕ", Style.TITLE),

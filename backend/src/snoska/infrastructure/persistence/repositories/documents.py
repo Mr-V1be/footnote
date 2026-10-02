@@ -275,6 +275,21 @@ class SqlDocumentVersionRepository:
         )
         return [_version(row) for row in result.mappings()]
 
+    async def latest_parsed(self) -> Sequence[DocumentVersion]:
+        result = await self._connection.execute(
+            select(document_versions)
+            .join(
+                documents,
+                and_(
+                    documents.c.id == document_versions.c.document_id,
+                    documents.c.latest_version_number == document_versions.c.number,
+                ),
+            )
+            .where(document_versions.c.status == ParseStatus.PARSED.value)
+            .order_by(document_versions.c.created_at)
+        )
+        return [_version(row) for row in result.mappings()]
+
     async def find_by_upload_key(self, upload_key: str) -> UploadReference | None:
         result = await self._connection.execute(
             select(document_versions.c.document_id, document_versions.c.number).where(

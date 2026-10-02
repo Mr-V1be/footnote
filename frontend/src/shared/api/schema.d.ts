@@ -272,6 +272,27 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/checks/quality": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Quality
+         * @description Precision, recall and timing of the checks on the labelled reference set;
+         *     null until the benchmark has been run.
+         */
+        get: operations["check_quality"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/corpus/acts": {
         parameters: {
             query?: never;
@@ -552,6 +573,27 @@ export type components = {
             /** Nextcursor */
             nextCursor: string | null;
         };
+        /** DocumentTimingOut */
+        DocumentTimingOut: {
+            /** Filename */
+            fileName: string;
+            /** Title */
+            title: string;
+            /** Kind */
+            kind: string;
+            /** Pages */
+            pages: number;
+            /** Typical */
+            typical: boolean;
+            /** Parsems */
+            parseMs: number;
+            /** Deterministicms */
+            deterministicMs: number;
+            /** Modelms */
+            modelMs: number | null;
+            /** Totalms */
+            totalMs: number | null;
+        };
         /** EditionContentOut */
         EditionContentOut: {
             act: components["schemas"]["ActOut"];
@@ -633,6 +675,12 @@ export type components = {
             /** Chars */
             chars: number;
         };
+        /** GroupMetricsOut */
+        GroupMetricsOut: {
+            /** Code */
+            code: string;
+            metrics: components["schemas"]["MetricsOut"];
+        };
         /**
          * LayoutSource
          * @description Where page geometry came from: declared by the file or measured from ink.
@@ -675,6 +723,34 @@ export type components = {
             roles: string[];
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
+        };
+        /**
+         * MetricsOut
+         * @description Confusion counts of a group of observations, with the shares derived.
+         *
+         *     A share is null when there is nothing to count it from: no violation was
+         *     reported (precision) or none is labelled (recall), or the checks did not
+         *     run at all (see ``errors``).
+         */
+        MetricsOut: {
+            /** Observations */
+            observations: number;
+            /** Truepositives */
+            truePositives: number;
+            /** Falsepositives */
+            falsePositives: number;
+            /** Falsenegatives */
+            falseNegatives: number;
+            /** Truenegatives */
+            trueNegatives: number;
+            /** Reviews */
+            reviews: number;
+            /** Errors */
+            errors: number;
+            /** Precision */
+            precision: number | null;
+            /** Recall */
+            recall: number | null;
         };
         /**
          * ModelsOut
@@ -824,6 +900,35 @@ export type components = {
             code: string;
             /** Detail */
             detail?: string | null;
+        };
+        /**
+         * QualityOut
+         * @description How the checks did on the labelled reference set, as last measured.
+         *
+         *     ``current`` is false when the catalogue changed after the measurement.
+         *     ``model`` is null when no model was connected: the model checks were
+         *     not measured.
+         */
+        QualityOut: {
+            /**
+             * Measuredat
+             * Format: date-time
+             */
+            measuredAt: string;
+            /** Catalogrevision */
+            catalogRevision: string;
+            /** Current */
+            current: boolean;
+            /** Model */
+            model: string | null;
+            /** Documents */
+            documents: components["schemas"]["DocumentTimingOut"][];
+            /** Methods */
+            methods: components["schemas"]["GroupMetricsOut"][];
+            /** Families */
+            families: components["schemas"]["GroupMetricsOut"][];
+            /** Checks */
+            checks: components["schemas"]["GroupMetricsOut"][];
         };
         /**
          * RequisiteKind
@@ -2380,6 +2485,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckCatalogOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    check_quality: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QualityOut"] | null;
                 };
             };
             /** @description Unauthorized */

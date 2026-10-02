@@ -1,0 +1,151 @@
+# The reference set: documents written for measuring the checks, and the
+# violations an expert finds in each of them. The documents are produced by
+# scripts/demo/build_documents.py; organisations and people are fictional.
+#
+# `violations` lists the checks that must report a violation. Every other
+# check that applies to the document's kind is expected not to: a pass, or
+# "not applicable" when there is nothing to judge. A check listed here that
+# does not apply to the kind is a labelling error and stops the benchmark.
+#
+# `pages` is the length in print (A4). `typical` marks the document the time
+# of a check is measured on: a complete policy of eight pages.
+documents:
+  - file: politika-severnyy-veter.docx
+    title: Политика ООО «Северный ветер» — полная редакция
+    kind: pd_policy
+    pages: 8
+    typical: true
+    violations: []
+
+  - file: politika-zarya.docx
+    title: Политика ООО «Заря» — черновик с пробелами
+    kind: pd_policy
+    pages: 1
+    violations:
+      - formatting.page_margins # левое поле 15 мм
+      - formatting.font_size # 11 пт
+      - formatting.approval_stamp
+      - formatting.date_format # «1.2.2026»
+      - formatting.numbering_sequence # после раздела 4 идёт 6
+      - personal_data.purposes # «в целях осуществления своей деятельности»
+      - personal_data.data_per_purpose # «любые сведения»
+      - personal_data.terms
+      - personal_data.destruction
+      - personal_data.cross_border
+      - personal_data.processor
+      - personal_data.requests
+      - personal_data.responsible_person
+
+  - file: politika-kovalev-skan.pdf
+    title: Политика ИП Ковалёва — скан
+    kind: pd_policy
+    pages: 1
+    violations:
+      - personal_data.cross_border
+      - personal_data.processor
+
+  - file: polozhenie-zarya.docx
+    title: Положение ООО «Заря» о данных гостей
+    kind: regulation
+    pages: 1
+    violations:
+      - formatting.approval_stamp
+      - formatting.numbering # пункт 3.1.1.1.1 — пять уровней
+      - personal_data.destruction
+      - personal_data.protection
+      - personal_data.responsible_person
+
+  - file: soglasie-severnyy-veter.docx
+    title: Согласие покупателя ООО «Северный ветер»
+    kind: pd_consent
+    pages: 1
+    violations: []
+
+  - file: soglasie-zarya.docx
+    title: Согласие участника программы лояльности ООО «Заря»
+    kind: pd_consent
+    pages: 1
+    violations:
+      - formatting.font_size # 10 пт
+      - personal_data.consent_operator # нет адреса оператора
+      - personal_data.consent_purpose # «для любых целей»
+      - personal_data.consent_data # «любых моих персональных данных»
+      - personal_data.consent_processor # «третьим лицам по своему усмотрению»
+      - personal_data.consent_term
+      - personal_data.consent_specific
+
+  - file: poruchenie-bystraya-dostavka.docx
+    title: Договор поручения с ООО «Быстрая доставка»
+    kind: pd_assignment
+    pages: 2
+    violations: []
+
+  - file: poruchenie-oblachnye-resheniya.docx
+    title: Договор поручения с ООО «Облачные решения»
+    kind: pd_assignment
+    pages: 2
+    violations:
+      - formatting.line_spacing # двойной интервал
+      - formatting.paragraph_indent # без абзацного отступа
+      - formatting.signature_order # «Петров И.И.»
+      - personal_data.assignment_security
+      - personal_data.assignment_documents
+      - personal_data.assignment_incidents
+
+  - file: prikaz-severnyy-veter.docx
+    title: Приказ ООО «Северный ветер» № 3-ОД
+    kind: order
+    pages: 1
+    violations: []
+
+  - file: prikaz-zarya.docx
+    title: Приказ ООО «Заря» о назначении ответственного
+    kind: order
+    pages: 1
+    violations:
+      - formatting.registration_number
+      - formatting.place
+      - formatting.title # заголовок не отвечает на вопрос «о чём?»
+      - formatting.date_format # «2026-02-03»
+      - formatting.numbering # римские цифры
+      - formatting.signature_order # «Петров И.И.»
+
+  - file: politika-sayt-uyut.docx
+    title: Обработка данных в интернет-магазине «Уют»
+    kind: pd_policy
+    pages: 1
+    violations:
+      - formatting.document_type
+      - formatting.date
+      - formatting.place
+      - formatting.approval_stamp
+      - personal_data.legal_grounds
+      - personal_data.subject_categories
+      - personal_data.subject_rights
+
+  - file: soglasie-rassylka.docx
+    title: Согласие на рекламную рассылку ООО «Северный ветер»
+    kind: pd_consent
+    pages: 1
+    violations:
+      - personal_data.consent_subject
+      - personal_data.consent_actions
+      - personal_data.consent_signature
+
+  - file: poruchenie-v-dogovore.docx
+    title: Договор услуг с ООО «Колл-центр Плюс» — пункт о данных
+    kind: pd_assignment
+    pages: 1
+    violations:
+      - personal_data.assignment_data
+      - personal_data.assignment_actions
+      - personal_data.assignment_purposes
+      - personal_data.assignment_confidentiality
+
+  - file: prikaz-uyut.docx
+    title: Приказ ООО «Уют» № 12-ОД
+    kind: order
+    pages: 1
+    violations:
+      - formatting.date # в преамбуле только дата закона
+      - formatting.signature

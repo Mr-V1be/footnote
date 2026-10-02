@@ -1,9 +1,11 @@
-"""Builds the demo document set into backend/demo/documents.
+"""Builds the demo documents and the reference set into backend/demo.
 
 Run with the backend environment (python-docx, pypdfium2 and Pillow are its
 dependencies); LibreOffice converts DOCX to PDF:
 
-    backend/.venv/bin/python scripts/demo/build_documents.py
+    backend/.venv/bin/python scripts/demo/build_documents.py [path prefix...]
+
+With path prefixes (``reference/``) only the matching documents are rebuilt.
 """
 
 from __future__ import annotations
@@ -27,10 +29,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 import content_polar_other
 import content_polar_policy
 import content_port
+import reference_contracts
+import reference_orders
+import reference_policies
+import reference_policy_full
+import reference_short
 from model import DemoDocument, PageBreak, PageSetup, Para, Style, Table
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / "backend" / "demo" / "documents"
+OUTPUT = ROOT / "backend" / "demo"
 SCAN_DPI = 200
 SCAN_SKEW_DEGREES = 0.6
 SCAN_NOISE_SIGMA = 18
@@ -47,6 +54,21 @@ DOCUMENTS: tuple[DemoDocument, ...] = (
     content_polar_other.REGULATION_V2,
     content_port.POLICY,
     content_port.EMPLOYEE_CONSENT,
+    # The reference set: what the checks are measured against.
+    reference_policy_full.POLICY_FULL,
+    reference_policies.POLICY_FLAWED,
+    reference_policies.POLICY_SCAN,
+    reference_policies.REGULATION_FLAWED,
+    reference_contracts.CONSENT_FULL,
+    reference_contracts.CONSENT_FLAWED,
+    reference_contracts.ASSIGNMENT_FULL,
+    reference_contracts.ASSIGNMENT_FLAWED,
+    reference_orders.ORDER_CORRECT,
+    reference_orders.ORDER_FLAWED,
+    reference_short.POLICY_SITE,
+    reference_short.CONSENT_NEWSLETTER,
+    reference_short.ASSIGNMENT_CLAUSE,
+    reference_short.ORDER_UNSIGNED,
 )
 
 _ALIGN = {
@@ -169,8 +191,10 @@ def _scan(pdf: Path, target: Path) -> None:
     first.save(target, "PDF", resolution=SCAN_DPI, save_all=True, append_images=rest)
 
 
-def build() -> None:
+def build(prefixes: list[str]) -> None:
     for spec in DOCUMENTS:
+        if prefixes and not spec.path.startswith(tuple(prefixes)):
+            continue
         target = OUTPUT / spec.path
         target.parent.mkdir(parents=True, exist_ok=True)
         if spec.output == "docx":
@@ -189,4 +213,4 @@ def build() -> None:
 
 
 if __name__ == "__main__":
-    build()
+    build(sys.argv[1:])

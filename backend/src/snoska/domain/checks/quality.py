@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
+from datetime import datetime
 
 from snoska.domain.checks.catalog import CheckMethod
 from snoska.domain.checks.outcome import ResultStatus
@@ -93,3 +94,55 @@ def group_metrics[K](
         group = key(observation)
         grouped[group] = grouped[group].add(observation)
     return dict(grouped)
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentTiming:
+    """How long one reference document took, by stage.
+
+    ``model_ms`` is None when the model part did not run (no provider is
+    connected): there is nothing honest to report for it.
+    """
+
+    file_name: str
+    title: str
+    kind: str
+    pages: int
+    typical: bool
+    parse_ms: int
+    deterministic_ms: int
+    model_ms: int | None
+
+    @property
+    def total_ms(self) -> int | None:
+        if self.model_ms is None:
+            return None
+        return self.parse_ms + self.deterministic_ms + self.model_ms
+
+
+@dataclass(frozen=True, slots=True)
+class QualityReport:
+    """One benchmark run over the reference set.
+
+    ``model`` names the language model the model checks ran on, or is None
+    when none was connected and their quality was not measured.
+    """
+
+    measured_at: datetime
+    catalog_revision: str
+    model: str | None
+    documents: tuple[DocumentTiming, ...]
+    observations: tuple[Observation, ...]
+
+    def by_check(self) -> Mapping[str, Metrics]:
+        return group_metrics(self.observations, lambda item: item.check_code)
+
+    def by_family(self) -> Mapping[str, Metrics]:
+        return group_metrics(self.observations, lambda item: item.family)
+
+    def by_method(self) -> Mapping[CheckMethod, Metrics]:
+        return group_metrics(self.observations, lambda item: item.method)
+
+    @property
+    def typical(self) -> DocumentTiming | None:
+        return next((item for item in self.documents if item.typical), None)

@@ -7,7 +7,7 @@ from model import DemoDocument, PageSetup, Para, Style, Table, paras
 ORG = "АО «Речной порт»"
 
 POLICY = DemoDocument(
-    path="rechnoy-port/politika-pd.pdf",
+    path="documents/rechnoy-port/politika-pd.pdf",
     output="pdf",
     page=PageSetup(size=12, margin_left=25, margin_right=15),
     elements=(
@@ -54,7 +54,7 @@ POLICY = DemoDocument(
 )
 
 EMPLOYEE_CONSENT = DemoDocument(
-    path="rechnoy-port/soglasie-rabotnika.docx",
+    path="documents/rechnoy-port/soglasie-rabotnika.docx",
     page=PageSetup(size=12, margin_left=20, margin_right=10),
     elements=(
         Para("Генеральному директору " + ORG, Style.RIGHT),

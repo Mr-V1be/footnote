@@ -1,0 +1,2166 @@
+{
+  "format": 1,
+  "measured_at": "2026-10-02T22:34:11+00:00",
+  "catalog_revision": "ff043634e2ee",
+  "model": null,
+  "documents": [
+    {
+      "file": "politika-severnyy-veter.docx",
+      "title": "Политика ООО «Северный ветер» — полная редакция",
+      "kind": "pd_policy",
+      "pages": 8,
+      "typical": true,
+      "parse_ms": 28,
+      "deterministic_ms": 2,
+      "model_ms": null
+    },
+    {
+      "file": "politika-zarya.docx",
+      "title": "Политика ООО «Заря» — черновик с пробелами",
+      "kind": "pd_policy",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 14,
+      "deterministic_ms": 1,
+      "model_ms": null
+    },
+    {
+      "file": "politika-kovalev-skan.pdf",
+      "title": "Политика ИП Ковалёва — скан",
+      "kind": "pd_policy",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 1520,
+      "deterministic_ms": 1,
+      "model_ms": null
+    },
+    {
+      "file": "polozhenie-zarya.docx",
+      "title": "Положение ООО «Заря» о данных гостей",
+      "kind": "regulation",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 15,
+      "deterministic_ms": 1,
+      "model_ms": null
+    },
+    {
+      "file": "soglasie-severnyy-veter.docx",
+      "title": "Согласие покупателя ООО «Северный ветер»",
+      "kind": "pd_consent",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 9,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "soglasie-zarya.docx",
+      "title": "Согласие участника программы лояльности ООО «Заря»",
+      "kind": "pd_consent",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 7,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "poruchenie-bystraya-dostavka.docx",
+      "title": "Договор поручения с ООО «Быстрая доставка»",
+      "kind": "pd_assignment",
+      "pages": 2,
+      "typical": false,
+      "parse_ms": 9,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "poruchenie-oblachnye-resheniya.docx",
+      "title": "Договор поручения с ООО «Облачные решения»",
+      "kind": "pd_assignment",
+      "pages": 2,
+      "typical": false,
+      "parse_ms": 17,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "prikaz-severnyy-veter.docx",
+      "title": "Приказ ООО «Северный ветер» № 3-ОД",
+      "kind": "order",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 7,
+      "deterministic_ms": 0,
+      "model_ms": 0
+    },
+    {
+      "file": "prikaz-zarya.docx",
+      "title": "Приказ ООО «Заря» о назначении ответственного",
+      "kind": "order",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 6,
+      "deterministic_ms": 0,
+      "model_ms": 0
+    },
+    {
+      "file": "politika-sayt-uyut.docx",
+      "title": "Обработка данных в интернет-магазине «Уют»",
+      "kind": "pd_policy",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 7,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "soglasie-rassylka.docx",
+      "title": "Согласие на рекламную рассылку ООО «Северный ветер»",
+      "kind": "pd_consent",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 6,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "poruchenie-v-dogovore.docx",
+      "title": "Договор услуг с ООО «Колл-центр Плюс» — пункт о данных",
+      "kind": "pd_assignment",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 11,
+      "deterministic_ms": 0,
+      "model_ms": null
+    },
+    {
+      "file": "prikaz-uyut.docx",
+      "title": "Приказ ООО «Уют» № 12-ОД",
+      "kind": "order",
+      "pages": 1,
+      "typical": false,
+      "parse_ms": 10,
+      "deterministic_ms": 0,
+      "model_ms": 0
+    }
+  ],
+  "observations": [
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.approval_stamp",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.legal_grounds",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.data_per_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.subject_categories",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.terms",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.destruction",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.subject_rights",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.protection",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.cross_border",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.requests",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-severnyy-veter.docx",
+      "check": "personal_data.responsible_person",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.approval_stamp",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.legal_grounds",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.data_per_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.subject_categories",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.terms",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.destruction",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.subject_rights",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.protection",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.cross_border",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.requests",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-zarya.docx",
+      "check": "personal_data.responsible_person",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "violation"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.approval_stamp",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.legal_grounds",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.data_per_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.subject_categories",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.terms",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.destruction",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.subject_rights",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.protection",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.cross_border",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.requests",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-kovalev-skan.pdf",
+      "check": "personal_data.responsible_person",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.approval_stamp",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.legal_grounds",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.data_per_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.subject_categories",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.terms",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.destruction",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.subject_rights",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.protection",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "polozhenie-zarya.docx",
+      "check": "personal_data.responsible_person",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_subject",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_operator",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_term",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_signature",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-severnyy-veter.docx",
+      "check": "personal_data.consent_specific",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_subject",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_operator",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_term",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_signature",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-zarya.docx",
+      "check": "personal_data.consent_specific",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_confidentiality",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_security",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_documents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-bystraya-dostavka.docx",
+      "check": "personal_data.assignment_incidents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_confidentiality",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_security",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_documents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-oblachnye-resheniya.docx",
+      "check": "personal_data.assignment_incidents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.registration_number",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.title",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.signature",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-severnyy-veter.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.registration_number",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.title",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.signature",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-zarya.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.approval_stamp",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.legal_grounds",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.data_per_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.subject_categories",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.terms",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.destruction",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.subject_rights",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.protection",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.cross_border",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.requests",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "politika-sayt-uyut.docx",
+      "check": "personal_data.responsible_person",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_subject",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_operator",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_purpose",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_processor",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_term",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_signature",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "soglasie-rassylka.docx",
+      "check": "personal_data.consent_specific",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_data",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_actions",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_purposes",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_confidentiality",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": true,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_security",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_documents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "poruchenie-v-dogovore.docx",
+      "check": "personal_data.assignment_incidents",
+      "family": "personal_data",
+      "method": "model",
+      "expected_violation": false,
+      "status": "error"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.page_margins",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.font_size",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.line_spacing",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.paragraph_indent",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.document_type",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.date",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.registration_number",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.place",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.title",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.signature",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": true,
+      "status": "violation"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.signature_order",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "not_applicable"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.date_format",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.numbering",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    },
+    {
+      "document": "prikaz-uyut.docx",
+      "check": "formatting.numbering_sequence",
+      "family": "formatting",
+      "method": "deterministic",
+      "expected_violation": false,
+      "status": "passed"
+    }
+  ]
+}

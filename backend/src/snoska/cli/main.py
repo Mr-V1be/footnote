@@ -7,7 +7,7 @@ import uvicorn
 
 from snoska.api.app import create_app
 from snoska.bootstrap.settings import Settings
-from snoska.cli import corpus, db, demo, models
+from snoska.cli import checks, corpus, db, demo, models
 from snoska.infrastructure.observability.logging import configure_logging
 from snoska.infrastructure.observability.tracing import configure_tracing
 from snoska.worker.runtime import WorkerRuntime
@@ -17,6 +17,7 @@ app.add_typer(db.app, name="db")
 app.add_typer(corpus.app, name="corpus")
 app.add_typer(models.app, name="models")
 app.add_typer(demo.app, name="demo")
+app.add_typer(checks.app, name="checks")
 
 
 @app.command()

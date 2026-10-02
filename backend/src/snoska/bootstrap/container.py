@@ -12,6 +12,9 @@ from snoska.application.checks.job import RunChecks
 from snoska.application.checks.legal.executor import LegalCheckSettings, LegalExecutor
 from snoska.application.checks.norms import NormLibrary
 from snoska.application.checks.progress import RunProgress
+from snoska.application.checks.quality.benchmark import CheckBenchmark
+from snoska.application.checks.quality.queries import QualityQueries
+from snoska.application.checks.recheck import RecheckDocuments
 from snoska.application.checks.scheduling import CheckScheduler
 from snoska.application.checks.service import CheckService
 from snoska.application.corpus.indexing import IndexCorpusEdition
@@ -37,6 +40,8 @@ from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.tenancy.access import AccessPolicy
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
 from snoska.infrastructure.checks.catalog import YamlCheckCatalog
+from snoska.infrastructure.checks.quality_store import JsonQualityReportStore
+from snoska.infrastructure.checks.reference import YamlReferenceSet
 from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
 from snoska.infrastructure.corpus_sources.pravo_ips import (
     PravoIpsClient,
@@ -133,6 +138,9 @@ class Container:
     norm_search: NormSearch
     checks: CheckService
     check_progress: RunProgress
+    recheck: RecheckDocuments
+    quality: QualityQueries
+    benchmark: CheckBenchmark
     platform: PlatformTenantQueries
     verifier: TokenVerifier
     provisioning: IdentityProvisioning
@@ -189,6 +197,8 @@ async def build_container(
     language_model = overrides.language_model or ai.language_model
     check_catalog = load_check_catalog(settings.checks)
     norms = NormLibrary(uow)
+    engine_of_checks = check_engine(settings.checks, embedder, language_model, norms)
+    quality_store = JsonQualityReportStore(settings.checks.quality_report)
     scheduler = CheckScheduler(check_catalog, clock)
     run_feed = PgRunChangeFeed(app_database(settings))
     corpus_indexing = IndexCorpusEdition(uow, embedder, clock)
@@ -222,6 +232,18 @@ async def build_container(
         norm_search=NormSearch(uow, embedder),
         checks=CheckService(uow, check_catalog, scheduler, norms, clock),
         check_progress=RunProgress(uow, run_feed),
+        recheck=RecheckDocuments(uow, scheduler),
+        quality=QualityQueries(quality_store, check_catalog),
+        benchmark=CheckBenchmark(
+            YamlReferenceSet(settings.checks.reference_dir, SUPPORTED_FORMATS),
+            parsers,
+            check_catalog,
+            engine_of_checks,
+            RequisiteDetector(),
+            quality_store,
+            clock,
+            language_model.model or None,
+        ),
         platform=PlatformTenantQueries(uow),
         verifier=verifier,
         provisioning=directory,
@@ -235,7 +257,7 @@ async def build_container(
             RUN_CHECKS.name: RunChecks(
                 uow,
                 check_catalog,
-                check_engine(settings.checks, embedder, language_model, norms),
+                engine_of_checks,
                 RequisiteDetector(),
                 clock,
                 language_model.model,

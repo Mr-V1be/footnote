@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate corpus index seed setup api worker web gate demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark demo-documents stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -45,7 +45,13 @@ web: ## Run the web app on :46300
 gate: ## Lint, typecheck, tests and source limits
 	scripts/gate.sh
 
-demo-documents: ## Rebuild the demo documents (needs LibreOffice)
+recheck: ## Check every document's latest version again (after the checks change)
+	$(BACKEND) snoska checks recheck
+
+benchmark: ## Measure the checks on the reference set (writes data/quality and docs/quality.md)
+	$(BACKEND) snoska checks benchmark --markdown ../docs/quality.md
+
+demo-documents: ## Rebuild the demo documents and the reference set (needs LibreOffice)
 	backend/.venv/bin/python scripts/demo/build_documents.py
 
 stop: ## Stop the containers

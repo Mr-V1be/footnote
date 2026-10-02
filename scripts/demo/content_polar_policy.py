@@ -7,7 +7,7 @@ from model import DemoDocument, Para, Style, Table, paras
 ORG = "ООО «Полярная звезда»"
 
 POLICY = DemoDocument(
-    path="polyarnaya-zvezda/politika-obrabotki-pd.docx",
+    path="documents/polyarnaya-zvezda/politika-obrabotki-pd.docx",
     elements=(
         *paras(
             Style.RIGHT,

@@ -17,6 +17,7 @@ from snoska.api.schemas.checks import (
     ReviewIn,
     RunOut,
 )
+from snoska.api.schemas.quality import QualityOut
 from snoska.domain.checks.run import CheckRun
 
 router = APIRouter(prefix="/v1", tags=["checks"], responses=PROBLEM_RESPONSES)
@@ -130,3 +131,10 @@ async def check_catalog(container: ContainerDep, _: CorpusReaderDep) -> CheckCat
         embedding_model=ai.embedder.model or None,
     )
     return CheckCatalogOut.of(container.checks.catalog, await container.checks.citations(), models)
+
+
+@router.get("/checks/quality", response_model=QualityOut | None, response_model_by_alias=True)
+async def check_quality(container: ContainerDep, _: CorpusReaderDep) -> QualityOut | None:
+    """Precision, recall and timing of the checks on the labelled reference set;
+    null until the benchmark has been run."""
+    return QualityOut.of(container.quality.latest())

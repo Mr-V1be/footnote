@@ -2005,6 +2005,111 @@
         ]
       }
     },
+    "/api/v1/checks/quality": {
+      "get": {
+        "tags": [
+          "checks"
+        ],
+        "summary": "Check Quality",
+        "description": "Precision, recall and timing of the checks on the labelled reference set;\nnull until the benchmark has been run.",
+        "operationId": "check_quality",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/QualityOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Check Quality"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/corpus/acts": {
       "get": {
         "tags": [
@@ -3033,6 +3138,73 @@
         ],
         "title": "DocumentPageOut"
       },
+      "DocumentTimingOut": {
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          },
+          "typical": {
+            "type": "boolean",
+            "title": "Typical"
+          },
+          "parseMs": {
+            "type": "integer",
+            "title": "Parsems"
+          },
+          "deterministicMs": {
+            "type": "integer",
+            "title": "Deterministicms"
+          },
+          "modelMs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelms"
+          },
+          "totalMs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Totalms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fileName",
+          "title",
+          "kind",
+          "pages",
+          "typical",
+          "parseMs",
+          "deterministicMs",
+          "modelMs",
+          "totalMs"
+        ],
+        "title": "DocumentTimingOut"
+      },
       "EditionContentOut": {
         "properties": {
           "act": {
@@ -3269,6 +3441,23 @@
         ],
         "title": "FontOut"
       },
+      "GroupMetricsOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MetricsOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "metrics"
+        ],
+        "title": "GroupMetricsOut"
+      },
       "LayoutSource": {
         "type": "string",
         "enum": [
@@ -3388,6 +3577,74 @@
           "permissions"
         ],
         "title": "MembershipOut"
+      },
+      "MetricsOut": {
+        "properties": {
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "truePositives": {
+            "type": "integer",
+            "title": "Truepositives"
+          },
+          "falsePositives": {
+            "type": "integer",
+            "title": "Falsepositives"
+          },
+          "falseNegatives": {
+            "type": "integer",
+            "title": "Falsenegatives"
+          },
+          "trueNegatives": {
+            "type": "integer",
+            "title": "Truenegatives"
+          },
+          "reviews": {
+            "type": "integer",
+            "title": "Reviews"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          },
+          "precision": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision"
+          },
+          "recall": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recall"
+          }
+        },
+        "type": "object",
+        "required": [
+          "observations",
+          "truePositives",
+          "falsePositives",
+          "falseNegatives",
+          "trueNegatives",
+          "reviews",
+          "errors",
+          "precision",
+          "recall"
+        ],
+        "title": "MetricsOut",
+        "description": "Confusion counts of a group of observations, with the shares derived.\n\nA share is null when there is nothing to count it from: no violation was\nreported (precision) or none is labelled (recall), or the checks did not\nrun at all (see ``errors``)."
       },
       "ModelsOut": {
         "properties": {
@@ -3876,6 +4133,75 @@
         ],
         "title": "Problem",
         "description": "RFC 9457 problem details with a stable machine-readable ``code``."
+      },
+      "QualityOut": {
+        "properties": {
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Measuredat"
+          },
+          "catalogRevision": {
+            "type": "string",
+            "title": "Catalogrevision"
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentTimingOut"
+            },
+            "type": "array",
+            "title": "Documents"
+          },
+          "methods": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMetricsOut"
+            },
+            "type": "array",
+            "title": "Methods"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMetricsOut"
+            },
+            "type": "array",
+            "title": "Families"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMetricsOut"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "measuredAt",
+          "catalogRevision",
+          "current",
+          "model",
+          "documents",
+          "methods",
+          "families",
+          "checks"
+        ],
+        "title": "QualityOut",
+        "description": "How the checks did on the labelled reference set, as last measured.\n\n``current`` is false when the catalogue changed after the measurement.\n``model`` is null when no model was connected: the model checks were\nnot measured."
       },
       "RequisiteKind": {
         "type": "string",

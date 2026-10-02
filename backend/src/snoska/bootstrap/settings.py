@@ -143,6 +143,9 @@ class ChecksSettings(BaseSettings):
     model_config = _config("SNOSKA_CHECKS_")
 
     catalog_dir: Path = BACKEND_ROOT / "data" / "checks"
+    # Labelled documents the checks are measured on, and the latest result.
+    reference_dir: Path = BACKEND_ROOT / "demo" / "reference"
+    quality_report: Path = BACKEND_ROOT / "data" / "quality" / "benchmark.json"
     # Model checks running at once; match the model server's parallel slots.
     model_concurrency: int = 2
     # Passages of the document shown to the model for one requirement.
