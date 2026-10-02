@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import type { Block } from "@/shared/api/types";
 
-import type { Footnote } from "./footnotes";
+import type { Footnote } from "../footnotes";
 import { InlineText } from "./InlineText";
 import styles from "./sheet.module.css";
 

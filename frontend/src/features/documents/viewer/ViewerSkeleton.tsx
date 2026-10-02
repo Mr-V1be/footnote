@@ -1,7 +1,7 @@
 import { Skeleton } from "@/shared/ui/skeleton/Skeleton";
 
 import styles from "./document-screen.module.css";
-import sheet from "./sheet.module.css";
+import sheet from "./sheet/sheet.module.css";
 
 const LINE_WIDTHS = ["92%", "100%", "96%", "70%", "100%", "88%", "94%", "60%"];
 

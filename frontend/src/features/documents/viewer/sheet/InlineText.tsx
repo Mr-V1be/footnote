@@ -5,8 +5,8 @@ import { useMemo } from "react";
 import { TypesetRuns } from "@/shared/typography/Typeset";
 import { typeset } from "@/shared/typography/typeset";
 
-import { useFootnotes } from "./FootnoteContext";
-import { anchors, segmentText, type Footnote } from "./footnotes";
+import { useFootnotes } from "../FootnoteContext";
+import { anchors, segmentText, type Footnote } from "../footnotes";
 import styles from "./sheet.module.css";
 
 /**

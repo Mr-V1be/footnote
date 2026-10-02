@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 
 import type { Block } from "@/shared/api/types";
 
-import { anchors, type Footnote } from "./footnotes";
+import { anchors, type Footnote } from "../footnotes";
 import { InlineText } from "./InlineText";
 import styles from "./sheet.module.css";
 import { TableView } from "./TableView";

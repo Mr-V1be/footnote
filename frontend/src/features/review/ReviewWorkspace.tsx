@@ -9,7 +9,7 @@ import type { CardHandlers } from "@/features/checks/result/FindingList";
 import { useCheckReport, useFindingReview } from "@/features/checks/useCheckReport";
 import { isRunPending } from "@/features/checks/queries";
 import { useCan } from "@/features/session/membership";
-import { DocumentSheet } from "@/features/documents/viewer/DocumentSheet";
+import { DocumentSheet } from "@/features/documents/viewer/sheet/DocumentSheet";
 import {
   FootnoteProvider,
   useFootnotes,

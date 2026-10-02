@@ -7,7 +7,7 @@ import { Fragment, useMemo, type Ref } from "react";
 import type { DocumentStructure } from "@/shared/api/types";
 
 import { BlockView } from "./BlockView";
-import { footnotesByBlock, type Footnote } from "./footnotes";
+import { footnotesByBlock, type Footnote } from "../footnotes";
 import styles from "./sheet.module.css";
 
 const RECOGNISED = new Set(["pdf_ocr", "pdf_mixed"]);
