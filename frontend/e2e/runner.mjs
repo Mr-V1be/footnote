@@ -10,10 +10,15 @@ import { chromium } from "playwright";
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const BASE = process.env.WEB_URL ?? "http://localhost:46300";
 export const VIEWPORTS = {
+  // The smallest phone the layout is checked on; only for screens that ask for it.
+  small: { width: 360, height: 780 },
   phone: { width: 390, height: 844 },
   tablet: { width: 768, height: 1024 },
   desktop: { width: 1280, height: 800 },
 };
+const DEFAULT_VIEWPORTS = ["phone", "tablet", "desktop"];
+// Appended to file names, e.g. SUFFIX=before for the "before" half of a pair.
+const SUFFIX = process.env.SUFFIX ? `-${process.env.SUFFIX}` : "";
 const THEMES = ["light", "dark"];
 const SETTLE_MS = 700;
 
@@ -79,14 +84,14 @@ export async function capture({ screens, users, outDir }) {
   const problems = [];
   for (const screen of selected) {
     for (const [viewport, size] of Object.entries(VIEWPORTS)) {
-      if (screen.viewports && !screen.viewports.includes(viewport)) continue;
+      if (!(screen.viewports ?? DEFAULT_VIEWPORTS).includes(viewport)) continue;
       for (const theme of THEMES) {
         const context = await browser.newContext({
           viewport: size,
           deviceScaleFactor: 1,
           colorScheme: theme,
           storageState: screen.user ? states[screen.user] : undefined,
-          isMobile: viewport === "phone",
+          isMobile: viewport === "phone" || viewport === "small",
           hasTouch: viewport !== "desktop",
         });
         await context.addCookies([{ name: "snoska_theme", value: theme, url: BASE }]);
@@ -102,7 +107,9 @@ export async function capture({ screens, users, outDir }) {
           );
           if (overflow > 0)
             problems.push(`${screen.name} ${viewport} ${theme}: horizontal overflow ${overflow}px`);
-          await page.screenshot({ path: `${out}/${screen.name}--${viewport}-${theme}.png` });
+          await page.screenshot({
+            path: `${out}/${screen.name}--${viewport}-${theme}${SUFFIX}.png`,
+          });
           if (screen.after) await screen.after(page, { viewport, theme });
         } catch (error) {
           problems.push(`${screen.name} ${viewport} ${theme}: ${error.message.split("\n")[0]}`);
