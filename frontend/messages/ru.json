@@ -22,7 +22,8 @@
     "organization": "Организация",
     "switchOrganization": "Сменить организацию",
     "workspace": "Пространство",
-    "skipToContent": "К содержимому"
+    "skipToContent": "К содержимому",
+    "methodology": "Как мы проверяем"
   },
   "user": {
     "menu": "Профиль и настройки",
@@ -79,6 +80,7 @@
   "kinds": {
     "pd_policy": "Политика обработки ПДн",
     "pd_consent": "Согласие на обработку ПДн",
+    "pd_assignment": "Поручение обработки ПДн",
     "contract": "Договор",
     "regulation": "Положение",
     "order": "Приказ",
@@ -200,5 +202,123 @@
     "bytes": "{value}\u00a0Б",
     "kilobytes": "{value}\u00a0КБ",
     "megabytes": "{value}\u00a0МБ"
+  },
+  "checks": {
+    "panelMode": "Что показывать на полях",
+    "findingsMode": "Замечания",
+    "requisitesMode": "Реквизиты",
+    "findings": "Замечания",
+    "severity": {
+      "critical": "Критично",
+      "important": "Важно",
+      "advice": "Совет"
+    },
+    "severityCount": {
+      "critical": "{count, plural, one {# критичное} few {# критичных} many {# критичных} other {# критичного}}",
+      "important": "{count, plural, one {# важное} few {# важных} many {# важных} other {# важного}}",
+      "advice": "{count, plural, one {# совет} few {# совета} many {# советов} other {# совета}}"
+    },
+    "review": {
+      "open": "Открыто",
+      "accepted": "Принято",
+      "rejected": "Отклонено",
+      "fixed": "Исправлено"
+    },
+    "actions": {
+      "accept": "Принять",
+      "reject": "Отклонить",
+      "fix": "Исправлено",
+      "reopen": "Вернуть в работу",
+      "label": "Решение по замечанию"
+    },
+    "reviewFailed": "Не удалось сохранить решение. Обновите страницу — возможно, его уже изменил коллега.",
+    "kind": {
+      "review": "Нужен юрист"
+    },
+    "method": {
+      "deterministic": "правило",
+      "model": "модель"
+    },
+    "documentWide": "Документ в целом",
+    "norm": "Норма",
+    "requirement": "Требование",
+    "howToFix": "Как исправить",
+    "showMore": "Показать полностью",
+    "showLess": "Свернуть",
+    "showInText": "Показать в тексте",
+    "markerLabel": "Замечание {number}: {title}",
+    "scope": {
+      "outstanding": "Требуют внимания",
+      "resolved": "Решённые",
+      "all": "Все замечания"
+    },
+    "filterSeverity": "Серьёзность",
+    "filterScope": "Статус замечаний",
+    "allSeverities": "Любая серьёзность",
+    "someSeverities": "{count, plural, one {# уровень} few {# уровня} many {# уровней} other {# уровня}}",
+    "noFindingsTitle": "Замечаний нет",
+    "noFindingsDescription": "Все применимые проверки пройдены.",
+    "noneMatchTitle": "Под фильтр ничего не подходит",
+    "noneMatchDescription": "Измените фильтр по серьёзности или статусу.",
+    "resetFilters": "Сбросить фильтры",
+    "summary": {
+      "queued": "Проверка в очереди",
+      "running": "Проверяем документ",
+      "progress": "{done} из\u00a0{total}",
+      "completed": "Проверено {date}",
+      "failed": "Проверку не удалось выполнить",
+      "failedHint": "Запустите её снова — результат прошлых проверок не потерян.",
+      "none": "Документ ещё не проверялся",
+      "outstanding": "{count, plural, one {# замечание} few {# замечания} many {# замечаний} other {# замечания}}",
+      "clean": "Замечаний нет",
+      "reviews": "{count, plural, one {# требует юриста} few {# требуют юриста} many {# требуют юриста} other {# требуют юриста}}",
+      "passed": "Без замечаний: {count}",
+      "notPerformed": "Не выполнено: {count}",
+      "modelMissing": "Юридические проверки не выполнены: языковая модель не подключена.",
+      "modelUnavailable": "Часть проверок не выполнена: модель не ответила. Проверьте документ снова позже.",
+      "checked": "Что проверено",
+      "recheck": "Проверить снова",
+      "rechecking": "Ставим на проверку…"
+    },
+    "results": {
+      "passed": "Пройдено",
+      "violation": "Есть замечания",
+      "needs_review": "Нужен юрист",
+      "not_applicable": "Неприменимо",
+      "error": "Не выполнено"
+    },
+    "errors": {
+      "model_not_configured": "Модель не подключена",
+      "model_unavailable": "Модель не ответила",
+      "invalid_model_answer": "Модель не дала обоснованного ответа",
+      "norm_unavailable": "Норма недоступна в корпусе",
+      "internal_error": "Внутренняя ошибка"
+    },
+    "detail": {
+      "margin": "{side, select, left {Левое} right {Правое} top {Верхнее} other {Нижнее}} поле — {value}\u00a0мм при минимуме {min}\u00a0мм{measured, select, true { (измерено по тексту)} other {}}.",
+      "font_size": "Кегль {size, number}\u00a0пт.",
+      "font_size_widespread": "Кегль {size, number}\u00a0пт — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "line_spacing": "Межстрочный интервал {value, number}.",
+      "line_spacing_widespread": "Межстрочный интервал {value, number} — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "paragraph_indent": "Абзацный отступ {cm, number}\u00a0см.",
+      "paragraph_indent_widespread": "Абзацный отступ {cm, number}\u00a0см — в {count, plural, one {# абзаце} few {# абзацах} many {# абзацах} other {# абзаца}}.",
+      "requisite_missing": "В документе не найден реквизит «{requisite}».",
+      "signature_order": "«{name}» — фамилия стоит перед инициалами.",
+      "date_format": "Дата «{value}» записана не по стандарту.",
+      "date_format_widespread": "Даты записаны не по стандарту в {count, plural, one {# месте} few {# местах} many {# местах} other {# места}}.",
+      "numbering_roman": "Номер «{label}» записан римскими цифрами.",
+      "numbering_roman_widespread": "Нумерация не по стандарту в {count, plural, one {# пункте} few {# пунктах} many {# пунктах} other {# пункта}}.",
+      "numbering_depth": "Пункт «{label}» — {levels}-й уровень нумерации, допустимо не больше {max}.",
+      "numbering_gap": "После предыдущего пункта ожидался номер {expected}, а стоит «{label}».",
+      "numbering_gap_widespread": "Пропуски или повторы в нумерации — {count, plural, one {# место} few {# места} many {# мест} other {# места}}."
+    }
+  },
+  "families": {
+    "formatting": "Оформление по ГОСТ Р 7.0.97-2016",
+    "personal_data": "152-ФЗ «О персональных данных»"
+  },
+  "familiesShort": {
+    "formatting": "ГОСТ Р 7.0.97",
+    "personal_data": "152-ФЗ"
   }
 }

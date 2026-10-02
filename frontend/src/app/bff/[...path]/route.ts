@@ -17,6 +17,7 @@ const FORWARDED_RESPONSE_HEADERS = [
   "content-type",
   "content-length",
   "content-disposition",
+  "cache-control",
   "x-request-id",
 ];
 
@@ -55,6 +56,8 @@ async function forward(
       ...(hasBody ? { duplex: "half" } : {}),
       cache: "no-store",
       redirect: "manual",
+      // A closed tab ends the upstream request too (event streams stay open otherwise).
+      signal: request.signal,
     } as RequestInit,
   );
 

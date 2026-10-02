@@ -2,7 +2,7 @@
 
 import { IconScan } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
-import { Fragment, useMemo } from "react";
+import { Fragment, useMemo, type Ref } from "react";
 
 import type { DocumentStructure } from "@/shared/api/types";
 
@@ -16,15 +16,17 @@ const RECOGNISED = new Set(["pdf_ocr", "pdf_mixed"]);
 export function DocumentSheet({
   structure,
   footnotes,
+  sheetRef,
 }: {
   structure: DocumentStructure;
-  footnotes: Footnote[];
+  footnotes: readonly Footnote[];
+  sheetRef?: Ref<HTMLElement>;
 }) {
   const t = useTranslations("viewer");
   const byBlock = useMemo(() => footnotesByBlock(footnotes), [footnotes]);
   const recognised = RECOGNISED.has(structure.version.method ?? "");
   return (
-    <article className={styles.sheet} lang="ru">
+    <article ref={sheetRef} className={styles.sheet} lang="ru">
       {recognised ? (
         <p className={styles.notice}>
           <IconScan stroke={1.75} aria-hidden />

@@ -11,8 +11,8 @@ import styles from "./sheet.module.css";
 const CELL_SEPARATOR_LENGTH = 1;
 
 /**
- * Requisite offsets refer to the table text (cells joined by tabs, rows by
- * line breaks); they are re-based onto the cell they fall into.
+ * Offsets refer to the table text (cells joined by tabs, rows by line
+ * breaks); they are re-based onto the cell they fall into.
  */
 function cellFootnotes(block: Block, footnotes: readonly Footnote[]): Map<string, Footnote[]> {
   const byCell = new Map<string, Footnote[]>();
@@ -21,12 +21,14 @@ function cellFootnotes(block: Block, footnotes: readonly Footnote[]): Map<string
     row.forEach((cell, cellIndex) => {
       const length = cell.text.length;
       for (const footnote of footnotes) {
-        const { start, end } = footnote.requisite;
-        if (start >= offset && end <= offset + length) {
+        // A span is marked in the cell it starts in, up to the end of that cell.
+        const { start, end } = footnote;
+        if (start >= offset && start < offset + length) {
           const key = `${rowIndex}:${cellIndex}`;
           const local = {
             ...footnote,
-            requisite: { ...footnote.requisite, start: start - offset, end: end - offset },
+            start: start - offset,
+            end: Math.min(end, offset + length) - offset,
           };
           byCell.set(key, [...(byCell.get(key) ?? []), local]);
         }

@@ -79,6 +79,33 @@ export function MenuRadioItem({ value, children }: { value: string; children: Re
   );
 }
 
+export function MenuCheckboxItem({
+  checked,
+  onCheckedChange,
+  children,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  children: ReactNode;
+}) {
+  return (
+    <Primitive.CheckboxItem
+      className={styles.item}
+      checked={checked}
+      onCheckedChange={(value) => onCheckedChange(value === true)}
+      // Several options are usually toggled in a row: keep the menu open.
+      onSelect={(event) => event.preventDefault()}
+    >
+      <span className={styles.icon}>
+        <Primitive.ItemIndicator>
+          <IconCheck stroke={1.75} />
+        </Primitive.ItemIndicator>
+      </span>
+      <span className={styles.text}>{children}</span>
+    </Primitive.CheckboxItem>
+  );
+}
+
 export function MenuLabel({ children }: { children: ReactNode }) {
   return <Primitive.Label className={styles.label}>{children}</Primitive.Label>;
 }

@@ -37,6 +37,11 @@
   color: var(--color-success);
 }
 
+.advice {
+  background: var(--color-advice-soft);
+  color: var(--color-advice);
+}
+
 .important {
   background: var(--color-important-soft);
   color: var(--color-important);

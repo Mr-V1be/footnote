@@ -3,32 +3,34 @@
 import { IconCrosshair } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
-import { useFootnotes } from "./FootnoteContext";
-import { anchors, type Footnote } from "./footnotes";
-import styles from "./panels.module.css";
 import { Typeset } from "@/shared/typography/Typeset";
 
-/** Margin notes: one card per marker in the text. */
-export function FootnoteList({
-  footnotes,
+import { useFootnotes } from "./FootnoteContext";
+import { anchors } from "./footnotes";
+import styles from "./panels.module.css";
+import type { RequisiteNote } from "./requisites";
+
+/** Margin notes on requisites: one card per marker in the text. */
+export function RequisiteNotes({
+  notes,
   pending = false,
   onLocate,
 }: {
-  footnotes: readonly Footnote[];
+  notes: readonly RequisiteNote[];
   /** The version is still being parsed: nothing is known yet. */
   pending?: boolean;
   onLocate?: () => void;
 }) {
   const t = useTranslations();
   const { active, setActive, revealMark } = useFootnotes();
-  if (footnotes.length === 0) {
+  if (notes.length === 0) {
     return (
       <p className={styles.empty}>{t(pending ? "viewer.afterParsing" : "viewer.noRequisites")}</p>
     );
   }
   return (
     <ol className={styles.footnotes} aria-label={t("viewer.footnotes")}>
-      {footnotes.map(({ number, requisite }) => (
+      {notes.map(({ footnote: { number }, requisite }) => (
         <li
           key={number}
           id={anchors.footnote(number)}

@@ -7,16 +7,15 @@ import {
   IconDownload,
   IconFileOff,
   IconHourglass,
-  IconListTree,
-  IconQuote,
   IconUpload,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { ReviewWorkspace } from "@/features/review/ReviewWorkspace";
 import { useCan, useMembership } from "@/features/session/membership";
 import { useApi } from "@/shared/api/ApiProvider";
 import { ApiError } from "@/shared/api/errors";
@@ -24,7 +23,6 @@ import type { DocumentDetails } from "@/shared/api/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 import { Button } from "@/shared/ui/button/Button";
-import { Drawer, DrawerContent } from "@/shared/ui/drawer/Drawer";
 import { IconButton } from "@/shared/ui/icon-button/IconButton";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/shared/ui/menu/Menu";
 import { PageHeader } from "@/shared/ui/page-header/PageHeader";
@@ -41,16 +39,8 @@ import {
 } from "../queries";
 import { StatusBadge } from "../StatusBadge";
 import { UploadDialog } from "../upload/UploadDialog";
-import { DocumentSheet } from "./DocumentSheet";
 import styles from "./document-screen.module.css";
-import { FileDetails } from "./FileDetails";
-import { FootnoteProvider } from "./FootnoteContext";
-import { FootnoteList } from "./FootnoteList";
-import { numberFootnotes } from "./footnotes";
-import { OutlineNav } from "./OutlineNav";
 import { SheetSkeleton, ViewerSkeleton } from "./ViewerSkeleton";
-
-type Panel = "outline" | "notes" | null;
 
 function useSelectedVersion(
   details: DocumentDetails | undefined,
@@ -68,6 +58,10 @@ function useSelectedVersion(
   return [selected, select];
 }
 
+/**
+ * A document: its versions, and for a parsed version the review of its
+ * check — the document with findings in the margin.
+ */
 export function DocumentScreen({ documentId }: { documentId: string }) {
   const t = useTranslations();
   const format = useFormatter();
@@ -78,7 +72,6 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   const organization = membership.organization.alias;
   const canUpload = useCan("documents.upload");
   const wide = useMediaQuery("(width >= 48rem)");
-  const [panel, setPanel] = useState<Panel>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
 
   const details = useQuery({
@@ -105,13 +98,6 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
     }
   }, [status, organization, queryClient]);
 
-  const footnotes = useMemo(
-    () => numberFootnotes(structure.data?.requisites ?? []),
-    [structure.data],
-  );
-  const revealPanel = useCallback(() => {
-    if (!window.matchMedia("(width >= 64rem)").matches) setPanel("notes");
-  }, []);
   const listHref = `/o/${organization}/w/${details.data?.workspace.slug ?? workspaces[0]?.slug ?? "main"}/documents`;
 
   if (details.isPending) return <ViewerSkeleton />;
@@ -145,12 +131,10 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   const versionInfo = document.versions.find((item) => item.number === version);
   const parsed =
     structure.data && structure.data.version.status === "parsed" ? structure.data : null;
-  const outline = parsed?.outline ?? [];
-  const pending = !structure.data || isProcessing(structure.data.version.status);
   const download =
     version !== null ? originalFileUrl(organization, document.id, version) : undefined;
 
-  function sheetContent() {
+  function content() {
     if (structure.isPending || !structure.data) return <SheetSkeleton />;
     if (structure.data.version.status === "failed") {
       return (
@@ -174,7 +158,7 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
         />
       );
     }
-    if (!parsed) {
+    if (!parsed || version === null) {
       return (
         <div className={styles.processing}>
           <StatePanel
@@ -188,7 +172,14 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
         </div>
       );
     }
-    return <DocumentSheet structure={parsed} footnotes={footnotes} />;
+    return (
+      <ReviewWorkspace
+        organization={organization}
+        documentId={document.id}
+        version={version}
+        structure={parsed}
+      />
+    );
   }
 
   const actions = (
@@ -240,125 +231,57 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   );
 
   return (
-    <FootnoteProvider onRevealCard={revealPanel}>
-      <div className={styles.screen}>
-        <PageHeader
-          leading={
-            <div className={styles.leading}>
-              <Link href={listHref} className={styles.back}>
-                <IconArrowLeft stroke={1.75} aria-hidden />
-                {t("viewer.backToList")}
-              </Link>
-              {wide ? null : compactActions}
-            </div>
-          }
-          title={document.title}
-          meta={
-            <>
-              <span>{kindLabel(document.kind)}</span>
-              {versionInfo ? (
-                <StatusBadge status={structure.data?.version.status ?? versionInfo.status} />
-              ) : null}
-              {document.versions.length > 1 && version !== null ? (
-                <Select
-                  label={t("viewer.versionSelect")}
-                  value={String(version)}
-                  onValueChange={(value) => selectVersion(Number(value))}
-                  options={document.versions.map((item) => ({
-                    value: String(item.number),
-                    label: t("viewer.versionOption", {
-                      number: item.number,
-                      date: format.dateTime(new Date(item.uploadedAt), { dateStyle: "medium" }),
-                    }),
-                  }))}
-                />
-              ) : (
-                <span className={styles.versionTag}>
-                  {t("documents.version", { number: version ?? 1 })}
-                </span>
-              )}
-            </>
-          }
-          actions={wide ? actions : undefined}
+    <div className={styles.screen}>
+      <PageHeader
+        leading={
+          <div className={styles.leading}>
+            <Link href={listHref} className={styles.back}>
+              <IconArrowLeft stroke={1.75} aria-hidden />
+              {t("viewer.backToList")}
+            </Link>
+            {wide ? null : compactActions}
+          </div>
+        }
+        title={document.title}
+        meta={
+          <>
+            <span>{kindLabel(document.kind)}</span>
+            {versionInfo ? (
+              <StatusBadge status={structure.data?.version.status ?? versionInfo.status} />
+            ) : null}
+            {document.versions.length > 1 && version !== null ? (
+              <Select
+                label={t("viewer.versionSelect")}
+                value={String(version)}
+                onValueChange={(value) => selectVersion(Number(value))}
+                options={document.versions.map((item) => ({
+                  value: String(item.number),
+                  label: t("viewer.versionOption", {
+                    number: item.number,
+                    date: format.dateTime(new Date(item.uploadedAt), { dateStyle: "medium" }),
+                  }),
+                }))}
+              />
+            ) : (
+              <span className={styles.versionTag}>
+                {t("documents.version", { number: version ?? 1 })}
+              </span>
+            )}
+          </>
+        }
+        actions={wide ? actions : undefined}
+      />
+
+      {content()}
+
+      {canUpload ? (
+        <UploadDialog
+          target={{ type: "version", documentId: document.id }}
+          open={uploadOpen}
+          onOpenChange={setUploadOpen}
+          onUploaded={(result) => selectVersion(result.versionNumber)}
         />
-
-        <nav className={styles.viewerBar} aria-label={t("viewer.actions")}>
-          <Button
-            variant="secondary"
-            icon={<IconListTree stroke={1.75} />}
-            onClick={() => setPanel("outline")}
-          >
-            {t("viewer.outline")}
-          </Button>
-          <span className={styles.notesToggle}>
-            <Button
-              variant="secondary"
-              icon={<IconQuote stroke={1.75} />}
-              onClick={() => setPanel("notes")}
-            >
-              {t("viewer.requisites")}
-              <span className={styles.count}>{footnotes.length}</span>
-            </Button>
-          </span>
-        </nav>
-
-        <div className={styles.workspace}>
-          <aside className={styles.outlineColumn} aria-label={t("viewer.outline")}>
-            <h2 className={styles.columnTitle}>{t("viewer.outline")}</h2>
-            <OutlineNav entries={outline} pending={pending} />
-          </aside>
-          <div className={styles.sheetColumn}>{sheetContent()}</div>
-          <aside className={styles.panelColumn} aria-label={t("viewer.requisites")}>
-            <section className={styles.panelSection}>
-              <h2 className={styles.columnTitle}>{t("viewer.requisites")}</h2>
-              <FootnoteList footnotes={footnotes} pending={pending} />
-            </section>
-            {parsed ? (
-              <section className={styles.panelSection}>
-                <h2 className={styles.columnTitle}>{t("viewer.details")}</h2>
-                <FileDetails structure={parsed} />
-              </section>
-            ) : null}
-          </aside>
-        </div>
-
-        <Drawer
-          open={panel === "outline"}
-          onOpenChange={(open) => setPanel(open ? "outline" : null)}
-        >
-          <DrawerContent
-            side={wide ? "left" : "bottom"}
-            title={t("viewer.outline")}
-            closeLabel={t("common.close")}
-          >
-            <OutlineNav entries={outline} pending={pending} onNavigate={() => setPanel(null)} />
-          </DrawerContent>
-        </Drawer>
-        <Drawer open={panel === "notes"} onOpenChange={(open) => setPanel(open ? "notes" : null)}>
-          <DrawerContent
-            side={wide ? "right" : "bottom"}
-            title={t("viewer.requisites")}
-            closeLabel={t("common.close")}
-          >
-            <FootnoteList footnotes={footnotes} pending={pending} onLocate={() => setPanel(null)} />
-            {parsed ? (
-              <section className={styles.drawerSection}>
-                <h2 className={styles.columnTitle}>{t("viewer.details")}</h2>
-                <FileDetails structure={parsed} />
-              </section>
-            ) : null}
-          </DrawerContent>
-        </Drawer>
-
-        {canUpload ? (
-          <UploadDialog
-            target={{ type: "version", documentId: document.id }}
-            open={uploadOpen}
-            onOpenChange={setUploadOpen}
-            onUploaded={(result) => selectVersion(result.versionNumber)}
-          />
-        ) : null}
-      </div>
-    </FootnoteProvider>
+      ) : null}
+    </div>
   );
 }

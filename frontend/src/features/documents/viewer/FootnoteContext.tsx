@@ -32,15 +32,17 @@ export function FootnoteProvider({
   onRevealCard,
   children,
 }: {
-  /** Called before scrolling to a card, e.g. to open the panel on a phone. */
-  onRevealCard: () => Promise<void> | void;
+  /** Called before scrolling to a card: select it, open the panel on a phone. */
+  onRevealCard: (number: number) => void;
   children: ReactNode;
 }) {
   const [active, setActive] = useState<number | null>(null);
   const revealMark = useCallback((number: number) => scrollAndFlash(anchors.mark(number)), []);
   const revealCard = useCallback(
     (number: number) => {
-      void Promise.resolve(onRevealCard()).then(() =>
+      onRevealCard(number);
+      // Two frames: the panel opens and the card takes its place before scrolling.
+      window.requestAnimationFrame(() =>
         window.requestAnimationFrame(() => scrollAndFlash(anchors.footnote(number))),
       );
     },

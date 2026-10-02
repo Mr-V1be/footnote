@@ -20,6 +20,7 @@ export function Select({
   icon,
   id,
   block = false,
+  size = "md",
 }: {
   value: string;
   onValueChange: (value: string) => void;
@@ -29,12 +30,13 @@ export function Select({
   icon?: ReactNode;
   id?: string;
   block?: boolean;
+  size?: "sm" | "md";
 }) {
   return (
     <Primitive.Root value={value} onValueChange={onValueChange}>
       <Primitive.Trigger
         id={id}
-        className={`${styles.trigger} ${block ? styles.block : ""}`}
+        className={`${styles.trigger} ${block ? styles.block : ""} ${size === "sm" ? styles.sm : ""}`}
         aria-label={label}
       >
         {icon ? <span className={styles.icon}>{icon}</span> : null}

@@ -17,6 +17,12 @@
   background: var(--color-neutral-soft);
 }
 
+.sm {
+  block-size: var(--control-height-sm);
+  padding-inline: var(--space-2);
+  font-size: var(--text-sm);
+}
+
 .block {
   inline-size: 100%;
 }

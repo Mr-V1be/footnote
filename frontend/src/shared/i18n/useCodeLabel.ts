@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import type { Messages } from "./messages";
 
 /** Namespaces whose keys are codes of open, server-side registries. */
-type RegistryNamespace = "roles" | "kinds" | "formats";
+type RegistryNamespace = "roles" | "kinds" | "formats" | "families" | "familiesShort";
 
 /**
  * Label for a registry code. Registries live on the server and may gain

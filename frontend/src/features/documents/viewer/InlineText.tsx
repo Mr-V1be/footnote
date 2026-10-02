@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { TypesetRuns } from "@/shared/typography/Typeset";
@@ -16,7 +15,6 @@ import styles from "./sheet.module.css";
  * where a mark begins in the middle of it.
  */
 export function InlineText({ text, footnotes }: { text: string; footnotes: readonly Footnote[] }) {
-  const t = useTranslations();
   const { active, setActive, revealCard } = useFootnotes();
   const value = useMemo(() => typeset(text), [text]);
   if (footnotes.length === 0) return <TypesetRuns value={value} />;
@@ -30,12 +28,13 @@ export function InlineText({ text, footnotes }: { text: string; footnotes: reado
             </span>
           );
         }
-        const { number, requisite } = segment.footnote;
+        const { number, tone, label } = segment.footnote;
         const isActive = active === number;
         return (
           <span key={index} className={styles.marked}>
             <mark
               id={anchors.mark(number)}
+              data-tone={tone}
               className={`${styles.mark} ${isActive ? styles.markActive : ""}`}
               onMouseEnter={() => setActive(number)}
               onMouseLeave={() => setActive(null)}
@@ -47,10 +46,7 @@ export function InlineText({ text, footnotes }: { text: string; footnotes: reado
             <sup className={styles.marker}>
               <a
                 href={`#${anchors.footnote(number)}`}
-                aria-label={t("viewer.footnoteLabel", {
-                  number,
-                  kind: t(`requisites.${requisite.kind}`),
-                })}
+                aria-label={label}
                 onClick={(event) => {
                   event.preventDefault();
                   revealCard(number);
