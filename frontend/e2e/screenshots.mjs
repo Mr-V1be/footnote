@@ -22,6 +22,9 @@ const VIEWPORTS = {
 };
 const THEMES = ["light", "dark"];
 const ORG = "polyarnaya-zvezda";
+const PORT_ORG = "rechnoy-port";
+const QUEUED_TITLE = "Приказ о назначении ответственного (скан)";
+let queuedDocument = null;
 const SETTLE_MS = 700;
 
 async function credentials() {
@@ -60,6 +63,27 @@ async function documentIdByTitle(page, title) {
   return href.split("/").pop();
 }
 
+/** Uploads one document through the web server once per run and returns its id. */
+async function ensureQueuedDocument(page) {
+  if (queuedDocument) return queuedDocument;
+  const file = await readFile(
+    resolve(root, "backend/demo/documents/polyarnaya-zvezda/prikaz-7-od.pdf"),
+  );
+  const response = await page.request.post(
+    `${BASE}/bff/api/v1/organizations/${PORT_ORG}/workspaces/main/documents`,
+    {
+      headers: { "Idempotency-Key": `screenshots-${Date.now()}` },
+      multipart: {
+        file: { name: "prikaz-skan.pdf", mimeType: "application/pdf", buffer: file },
+        kind: "order",
+        title: QUEUED_TITLE,
+      },
+    },
+  );
+  queuedDocument = (await response.json()).documentId;
+  return queuedDocument;
+}
+
 /** Each screen prepares the page; the runner captures it afterwards. */
 const SCREENS = [
   {
@@ -82,15 +106,21 @@ const SCREENS = [
     },
   },
   {
-    name: "03-documents-loading",
-    user: "orlov",
+    // Processing states are real: run this screen with the worker stopped,
+    // so the uploaded document stays queued while it is captured.
+    name: "03-documents-processing",
+    user: "lebedev",
     run: async (page) => {
-      const id = await documentIdByTitle(page, "Договор поручения");
-      await page.goto(`${BASE}/o/${ORG}/documents/${id}`, { waitUntil: "networkidle" });
-      // Hold the server response of the list so its loading skeleton stays visible.
-      await page.route(`**/o/${ORG}/w/main/documents**`, () => {});
-      await page.getByRole("link", { name: "К документам" }).click();
-      await page.getByLabel("К документам").or(page.locator("[aria-busy=true]")).first().waitFor();
+      await ensureQueuedDocument(page);
+      await page.goto(`${BASE}/o/${PORT_ORG}/w/main/documents`, { waitUntil: "networkidle" });
+    },
+  },
+  {
+    name: "03-viewer-processing",
+    user: "lebedev",
+    run: async (page) => {
+      const id = await ensureQueuedDocument(page);
+      await page.goto(`${BASE}/o/${PORT_ORG}/documents/${id}`, { waitUntil: "networkidle" });
     },
   },
   {
@@ -212,6 +242,7 @@ const SCREENS = [
 const USERS = {
   orlov: "orlov@polyarnaya-zvezda.example",
   belov: "belov@polyarnaya-zvezda.example",
+  lebedev: "lebedev@rechnoy-port.example",
   sokolova: "sokolova@sokolova.example",
 };
 
