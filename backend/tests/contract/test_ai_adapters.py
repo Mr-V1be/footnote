@@ -89,16 +89,22 @@ async def test_without_a_configured_api_every_call_says_so() -> None:
 
 
 class CountingBudget:
-    """Counts the requests taken; refuses after ``allowance`` of them."""
+    """Counts the requests taken and those that count (taken less the ones
+    given back); refuses after ``allowance`` of them."""
 
     def __init__(self, allowance: int | None = None) -> None:
         self.spent = 0
+        self.taken = 0
         self._allowance = allowance
 
     async def spend(self) -> None:
         if self._allowance is not None and self.spent >= self._allowance:
             raise ModelBudgetExhaustedError("spent")
         self.spent += 1
+        self.taken += 1
+
+    async def refund(self) -> None:
+        self.spent -= 1
 
     async def remaining_today(self) -> int | None:
         return None if self._allowance is None else self._allowance - self.spent
@@ -129,7 +135,8 @@ async def test_a_busy_model_is_retried_then_the_next_of_the_chain_answers() -> N
         completion = await model.complete(REQUEST)
     assert completion.model == "second"
     assert chat.call_count == POLICY.attempts + 1
-    assert budget.spent == chat.call_count, "every request is taken from the budget"
+    assert budget.taken == chat.call_count, "every request is taken from the budget"
+    assert budget.spent == 1, "requests refused as busy are given back"
 
 
 @respx.mock

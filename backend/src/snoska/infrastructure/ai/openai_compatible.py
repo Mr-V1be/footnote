@@ -66,7 +66,8 @@ class OpenAiCompatibleLanguageModel:
     Requests go to the first model of a chain; a model that is rate-limited
     or overloaded is retried with a growing pause, then the next model of
     the chain answers. Every request is first taken from the budget, so the
-    installation keeps to the provider's pace and daily allowance.
+    installation keeps to the provider's pace and daily allowance; one the
+    provider refused as busy or unserved is given back, as it does not count.
     """
 
     def __init__(
@@ -125,11 +126,14 @@ class OpenAiCompatibleLanguageModel:
                         raise ModelBudgetExhaustedError("the provider's daily allowance is spent")
                     last = f"{model}: {response.status_code}"
                     log.warning("ai.model_busy", model=model, status=response.status_code)
+                    if response.status_code == 429:
+                        await self._budget.refund()
                     await self._pause(attempt, response)
                     continue
                 if response.status_code in _UNSERVED_STATUS:
                     last = f"{model}: {response.status_code}"
                     log.warning("ai.model_unserved", model=model, status=response.status_code)
+                    await self._budget.refund()
                     break
                 if response.is_error:
                     raise AiProviderError(f"provider rejected the request: {response.status_code}")

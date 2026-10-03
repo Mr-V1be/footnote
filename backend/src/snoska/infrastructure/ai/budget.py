@@ -28,6 +28,9 @@ class UnlimitedBudget:
     async def spend(self) -> None:
         return None
 
+    async def refund(self) -> None:
+        return None
+
     async def remaining_today(self) -> int | None:
         return None
 
@@ -59,6 +62,13 @@ class RedisRequestBudget:
                 )
         if self._per_minute > 0:
             await self._pace()
+
+    async def refund(self) -> None:
+        if self._per_day <= 0:
+            return
+        key = self._day_key()
+        if int(await self._redis.decr(key)) < 0:
+            await self._redis.set(key, 0, ex=DAY_KEY_TTL_SECONDS)
 
     async def _pace(self) -> None:
         waited = 0.0

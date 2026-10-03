@@ -78,6 +78,11 @@ class RequestBudget(Protocol):
         reached, raise ModelBudgetExhaustedError if the day's allowance is."""
         ...
 
+    async def refund(self) -> None:
+        """Give back a request the provider refused without serving it (a
+        busy model, a model it no longer serves): it does not count it."""
+        ...
+
     async def remaining_today(self) -> int | None:
         """Requests left today; None when there is no daily allowance."""
         ...
