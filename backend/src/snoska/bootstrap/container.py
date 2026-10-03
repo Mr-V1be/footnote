@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import timedelta
 
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -26,12 +27,16 @@ from snoska.application.integrations.api_keys import ApiKeys
 from snoska.application.integrations.delivery import DeliverWebhook
 from snoska.application.integrations.events import FollowUps
 from snoska.application.integrations.webhooks import WebhookEndpoints
+from snoska.application.operations.corpus_watch import WatchCorpusEditions
+from snoska.application.operations.platform import CORPUS_WATCH, PlatformConsole
+from snoska.application.operations.scheduler import PeriodicScheduler
 from snoska.application.shared.jobs import (
     DELIVER_WEBHOOK,
     INDEX_CORPUS_EDITION,
     NOTIFY_TEST_PAYMENT,
     PARSE_DOCUMENT_VERSION,
     RUN_CHECKS,
+    WATCH_CORPUS,
 )
 from snoska.application.shared.outbox_relay import OutboxRelay
 from snoska.application.tenancy.access import DefaultWorkspace, TenantAccessService
@@ -45,6 +50,7 @@ from snoska.bootstrap.settings import Settings
 from snoska.domain.documents.formats import SUPPORTED_FORMATS
 from snoska.domain.documents.kinds import DOCUMENT_KINDS
 from snoska.domain.documents.requisites import RequisiteDetector
+from snoska.domain.operations.schedule import PeriodicTask
 from snoska.domain.tenancy.access import AccessPolicy
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
 from snoska.infrastructure.autofix.docx_patcher import DocxPatcher
@@ -57,8 +63,12 @@ from snoska.infrastructure.corpus_sources.pravo_ips import (
     PravoIpsSource,
 )
 from snoska.infrastructure.corpus_sources.snapshot import SnapshotSource
+from snoska.infrastructure.identity.admins import KeycloakPlatformAdmins
+from snoska.infrastructure.identity.health import IdentityHealth
 from snoska.infrastructure.integrations.http_transport import HttpWebhookTransport
+from snoska.infrastructure.notifications.smtp import SmtpConfig, SmtpMailer
 from snoska.infrastructure.persistence.health import DatabaseHealth
+from snoska.infrastructure.queue.health import RedisHealth
 from snoska.infrastructure.storage.health import StorageHealth
 from snoska.ports.corpus_source import CorpusSource
 from snoska.ports.health import HealthCheck
@@ -104,6 +114,9 @@ class Container:
     quality: QualityQueries
     benchmark: CheckBenchmark
     platform: PlatformTenantQueries
+    console: PlatformConsole
+    scheduler: PeriodicScheduler
+    corpus_watch: WatchCorpusEditions
     verifier: TokenVerifier
     provisioning: IdentityProvisioning
     ai: AiAdapters
@@ -150,6 +163,43 @@ async def build_container(
     transport = core.overrides.webhook_transport or HttpWebhookTransport(
         core.http, allow_private=settings.integrations.webhooks_allow_private
     )
+    billing = BillingService(
+        uow, core.plans, core.meter, payments, core.audit, clock, web_url=settings.web_url
+    )
+    operations = settings.operations
+    corpus_sync = CorpusSync(uow, acts, _corpus_sources(core, acts), clock)
+    corpus_watch = WatchCorpusEditions(
+        uow,
+        acts,
+        corpus_sync,
+        KeycloakPlatformAdmins(core.keycloak, operations.platform_admin_role),
+        SmtpMailer(
+            SmtpConfig(
+                host=operations.smtp_host,
+                port=operations.smtp_port,
+                sender=operations.smtp_sender,
+            )
+        ),
+        clock,
+        web_url=settings.web_url,
+    )
+    scheduler = PeriodicScheduler(
+        uow,
+        (
+            PeriodicTask(
+                name=CORPUS_WATCH,
+                job_name=WATCH_CORPUS.name,
+                interval=timedelta(hours=operations.corpus_watch_interval_hours),
+            ),
+        ),
+        clock,
+    )
+    health: tuple[HealthCheck, ...] = (
+        DatabaseHealth(core.engine),
+        StorageHealth(core.blobs),
+        RedisHealth(settings.redis.url()),
+        IdentityHealth(core.http, settings.keycloak.issuer),
+    )
 
     async def close() -> None:
         await checks.feed.close()
@@ -181,9 +231,7 @@ async def build_container(
             clock,
             allow_http=settings.integrations.webhooks_allow_private,
         ),
-        billing=BillingService(
-            uow, core.plans, core.meter, payments, core.audit, clock, web_url=settings.web_url
-        ),
+        billing=billing,
         test_gateway=TestGateway(payments, uow, clock),
         uploads=uploads,
         questions=NormQuestions(
@@ -207,7 +255,7 @@ async def build_container(
         ),
         documents=DocumentQueries(uow, core.blobs, DOCUMENT_KINDS, RequisiteDetector(), core.gate),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),
-        corpus_sync=CorpusSync(uow, acts, _corpus_sources(core, acts), clock),
+        corpus_sync=corpus_sync,
         corpus_indexing=corpus_indexing,
         corpus=CorpusQueries(uow),
         norm_search=NormSearch(uow, core.embedder),
@@ -217,10 +265,23 @@ async def build_container(
         quality=checks.quality,
         benchmark=checks.benchmark,
         platform=PlatformTenantQueries(uow),
+        console=PlatformConsole(
+            uow,
+            billing,
+            core.directory,
+            health,
+            scheduler,
+            model_configured=core.ai.configured,
+            language_model=core.language_model.model or None,
+            embedding_model=core.embedder.model or None,
+            embedding_space=core.embedder.space,
+        ),
+        scheduler=scheduler,
+        corpus_watch=corpus_watch,
         verifier=core.verifier,
         provisioning=core.keycloak,
         ai=core.ai,
-        health_checks=(DatabaseHealth(core.engine), StorageHealth(core.blobs)),
+        health_checks=health,
         job_handlers={
             PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(
                 uow,
@@ -232,6 +293,7 @@ async def build_container(
             INDEX_CORPUS_EDITION.name: corpus_indexing,
             RUN_CHECKS.name: checks.run_job,
             DELIVER_WEBHOOK.name: DeliverWebhook(uow, transport, clock),
+            WATCH_CORPUS.name: corpus_watch,
             NOTIFY_TEST_PAYMENT.name: TestPaymentNotifier(
                 core.http, f"{settings.api_url}/api/v1/billing/webhooks/test"
             ),

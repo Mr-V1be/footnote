@@ -135,6 +135,13 @@ class KeycloakAdminClient:
                 return found
             first += PAGE_SIZE
 
+    async def realm_role_emails(self, role: str) -> list[str]:
+        """Emails of the users holding a realm role (the platform's operators)."""
+        users = (await self._call("GET", f"/roles/{role}/users", ok=(200, 404))).json()
+        if not isinstance(users, list):
+            return []
+        return [str(user["email"]) for user in users if user.get("email")]
+
     # ── Member administration ────────────────────────────────────────────────
 
     async def invite(self, organization_id: UUID, invitation: Invitation) -> UUID:

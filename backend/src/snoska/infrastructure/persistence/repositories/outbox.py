@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from snoska.infrastructure.persistence.tables.outbox import outbox_messages
@@ -52,6 +52,12 @@ class SqlOutboxRepository:
             .where(outbox_messages.c.id == message_id)
             .values(dispatched_at=now, last_error=None)
         )
+
+    async def pending_count(self) -> int:
+        result = await self._connection.execute(
+            select(func.count()).where(outbox_messages.c.dispatched_at.is_(None))
+        )
+        return int(result.scalar_one())
 
     async def postpone(self, message_id: UUID, until: datetime, error: str) -> None:
         await self._connection.execute(

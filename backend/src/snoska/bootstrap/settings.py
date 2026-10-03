@@ -235,6 +235,18 @@ class BillingSettings(BaseSettings):
     plans: Path = BACKEND_ROOT / "data" / "billing" / "plans.yaml"
 
 
+class OperationsSettings(BaseSettings):
+    model_config = _config("SNOSKA_")
+
+    smtp_host: str = "127.0.0.1"
+    smtp_port: int = 46331
+    smtp_sender: str = "Сноска <no-reply@snoska.example>"
+    # How often the official portal is checked for new redactions.
+    corpus_watch_interval_hours: int = 168
+    # The realm role whose holders get the platform's notices.
+    platform_admin_role: str = "platform-admin"
+
+
 class TenancySettings(BaseSettings):
     model_config = _config("SNOSKA_TENANCY_")
 
@@ -261,6 +273,7 @@ class Settings(BaseSettings):
     integrations: IntegrationsSettings = Field(default_factory=IntegrationsSettings)
     payments: PaymentsSettings = Field(default_factory=PaymentsSettings)
     billing: BillingSettings = Field(default_factory=BillingSettings)
+    operations: OperationsSettings = Field(default_factory=OperationsSettings)
     # Where people open the product (links in emails and invitations).
     web_url: str = "http://localhost:46300"
     # Where the API answers for calls made by the platform itself (webhooks

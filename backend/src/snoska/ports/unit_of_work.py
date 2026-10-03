@@ -31,6 +31,7 @@ from snoska.ports.integrations.repositories import (
     WebhookDeliveryRepository,
     WebhookEndpointRepository,
 )
+from snoska.ports.operations.repositories import EditionCheckLog, TaskStateRepository
 from snoska.ports.outbox import OutboxRepository
 from snoska.ports.tenancy_repositories import (
     OrganizationRepository,
@@ -117,6 +118,12 @@ class UnitOfWork(Protocol):
 
     @property
     def conversations(self) -> ConversationRepository: ...
+
+    @property
+    def task_states(self) -> TaskStateRepository: ...
+
+    @property
+    def edition_checks(self) -> EditionCheckLog: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

@@ -9,6 +9,7 @@ from snoska.infrastructure.persistence.tables import (
     corpus,
     documents,
     integrations,
+    operations,
     outbox,
     tenancy,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "documents",
     "integrations",
     "metadata",
+    "operations",
     "outbox",
     "tenancy",
 ]

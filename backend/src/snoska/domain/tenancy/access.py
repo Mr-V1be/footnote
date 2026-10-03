@@ -114,6 +114,11 @@ class OrganizationAccess:
 class PlatformAccess:
     user_id: UUID
     roles: tuple[RoleDefinition, ...]
+    display_name: str = ""
+
+    @property
+    def actor(self) -> Actor:
+        return Actor(ActorKind.USER, self.user_id, self.display_name or "platform")
 
     @property
     def permissions(self) -> frozenset[Permission]:
@@ -154,4 +159,5 @@ class AccessPolicy:
         return PlatformAccess(
             user_id=principal.user_id,
             roles=self._platform_roles.resolve(principal.platform_role_codes),
+            display_name=principal.display_name,
         )

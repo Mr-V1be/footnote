@@ -19,6 +19,7 @@ from snoska.api.routers import (
     documents,
     health,
     me,
+    platform,
     workspaces,
 )
 from snoska.api.routers.admin import audit, integrations, members
@@ -83,6 +84,7 @@ def create_app(
         checks,
         corpus,
         ask,
+        platform,
     ):
         app.include_router(module.router, prefix=API_PREFIX)
     if settings.integrations.demo_receiver:

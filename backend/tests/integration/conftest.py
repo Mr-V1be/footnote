@@ -37,7 +37,7 @@ from tests.support.scenario import MEMBERS, ORG_A, ORG_B, member_of
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
-    "conversation_turns, conversations, "
+    "edition_checks, task_states, conversation_turns, conversations, "
     "version_changes, payment_events, invoices, usage_ledger, subscriptions, "
     "webhook_deliveries, webhook_endpoints, api_keys, audit_events, workspace_members, "
     "findings, check_results, check_runs, text_embeddings, edition_indexes, "

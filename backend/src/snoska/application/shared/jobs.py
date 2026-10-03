@@ -42,10 +42,20 @@ NOTIFY_TEST_PAYMENT = JobSpec(
     time_limit_seconds=60,
 )
 
+# The weekly look at the official portal for new redactions of the acts.
+WATCH_CORPUS = JobSpec(
+    name="corpus.watch",
+    queue="corpus",
+    max_retries=3,
+    time_limit_seconds=10 * 60,
+    min_backoff_ms=60_000,
+)
+
 JOB_SPECS: tuple[JobSpec, ...] = (
     PARSE_DOCUMENT_VERSION,
     INDEX_CORPUS_EDITION,
     RUN_CHECKS,
     DELIVER_WEBHOOK,
     NOTIFY_TEST_PAYMENT,
+    WATCH_CORPUS,
 )

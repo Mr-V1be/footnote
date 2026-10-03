@@ -27,6 +27,7 @@ from snoska.ports.jobs import JobHandler
 log = structlog.get_logger(__name__)
 
 SHUTDOWN_TIMEOUT_SECONDS = 30
+SCHEDULER_TICK_SECONDS = 60.0
 
 
 class WorkerRuntime:
@@ -44,6 +45,7 @@ class WorkerRuntime:
         self._container: Container | None = None
         self._listener: ChannelListener | None = None
         self._relay_task: asyncio.Task[None] | None = None
+        self._scheduler_task: asyncio.Task[None] | None = None
         self._stop: asyncio.Event | None = None
         self._broker.add_middleware(LoopStartup(self._start), after=AsyncIO)
         self._broker.add_middleware(LoopShutdown(self._shutdown), before=AsyncIO)
@@ -66,13 +68,30 @@ class WorkerRuntime:
         self._relay_task = asyncio.create_task(
             relay.run(self._listener.event, self._stop, self._settings.worker.relay_poll_seconds)
         )
+        await self._container.scheduler.register()
+        self._scheduler_task = asyncio.create_task(self._schedule(self._container, self._stop))
         log.info("worker.started", threads=self._settings.worker.threads)
+
+    @staticmethod
+    async def _schedule(container: Container, stop: asyncio.Event) -> None:
+        """Queue the periodic tasks that are due, once a minute."""
+        while not stop.is_set():
+            try:
+                await container.scheduler.tick()
+            except Exception:
+                log.exception("scheduler.tick_failed")
+            try:
+                await asyncio.wait_for(stop.wait(), timeout=SCHEDULER_TICK_SECONDS)
+            except TimeoutError:
+                continue
 
     async def _stop_relay(self) -> None:
         if self._stop is not None:
             self._stop.set()
         if self._relay_task is not None:
             await self._relay_task
+        if self._scheduler_task is not None:
+            await self._scheduler_task
 
     async def _shutdown(self) -> None:
         if self._listener is not None:

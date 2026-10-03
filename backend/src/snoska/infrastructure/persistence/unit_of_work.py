@@ -32,6 +32,10 @@ from snoska.infrastructure.persistence.repositories.integrations import (
     SqlWebhookDeliveryRepository,
     SqlWebhookEndpointRepository,
 )
+from snoska.infrastructure.persistence.repositories.operations import (
+    SqlEditionCheckLog,
+    SqlTaskStateRepository,
+)
 from snoska.infrastructure.persistence.repositories.outbox import SqlOutboxRepository
 from snoska.infrastructure.persistence.repositories.structures import (
     SqlDocumentStructureRepository,
@@ -88,6 +92,8 @@ class SqlUnitOfWork:
     payment_events: SqlPaymentEventLog
     changes: SqlChangeJournal
     conversations: SqlConversationRepository
+    task_states: SqlTaskStateRepository
+    edition_checks: SqlEditionCheckLog
 
     def __init__(self, engine: AsyncEngine, tenant_id: UUID | None, box: SecretBox) -> None:
         self._engine = engine
@@ -126,6 +132,8 @@ class SqlUnitOfWork:
         self.payment_events = SqlPaymentEventLog(connection, self._tenant_id)
         self.changes = SqlChangeJournal(connection, self._tenant_id)
         self.conversations = SqlConversationRepository(connection)
+        self.task_states = SqlTaskStateRepository(connection)
+        self.edition_checks = SqlEditionCheckLog(connection)
         return self
 
     async def commit(self) -> None:

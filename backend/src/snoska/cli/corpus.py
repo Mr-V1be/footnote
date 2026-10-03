@@ -112,3 +112,16 @@ def search(query: str, act: str | None = None, limit: int = 5) -> None:
                 typer.echo(f"{1 - hit.distance:.3f}  {hit.unit.citation}  {hit.unit.text[:140]}")
 
     asyncio.run(run())
+
+
+@app.command()
+def watch() -> None:
+    """Check the official portal for new redactions now (as the weekly job does)."""
+
+    async def run() -> None:
+        async with container_scope(settings_for_cli()) as container:
+            checks = await container.corpus_watch.run()
+        for check in checks:
+            typer.echo(f"{check.act_code}: {check.outcome} {check.revision or check.error or ''}")
+
+    asyncio.run(run())
