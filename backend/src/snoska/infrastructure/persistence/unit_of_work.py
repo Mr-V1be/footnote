@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncTransaction
 
+from snoska.infrastructure.persistence.repositories.ask import SqlConversationRepository
 from snoska.infrastructure.persistence.repositories.audit import SqlAuditLog
 from snoska.infrastructure.persistence.repositories.autofix import SqlChangeJournal
 from snoska.infrastructure.persistence.repositories.billing import (
@@ -86,6 +87,7 @@ class SqlUnitOfWork:
     invoices: SqlInvoiceRepository
     payment_events: SqlPaymentEventLog
     changes: SqlChangeJournal
+    conversations: SqlConversationRepository
 
     def __init__(self, engine: AsyncEngine, tenant_id: UUID | None, box: SecretBox) -> None:
         self._engine = engine
@@ -123,6 +125,7 @@ class SqlUnitOfWork:
         self.invoices = SqlInvoiceRepository(connection)
         self.payment_events = SqlPaymentEventLog(connection, self._tenant_id)
         self.changes = SqlChangeJournal(connection, self._tenant_id)
+        self.conversations = SqlConversationRepository(connection)
         return self
 
     async def commit(self) -> None:

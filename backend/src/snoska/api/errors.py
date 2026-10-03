@@ -18,7 +18,7 @@ from snoska.domain.shared.errors import (
     TooLargeError,
     ValidationError,
 )
-from snoska.ports.ai import AiProviderError
+from snoska.ports.ai import AiProviderError, ModelNotConfiguredError
 from snoska.ports.billing.payments import InvalidNotificationError
 from snoska.ports.identity import AuthenticationError, IdentityProviderError
 
@@ -68,6 +68,11 @@ def install_error_handlers(app: FastAPI) -> None:
         fields = ", ".join(".".join(str(part) for part in error["loc"]) for error in exc.errors())
         return problem_response(HTTPStatus.UNPROCESSABLE_ENTITY, "invalid_request", fields)
 
+    async def model_not_configured(_: Request, __: Exception) -> JSONResponse:
+        return problem_response(
+            HTTPStatus.SERVICE_UNAVAILABLE, "model_not_configured", "no model API is configured"
+        )
+
     async def dependency_unavailable(_: Request, exc: Exception) -> JSONResponse:
         log.warning("api.dependency_unavailable", error=repr(exc))
         return problem_response(HTTPStatus.SERVICE_UNAVAILABLE, "dependency_unavailable")
@@ -83,6 +88,7 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(DomainError, domain_error)
     app.add_exception_handler(RequestValidationError, validation_error)
     app.add_exception_handler(IdentityProviderError, dependency_unavailable)
+    app.add_exception_handler(ModelNotConfiguredError, model_not_configured)
     app.add_exception_handler(AiProviderError, dependency_unavailable)
     app.add_exception_handler(InvalidNotificationError, forged_notification)
     app.add_exception_handler(Exception, unexpected)

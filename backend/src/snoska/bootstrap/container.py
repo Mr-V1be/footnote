@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from snoska.application.ask.service import NormQuestions
 from snoska.application.audit.queries import AuditQueries
 from snoska.application.autofix.service import Autofix
 from snoska.application.billing.service import BillingService
@@ -90,6 +91,7 @@ class Container:
     test_gateway: TestGateway
     uploads: DocumentUploads
     autofix: Autofix
+    questions: NormQuestions
     documents: DocumentQueries
     catalog: CatalogQuery
     corpus_sync: CorpusSync
@@ -184,6 +186,15 @@ async def build_container(
         ),
         test_gateway=TestGateway(payments, uow, clock),
         uploads=uploads,
+        questions=NormQuestions(
+            uow,
+            checks.norms,
+            core.embedder,
+            core.language_model,
+            core.meter,
+            clock,
+            configured=core.ai.configured or core.overrides.language_model is not None,
+        ),
         autofix=Autofix(
             uow,
             core.blobs,

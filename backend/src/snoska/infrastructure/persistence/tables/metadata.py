@@ -39,4 +39,6 @@ TENANT_TABLES: tuple[str, ...] = (
     "invoices",
     "payment_events",
     "version_changes",
+    "conversations",
+    "conversation_turns",
 )

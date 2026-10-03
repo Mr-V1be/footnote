@@ -5,6 +5,7 @@ from typing import Protocol, Self
 from uuid import UUID
 
 from snoska.domain.shared.errors import ConflictError
+from snoska.ports.ask.repositories import ConversationRepository
 from snoska.ports.audit.log import AuditLog
 from snoska.ports.autofix.journal import ChangeJournal
 from snoska.ports.billing.repositories import (
@@ -113,6 +114,9 @@ class UnitOfWork(Protocol):
 
     @property
     def changes(self) -> ChangeJournal: ...
+
+    @property
+    def conversations(self) -> ConversationRepository: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

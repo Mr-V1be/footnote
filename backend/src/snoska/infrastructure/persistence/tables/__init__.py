@@ -1,6 +1,7 @@
 """Table definitions. Importing this package registers every table."""
 
 from snoska.infrastructure.persistence.tables import (
+    ask,
     audit,
     autofix,
     billing,
@@ -14,6 +15,7 @@ from snoska.infrastructure.persistence.tables import (
 from snoska.infrastructure.persistence.tables.metadata import metadata
 
 __all__ = [
+    "ask",
     "audit",
     "autofix",
     "billing",

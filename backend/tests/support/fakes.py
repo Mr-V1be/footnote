@@ -100,6 +100,8 @@ class RecordedLanguageModel:
 
     async def complete(self, request: CompletionRequest) -> Completion:
         self.requests.append(request)
+        if "citations" in str(request.response_schema):
+            return self._completion(_question_answer(request))
         prompt = request.messages[-1].content
         question = prompt.splitlines()[0]
         verdict = next(
@@ -124,12 +126,41 @@ class RecordedLanguageModel:
             "explanation": f"Записанный ответ: {verdict}.",
             "recommendation": "Дополните документ." if verdict in ("partial", "absent") else "",
         }
+        return self._completion(answer)
+
+    def _completion(self, answer: Mapping[str, object]) -> Completion:
         return Completion(
             text=json.dumps(answer, ensure_ascii=False),
             model=self.model,
             prompt_tokens=None,
             completion_tokens=None,
         )
+
+
+_PROVISION = re.compile(r"^(N\d+) \(([^)]*)\):\n(.+)$", re.MULTILINE)
+
+
+def _question_answer(request: CompletionRequest) -> Mapping[str, object]:
+    """Answers a question to the corpus by quoting the first provision shown.
+    A question about the weather is not in the norm; a question asking to
+    "invent" gets an unfounded quote first and a correct one when corrected."""
+    prompt = request.messages[1].content
+    question = prompt.splitlines()[0]
+    if "погод" in question:
+        return {"found": False, "answer": "", "citations": []}
+    corrected = len(request.messages) > 2
+    provisions = _PROVISION.findall(prompt)
+    if not provisions:
+        return {"found": False, "answer": "", "citations": []}
+    key, _, text = provisions[0]
+    quote = " ".join(text.split()[:_QUOTE_WORDS])
+    if "выдумай" in question and not corrected:
+        quote = "положение, которого нет ни в одном законе"
+    return {
+        "found": True,
+        "answer": "Записанный ответ по норме [1].",
+        "citations": [{"norm": key, "quote": quote}],
+    }
 
 
 class RecordingTransport:

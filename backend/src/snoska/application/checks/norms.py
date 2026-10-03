@@ -86,6 +86,27 @@ class NormLibrary:
             units = [hit.unit for hit in hits if hit.unit.anchor not in exclude][:limit]
             return await _with_lead_ins(uow.corpus, act_code, units)
 
+    async def nearest(
+        self, space: EmbeddingSpace, vector: Sequence[float], limit: int
+    ) -> list[Provision]:
+        """Provisions of every act in force closest in meaning to a question."""
+        async with self._uow_factory.for_platform() as uow:
+            hits = await uow.corpus.search(space, vector, act_code=None, limit=limit)
+            by_edition: dict[UUID, list[NormUnit]] = {}
+            for hit in hits:
+                by_edition.setdefault(hit.unit.edition_id, []).append(hit.unit)
+            found: dict[UUID, Provision] = {}
+            for edition_id, units in by_edition.items():
+                edition = await uow.corpus.get_edition(edition_id)
+                if edition is None:
+                    continue
+                for unit, provision in zip(
+                    units, await _with_lead_ins(uow.corpus, edition.act_code, units), strict=True
+                ):
+                    found[unit.id] = provision
+        # In the order of closeness.
+        return [found[hit.unit.id] for hit in hits if hit.unit.id in found]
+
     async def citations(self, act_code: str, anchors: Collection[str]) -> Mapping[str, str]:
         """How provisions are cited in the edition in force, by anchor."""
         async with self._uow_factory.for_platform() as uow:

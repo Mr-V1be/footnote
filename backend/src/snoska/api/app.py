@@ -10,6 +10,7 @@ from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from snoska.api.errors import install_error_handlers
 from snoska.api.middleware import BodySizeLimitMiddleware, RequestContextMiddleware
 from snoska.api.routers import (
+    ask,
     autofix,
     billing,
     checks,
@@ -81,6 +82,7 @@ def create_app(
         autofix,
         checks,
         corpus,
+        ask,
     ):
         app.include_router(module.router, prefix=API_PREFIX)
     if settings.integrations.demo_receiver:
