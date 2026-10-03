@@ -49,6 +49,10 @@
   --color-neutral-soft: light-dark(#efefeb, #262a30);
 
   --color-focus: light-dark(#2438c4, #a9b4ff);
+
+  /* Devices that frame screenshots of the product. */
+  --color-device: light-dark(#1d2025, #0b0c0e);
+  --color-device-edge: light-dark(#3a3f46, #2b2f35);
   --color-highlight: light-dark(#e6e9fd, #2a3060);
 
   /* Typography. */
@@ -139,6 +143,7 @@
   --topbar-offset: calc(var(--topbar-height) + env(safe-area-inset-top));
   --content-max: 72rem;
   --content-narrow: 52rem;
+  --content-wide: 78rem;
   --sheet-max: 47rem;
   --sheet-padding: 3.5rem;
   --bottom-bar-height: 4rem;

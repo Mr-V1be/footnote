@@ -1,0 +1,61 @@
+/* Shared by the sections of the public site: a band and its wide grid. */
+
+.band {
+  padding-block: var(--space-12);
+}
+
+.surface {
+  border-block: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.ink {
+  background: var(--color-ink-soft);
+}
+
+.inner {
+  display: grid;
+  gap: var(--space-8);
+  inline-size: 100%;
+  max-inline-size: var(--content-wide);
+  margin-inline: auto;
+  padding-inline: max(var(--space-gutter), env(safe-area-inset-left))
+    max(var(--space-gutter), env(safe-area-inset-right));
+}
+
+.heading {
+  display: grid;
+  gap: var(--space-2);
+  max-inline-size: 40rem;
+}
+
+.eyebrow {
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+}
+
+.lead {
+  color: var(--color-text-secondary);
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  text-wrap: pretty;
+}
+
+@media (width >= 64rem) {
+  .band {
+    padding-block: var(--space-16);
+  }
+
+  .title {
+    font-size: var(--text-3xl);
+  }
+}

@@ -1,0 +1,82 @@
+.plans {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.plan {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.marked {
+  border-color: var(--color-ink-line);
+  box-shadow:
+    inset 0 0 0 var(--space-px) var(--color-ink-line),
+    var(--shadow-sheet);
+}
+
+.name {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.price {
+  font-family: var(--font-document);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
+}
+
+.period {
+  color: var(--color-text-tertiary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.limits {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.limits li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.limits svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+  color: var(--color-success);
+}
+
+.limit {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+@media (width >= 48rem) {
+  .plans {
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+}

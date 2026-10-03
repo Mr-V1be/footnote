@@ -1,0 +1,87 @@
+.frame {
+  position: relative;
+  margin: 0;
+  inline-size: 100%;
+}
+
+.screen {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.screen > img,
+.screen > video,
+.screen > picture > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Laptop: a thin bezel, a 16:10 screen and a base that is a little wider;
+   the base takes the frame's width, so nothing spills out of the column. */
+.laptop .screen {
+  margin-inline: 5.5%;
+  aspect-ratio: 16 / 10;
+  border: var(--space-2) solid var(--color-device);
+  border-block-end-width: var(--space-3);
+  border-radius: var(--radius-xl) var(--radius-xl) var(--radius-xs) var(--radius-xs);
+  box-shadow: var(--shadow-popover);
+}
+
+.base {
+  position: relative;
+  inline-size: 100%;
+  block-size: var(--space-3);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: linear-gradient(var(--color-device-edge), var(--color-device));
+  box-shadow: var(--shadow-sheet);
+}
+
+.base::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 18%;
+  block-size: var(--space-1-5);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--color-device-edge);
+  content: "";
+  transform: translateX(-50%);
+}
+
+/* Phone: rounded body, a status strip with the camera island above a
+   390:844 screen, so the island never covers the product's own top bar. */
+.phone {
+  max-inline-size: 18rem;
+  margin-inline: auto;
+}
+
+.phone .screen {
+  padding-block-start: var(--space-6);
+  border: var(--space-2) solid var(--color-device);
+  border-radius: calc(var(--radius-xl) * 2.6);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-popover);
+}
+
+.phone .screen > img,
+.phone .screen > video,
+.phone .screen > picture > img {
+  aspect-ratio: 390 / 844;
+  block-size: auto;
+}
+
+.phone .screen::after {
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-start: 50%;
+  inline-size: 28%;
+  block-size: var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-device);
+  content: "";
+  transform: translateX(-50%);
+}

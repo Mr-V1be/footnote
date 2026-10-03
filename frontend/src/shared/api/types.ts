@@ -93,3 +93,5 @@ export type Citation = Schemas["CitationOut"];
 // The platform console.
 export type OrganizationRow = Schemas["OrganizationRowOut"];
 export type SystemStatus = Schemas["SystemOut"];
+export type PlansOffer = Schemas["PlansOut"];
+export type ModelTrial = Schemas["ModelTrialOut"];

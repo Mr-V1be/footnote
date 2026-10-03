@@ -4,7 +4,8 @@ import { SESSION_COOKIE } from "@/server/auth/cookie";
 
 /**
  * Fast path for signed-out visitors: application pages need a session cookie.
- * The session itself is validated by the server when the page renders.
+ * The session itself is validated by the server when the page renders. The
+ * public pages (the landing, the methodology, the demo) are not matched.
  */
 export function proxy(request: NextRequest): NextResponse {
   if (request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
@@ -14,5 +15,5 @@ export function proxy(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ["/", "/o/:path*", "/platform", "/platform/:path*"],
+  matcher: ["/o/:path*", "/platform", "/platform/:path*"],
 };

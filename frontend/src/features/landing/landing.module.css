@@ -1,0 +1,132 @@
+/* The public site: full-width bands with a wide grid inside. */
+
+.site {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+  background: var(--color-canvas);
+}
+
+.main {
+  flex: 1;
+  outline: none;
+}
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--layer-header);
+  border-block-end: var(--border-width) solid var(--color-border);
+  background: color-mix(in srgb, var(--color-canvas) 86%, transparent);
+  backdrop-filter: blur(var(--blur-header));
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  max-inline-size: var(--content-wide);
+  min-block-size: var(--topbar-height);
+  margin-inline: auto;
+  padding-block-start: env(safe-area-inset-top);
+  padding-inline: max(var(--space-gutter), env(safe-area-inset-left))
+    max(var(--space-gutter), env(safe-area-inset-right));
+}
+
+.home {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text);
+}
+
+.nav {
+  display: none;
+  flex: 1;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.navLink {
+  padding: var(--space-1-5) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.navLink:hover {
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.long {
+  display: none;
+}
+
+.footer {
+  border-block-start: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunken);
+}
+
+.footerInner {
+  display: grid;
+  gap: var(--space-4);
+  inline-size: 100%;
+  max-inline-size: var(--content-wide);
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-gutter) calc(var(--space-8) + env(safe-area-inset-bottom));
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.footerLinks a:hover {
+  color: var(--color-ink);
+}
+
+.footerNote {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+@media (width >= 40rem) {
+  .long {
+    display: inline;
+  }
+
+  .short {
+    display: none;
+  }
+}
+
+@media (width >= 64rem) {
+  .nav {
+    display: flex;
+  }
+
+  .headerActions {
+    margin-inline-start: 0;
+  }
+
+  .footerInner {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+
+  .footerLinks {
+    justify-content: flex-end;
+  }
+}

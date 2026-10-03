@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 
 import { Drawer, DrawerContent, DrawerTrigger } from "@/shared/ui/drawer/Drawer";
 import { IconButton } from "@/shared/ui/icon-button/IconButton";
+import { SkipLink } from "@/shared/ui/skip-link/SkipLink";
 
 import styles from "./app-frame.module.css";
 import { Brand } from "./Brand";
@@ -27,9 +28,7 @@ export function AppFrame({
   const [drawerOpen, setDrawerOpen] = useState(false);
   return (
     <>
-      <a className={styles.skip} href="#main">
-        {t("nav.skipToContent")}
-      </a>
+      <SkipLink target="main" label={t("nav.skipToContent")} />
       <div className={styles.shell}>
         <aside className={styles.sidebar} aria-label={t("nav.label")}>
           {sidebar()}
