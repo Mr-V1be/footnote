@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import httpx
+import pytest
 
 from snoska.api.app import create_app
+from snoska.application.ask.service import RecordedAnswer, RecordedCitation
 from snoska.bootstrap.container import Container, Overrides, build_container
 from snoska.bootstrap.settings import Settings
+from snoska.domain.ask.answer import UngroundedAnswerError
+from snoska.domain.tenancy.access import MembershipClaim, Principal
 from tests.support.fakes import FakeDirectory, RecordedLanguageModel
 from tests.support.scenario import EVA, OLGA, ORG_A, ORG_B, auth, run_jobs
 from tests.support.tokens import StaticKeys, TokenFactory
@@ -98,3 +102,54 @@ async def test_without_a_model_api_the_question_is_refused_plainly(
         await unconfigured.close()
     assert refused.status_code in (409, 503)
     assert refused.json()["code"] in ("model_not_configured", "corpus_not_indexed")
+
+
+RECORDED = RecordedAnswer(
+    question="В какой срок нужно прекратить обработку после отзыва согласия?",
+    text="Не позднее тридцати дней с даты поступления отзыва.",
+    citations=(
+        RecordedCitation(
+            anchor="st-21/ch-5",
+            quote="оператор обязан прекратить их обработку [...] в срок, не превышающий "
+            "тридцати дней с даты поступления указанного отзыва",
+        ),
+    ),
+    model="recorded",
+)
+
+
+async def test_a_recorded_answer_is_kept_once_and_needs_no_model(
+    api: httpx.AsyncClient, tokens: TokenFactory, container: Container
+) -> None:
+    await indexed(container)
+    model = container.questions._model
+    assert isinstance(model, RecordedLanguageModel)
+    before = len(model.requests)
+    eva = Principal(
+        user_id=EVA.user_id,
+        email=EVA.email,
+        display_name=EVA.name,
+        memberships=(MembershipClaim(ORG_A.id, "alpha", frozenset({"executor"})),),
+        platform_role_codes=frozenset(),
+    )
+    access = await container.tenant_access.organization_access(eva, "alpha")
+    first = await container.questions.record(access, RECORDED)
+    again = await container.questions.record(access, RECORDED)
+    assert first.id == again.id
+    assert len(model.requests) == before
+
+    shown = await api.get(f"{BASE}/conversations/{first.id}", headers=auth(tokens, EVA))
+    [turn] = shown.json()["turns"]
+    assert turn["answer"].endswith("[1].")
+    [citation] = turn["citations"]
+    assert citation["citation"].startswith("ч. 5 ст. 21")
+    assert citation["quote"].startswith("оператор обязан прекратить их обработку …")
+
+    invented = RecordedAnswer(
+        question="Сколько дней на прекращение обработки?",
+        text="Три рабочих дня.",
+        citations=(RecordedCitation(anchor="st-21/ch-5", quote="не позднее трёх рабочих дней"),),
+        model="recorded",
+    )
+    with pytest.raises(UngroundedAnswerError):
+        await container.questions.record(access, invented)

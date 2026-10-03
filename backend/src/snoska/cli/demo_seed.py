@@ -13,7 +13,12 @@ import typer
 from snoska.application.documents.upload import IncomingFile
 from snoska.bootstrap.container import Container
 from snoska.bootstrap.settings import Settings
-from snoska.cli.demo_setup import ensure_integrations, ensure_plan, ensure_workspaces
+from snoska.cli.demo_setup import (
+    ensure_integrations,
+    ensure_plan,
+    ensure_questions,
+    ensure_workspaces,
+)
 from snoska.domain.tenancy.access import MembershipClaim, Principal
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, OWNER_ROLE
 from snoska.ports.identity import MemberSpec
@@ -129,3 +134,4 @@ async def apply_seed(settings: Settings, container: Container, data: dict[str, A
                 organization["integrations"],
                 settings.api_url,
             )
+        await ensure_questions(container, alias, organization.get("questions", []), members)

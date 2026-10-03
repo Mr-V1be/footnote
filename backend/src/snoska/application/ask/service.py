@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 import structlog
 
 from snoska.application.ask.prompt import ANSWER_SCHEMA, build_messages, correction
 from snoska.application.billing.meter import Charge, UsageMeter
-from snoska.application.checks.norms import NormLibrary
+from snoska.application.checks.norms import NormLibrary, Provision
 from snoska.application.corpus.search import CorpusNotIndexedError
 from snoska.domain.ask.answer import (
     QUESTION_MAX_LENGTH,
@@ -22,6 +24,7 @@ from snoska.domain.ask.answer import (
 )
 from snoska.domain.billing.plans import UsageMetric
 from snoska.domain.billing.usage import LedgerReason, ensure_allowance
+from snoska.domain.checks.catalog import LawNorm
 from snoska.domain.shared.errors import NotFoundError, ValidationError
 from snoska.domain.shared.ids import new_id
 from snoska.domain.tenancy.access import OrganizationAccess
@@ -69,6 +72,29 @@ class AskStatus:
     embedding_model: str | None
     # Model requests left today on a free tier; None without a daily allowance.
     requests_left_today: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RecordedCitation:
+    """A footnote of a recorded answer: the provision by its anchor and the
+    words quoted from it."""
+
+    anchor: str
+    quote: str
+
+
+@dataclass(frozen=True, slots=True)
+class RecordedAnswer:
+    """An answer given earlier, kept as data (the demo stand's questions):
+    shown without a request to the model, checked like a live answer."""
+
+    question: str
+    text: str
+    citations: tuple[RecordedCitation, ...]
+    model: str
+    act_code: str = "152-fz"
+    # When it was asked; now when not given.
+    asked_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,6 +176,36 @@ class NormQuestions:
         answer = await self._answer(text, earlier)
         return await self._store(access, text, answer, conversation_id, len(earlier))
 
+    async def record(self, access: OrganizationAccess, recorded: RecordedAnswer) -> Conversation:
+        """Store a recorded answer as the person's conversation, unless they
+        already have one with that question. The quotes are checked against
+        the edition in force, as a live answer's are."""
+        access.require(Permission.NORMS_ASK)
+        question = " ".join(recorded.question.split())
+        for conversation in await self.conversations(access):
+            if conversation.title == title_of(question):
+                return conversation
+        anchors = tuple(dict.fromkeys(item.anchor for item in recorded.citations))
+        provisions = await self._norms.provisions(LawNorm(recorded.act_code, anchors))
+        sources = _sources(provisions)
+        key_of = {source.anchor: source.key for source in sources}
+        raw = json.dumps(
+            {
+                "found": True,
+                "answer": recorded.text,
+                "citations": [
+                    {"norm": key_of[item.anchor], "quote": item.quote}
+                    for item in recorded.citations
+                ],
+            },
+            ensure_ascii=False,
+        )
+        answer = read_answer(raw, sources)
+        view = await self._store(
+            access, question, answer, None, 0, model=recorded.model, at=recorded.asked_at
+        )
+        return view.conversation
+
     async def _answer(self, question: str, earlier: Sequence[Turn]) -> Answer:
         space = self._embedder.space
         async with self._uow_factory.for_platform() as uow:
@@ -158,17 +214,7 @@ class NormQuestions:
             raise CorpusNotIndexedError(f"no edition in force is indexed in space {space.code!r}")
         [vector] = await self._embedder.embed([question])
         provisions = await self._norms.nearest(self._embedder.space, vector, PROVISIONS)
-        sources = [
-            SourceProvision(
-                key=f"N{index}",
-                act_code=provision.act_code,
-                edition_id=provision.edition_id,
-                anchor=provision.anchor,
-                citation=provision.citation,
-                text=provision.text,
-            )
-            for index, provision in enumerate(provisions, start=1)
-        ]
+        sources = _sources(provisions)
         messages: tuple[ChatMessage, ...] = build_messages(question, sources, earlier)
         for attempt in range(1, MAX_ATTEMPTS + 1):
             raw = ""
@@ -202,8 +248,11 @@ class NormQuestions:
         answer: Answer,
         conversation_id: UUID | None,
         ordinal: int,
+        *,
+        model: str | None = None,
+        at: datetime | None = None,
     ) -> ConversationView:
-        now = self._clock.now()
+        now = at or self._clock.now()
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             if conversation_id is None:
                 conversation = Conversation(
@@ -227,7 +276,7 @@ class NormQuestions:
                 ordinal=ordinal,
                 question=question,
                 answer=answer,
-                model=self._model.model,
+                model=model or self._model.model,
                 asked_at=now,
             )
             await self._meter.consume(
@@ -241,3 +290,18 @@ class NormQuestions:
             turns = await uow.conversations.turns(conversation.id)
             await uow.commit()
         return ConversationView(conversation=conversation, turns=turns)
+
+
+def _sources(provisions: Sequence[Provision]) -> list[SourceProvision]:
+    """Provisions under the keys an answer cites them by (N1, N2…)."""
+    return [
+        SourceProvision(
+            key=f"N{index}",
+            act_code=provision.act_code,
+            edition_id=provision.edition_id,
+            anchor=provision.anchor,
+            citation=provision.citation,
+            text=provision.text,
+        )
+        for index, provision in enumerate(provisions, start=1)
+    ]

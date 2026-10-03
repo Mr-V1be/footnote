@@ -1,15 +1,18 @@
 """Organization set-up of the demo stand beyond members and documents:
 workspaces with their own roles, the plan, an API key and a webhook to the
-stand's own receiver. Every step is idempotent, like the rest of the seed."""
+stand's own receiver, questions to the norm with their answers. Every step
+is idempotent, like the rest of the seed."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 import typer
 
+from snoska.application.ask.service import RecordedAnswer, RecordedCitation
 from snoska.application.integrations.webhooks import EndpointSpec
 from snoska.bootstrap.container import Container
 from snoska.domain.integrations.api_keys import ApiScope
@@ -100,3 +103,30 @@ async def ensure_integrations(
         )
         await container.webhooks.ping(access, endpoint.id)
         typer.echo(f"{alias}: webhook «{hook['description']}» to the demo receiver")
+
+
+async def ensure_questions(
+    container: Container,
+    alias: str,
+    questions: list[dict[str, Any]],
+    members: Mapping[str, Principal],
+) -> None:
+    """Each person's questions with recorded answers: no request to the model."""
+    for spec in questions:
+        asker = members[spec["asked_by"]]
+        access = await container.tenant_access.organization_access(asker, alias)
+        await container.questions.record(
+            access,
+            RecordedAnswer(
+                question=spec["question"],
+                text=" ".join(str(spec["answer"]).split()),
+                citations=tuple(
+                    RecordedCitation(anchor=item["anchor"], quote=" ".join(item["quote"].split()))
+                    for item in spec["citations"]
+                ),
+                model=spec["model"],
+                # Asked over the last days, as on a stand in use.
+                asked_at=datetime.now(UTC) - timedelta(hours=float(spec["asked_hours_ago"])),
+            ),
+        )
+        typer.echo(f"{alias}: question «{spec['question'][:48]}…» by {spec['asked_by']}")
