@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from snoska.application.audit.queries import AuditQueries
+from snoska.application.autofix.service import Autofix
 from snoska.application.billing.service import BillingService
 from snoska.application.checks.progress import RunProgress
 from snoska.application.checks.quality.benchmark import CheckBenchmark
@@ -45,6 +46,7 @@ from snoska.domain.documents.kinds import DOCUMENT_KINDS
 from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.tenancy.access import AccessPolicy
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
+from snoska.infrastructure.autofix.docx_patcher import DocxPatcher
 from snoska.infrastructure.billing.test_gateway import TestGateway
 from snoska.infrastructure.billing.test_provider import TestPaymentNotifier, TestPaymentProvider
 from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
@@ -87,6 +89,7 @@ class Container:
     billing: BillingService
     test_gateway: TestGateway
     uploads: DocumentUploads
+    autofix: Autofix
     documents: DocumentQueries
     catalog: CatalogQuery
     corpus_sync: CorpusSync
@@ -128,6 +131,17 @@ async def build_container(
     acts = YamlActCatalog(settings.corpus_catalog)
     corpus_indexing = IndexCorpusEdition(uow, core.embedder, clock)
     limits = UploadLimits(max_bytes=settings.max_upload_bytes)
+    uploads = DocumentUploads(
+        uow,
+        core.blobs,
+        SUPPORTED_FORMATS,
+        DOCUMENT_KINDS,
+        clock,
+        limits,
+        core.gate,
+        core.audit,
+        core.events,
+    )
     payments = TestPaymentProvider(
         settings.payments.test_secret.get_secret_value(), settings.web_url
     )
@@ -169,16 +183,16 @@ async def build_container(
             uow, core.plans, core.meter, payments, core.audit, clock, web_url=settings.web_url
         ),
         test_gateway=TestGateway(payments, uow, clock),
-        uploads=DocumentUploads(
+        uploads=uploads,
+        autofix=Autofix(
             uow,
             core.blobs,
-            SUPPORTED_FORMATS,
-            DOCUMENT_KINDS,
-            clock,
-            limits,
+            uploads,
+            DocxPatcher(),
+            checks.catalog,
             core.gate,
+            core.meter,
             core.audit,
-            core.events,
         ),
         documents=DocumentQueries(uow, core.blobs, DOCUMENT_KINDS, RequisiteDetector(), core.gate),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),

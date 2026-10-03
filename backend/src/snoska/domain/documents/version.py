@@ -53,9 +53,19 @@ class ParseSummary:
     character_count: int = 0
 
 
+class VersionOrigin(StrEnum):
+    UPLOAD = "upload"
+    # Made by the platform from an earlier version: formatting corrected.
+    AUTOFIX = "autofix"
+
+
 @dataclass(slots=True)
 class DocumentVersion:
-    """One uploaded file of a document and the lifecycle of its parsing."""
+    """One file of a document and the lifecycle of its parsing.
+
+    A version is uploaded by someone, or made by the platform (``origin``),
+    in which case ``derived_from`` names the version it was made from.
+    """
 
     id: UUID
     organization_id: UUID
@@ -70,6 +80,8 @@ class DocumentVersion:
     parsed_at: datetime | None
     failure_code: ParseFailureCode | None
     summary: ParseSummary | None
+    origin: VersionOrigin = VersionOrigin.UPLOAD
+    derived_from: int | None = None
 
     @classmethod
     def upload(
@@ -82,6 +94,8 @@ class DocumentVersion:
         file: StoredFile,
         uploaded_by: UUID,
         now: datetime,
+        origin: VersionOrigin = VersionOrigin.UPLOAD,
+        derived_from: int | None = None,
     ) -> DocumentVersion:
         return cls(
             id=id,
@@ -97,6 +111,8 @@ class DocumentVersion:
             parsed_at=None,
             failure_code=None,
             summary=None,
+            origin=origin,
+            derived_from=derived_from,
         )
 
     @property

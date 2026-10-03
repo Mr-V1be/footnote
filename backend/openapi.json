@@ -5067,6 +5067,428 @@
         }
       }
     },
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/autofix": {
+      "get": {
+        "tags": [
+          "autofix"
+        ],
+        "summary": "Autofix Preview",
+        "description": "What an automatic correction of the version's formatting would change.",
+        "operationId": "autofix_preview",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Number"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutofixPreviewOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "autofix"
+        ],
+        "summary": "Apply Autofix",
+        "description": "Correct the formatting into a new version; this one stays as it is.",
+        "operationId": "apply_autofix",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Number"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutofixOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/changes": {
+      "get": {
+        "tags": [
+          "autofix"
+        ],
+        "summary": "Version Changes",
+        "description": "What the correction that made this version changed (before and after).",
+        "operationId": "version_changes",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Number"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 63,
+              "pattern": "^[a-z0-9-]+$",
+              "title": "Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChangeOut"
+                  },
+                  "title": "Response Version Changes"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks": {
       "post": {
         "tags": [
@@ -6697,6 +7119,56 @@
         ],
         "title": "AuditTargetOut"
       },
+      "AutofixOut": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeOut"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "changes"
+        ],
+        "title": "AutofixOut"
+      },
+      "AutofixPreviewOut": {
+        "properties": {
+          "editable": {
+            "type": "boolean",
+            "title": "Editable"
+          },
+          "planned": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedFixOut"
+            },
+            "type": "array",
+            "title": "Planned"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/SkippedFixOut"
+            },
+            "type": "array",
+            "title": "Skipped"
+          }
+        },
+        "type": "object",
+        "required": [
+          "editable",
+          "planned",
+          "skipped"
+        ],
+        "title": "AutofixPreviewOut"
+      },
       "BillingOut": {
         "properties": {
           "plan": {
@@ -6973,6 +7445,59 @@
           "maxUploadBytes"
         ],
         "title": "CatalogOut"
+      },
+      "ChangeKind": {
+        "type": "string",
+        "enum": [
+          "format",
+          "text"
+        ],
+        "title": "ChangeKind"
+      },
+      "ChangeOut": {
+        "properties": {
+          "checkCode": {
+            "type": "string",
+            "title": "Checkcode"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ChangeKind"
+          },
+          "blockOrdinal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockordinal"
+          },
+          "before": {
+            "type": "string",
+            "title": "Before"
+          },
+          "after": {
+            "type": "string",
+            "title": "After"
+          },
+          "places": {
+            "type": "integer",
+            "title": "Places"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkCode",
+          "kind",
+          "blockOrdinal",
+          "before",
+          "after",
+          "places"
+        ],
+        "title": "ChangeOut",
+        "description": "One line of a correction's journal: before and after."
       },
       "CheckCatalogOut": {
         "properties": {
@@ -8791,6 +9316,24 @@
         ],
         "title": "PlanOut"
       },
+      "PlannedFixOut": {
+        "properties": {
+          "checkCode": {
+            "type": "string",
+            "title": "Checkcode"
+          },
+          "places": {
+            "type": "integer",
+            "title": "Places"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkCode",
+          "places"
+        ],
+        "title": "PlannedFixOut"
+      },
       "Problem": {
         "properties": {
           "type": {
@@ -9289,6 +9832,38 @@
         ],
         "title": "Severity"
       },
+      "SkipReason": {
+        "type": "string",
+        "enum": [
+          "needs_person",
+          "legal",
+          "not_editable",
+          "unsafe"
+        ],
+        "title": "SkipReason"
+      },
+      "SkippedFixOut": {
+        "properties": {
+          "checkCode": {
+            "type": "string",
+            "title": "Checkcode"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/SkipReason"
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkCode",
+          "reason",
+          "findings"
+        ],
+        "title": "SkippedFixOut"
+      },
       "StructureOut": {
         "properties": {
           "version": {
@@ -9494,6 +10069,14 @@
         ],
         "title": "UsageOut"
       },
+      "VersionOrigin": {
+        "type": "string",
+        "enum": [
+          "upload",
+          "autofix"
+        ],
+        "title": "VersionOrigin"
+      },
       "VersionOut": {
         "properties": {
           "number": {
@@ -9588,6 +10171,20 @@
               }
             ],
             "title": "Ocrconfidence"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/VersionOrigin"
+          },
+          "derivedFrom": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Derivedfrom"
           }
         },
         "type": "object",
@@ -9604,7 +10201,9 @@
           "method",
           "pageCount",
           "blockCount",
-          "ocrConfidence"
+          "ocrConfidence",
+          "origin",
+          "derivedFrom"
         ],
         "title": "VersionOut"
       },

@@ -49,6 +49,18 @@ def body_elements(container: _Element) -> Iterator[_Element]:
                 yield from body_elements(content)
 
 
+def block_elements(container: _Element) -> Iterator[_Element]:
+    """The body elements that become blocks, in the order the blocks are
+    numbered: paragraphs with text and tables with rows. The parser and the
+    corrector both count blocks this way, so an ordinal finds its element."""
+    for element in body_elements(container):
+        if element.tag == w("tbl"):
+            if read_table(element).rows:
+                yield element
+        elif paragraph_text(element):
+            yield element
+
+
 class _MutableCell:
     __slots__ = ("col_span", "row_span", "text")
 

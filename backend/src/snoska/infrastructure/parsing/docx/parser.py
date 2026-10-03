@@ -21,7 +21,7 @@ from snoska.domain.documents.structure import (
 )
 from snoska.domain.documents.version import ExtractionMethod, ParseFailureCode
 from snoska.infrastructure.parsing.docx.content import (
-    body_elements,
+    block_elements,
     clean_text,
     paragraph_runs,
     read_table,
@@ -75,7 +75,7 @@ class DocxParser:
         sheet = StyleSheet(document.styles.element, self._theme(document))
         numbering = NumberingResolver(self._numbering(document))
         blocks: list[Block] = []
-        for element in body_elements(document.element.body):
+        for element in block_elements(document.element.body):
             if len(blocks) >= MAX_BLOCKS:
                 raise DocumentParseError(ParseFailureCode.TOO_LARGE, "document has too many blocks")
             block = (
@@ -83,8 +83,11 @@ class DocxParser:
                 if element.tag == w("tbl")
                 else self._paragraph(element, len(blocks), sheet, numbering)
             )
-            if block is not None:
-                blocks.append(block)
+            if block is None:
+                raise DocumentParseError(
+                    ParseFailureCode.INTERNAL_ERROR, "a block element produced no block"
+                )
+            blocks.append(block)
 
         layout = DocumentLayout(
             pages=tuple(

@@ -20,6 +20,7 @@ from snoska.domain.documents.version import (
     ExtractionMethod,
     ParseFailureCode,
     ParseStatus,
+    VersionOrigin,
 )
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.checks.repositories import RunSummary
@@ -79,6 +80,9 @@ class VersionOut(ApiModel):
     page_count: int | None
     block_count: int | None
     ocr_confidence: float | None
+    # "autofix": made by the platform from version ``derived_from``.
+    origin: VersionOrigin
+    derived_from: int | None
 
     @classmethod
     def of(cls, version: DocumentVersion) -> VersionOut:
@@ -93,6 +97,8 @@ class VersionOut(ApiModel):
             failure_code=version.failure_code,
             uploaded_at=version.created_at,
             parsed_at=version.parsed_at,
+            origin=version.origin,
+            derived_from=version.derived_from,
             method=summary.method if summary else None,
             page_count=summary.page_count if summary else None,
             block_count=summary.block_count if summary else None,

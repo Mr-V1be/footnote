@@ -72,6 +72,9 @@ document_versions = Table(
     Column("size_bytes", BigInteger, nullable=False),
     Column("sha256", String(64), nullable=False),
     Column("uploaded_by", Uuid, nullable=False),
+    Column("origin", Text, nullable=False, server_default="upload"),
+    # The version an automatic correction was made from.
+    Column("derived_from", Integer, nullable=True),
     Column("upload_key", Text, nullable=True),
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("status", Text, nullable=False),

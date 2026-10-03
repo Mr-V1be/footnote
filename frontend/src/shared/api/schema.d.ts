@@ -519,6 +519,50 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/autofix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Autofix Preview
+         * @description What an automatic correction of the version's formatting would change.
+         */
+        get: operations["autofix_preview"];
+        put?: never;
+        /**
+         * Apply Autofix
+         * @description Correct the formatting into a new version; this one stays as it is.
+         */
+        post: operations["apply_autofix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Version Changes
+         * @description What the correction that made this version changed (before and after).
+         */
+        get: operations["version_changes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/organizations/{organization}/documents/{document_id}/versions/{number}/checks": {
         parameters: {
             query?: never;
@@ -835,6 +879,22 @@ export type components = {
             /** Label */
             label: string;
         };
+        /** AutofixOut */
+        AutofixOut: {
+            /** Version */
+            version: number;
+            /** Changes */
+            changes: components["schemas"]["ChangeOut"][];
+        };
+        /** AutofixPreviewOut */
+        AutofixPreviewOut: {
+            /** Editable */
+            editable: boolean;
+            /** Planned */
+            planned: components["schemas"]["PlannedFixOut"][];
+            /** Skipped */
+            skipped: components["schemas"]["SkippedFixOut"][];
+        };
         /** BillingOut */
         BillingOut: {
             plan: components["schemas"]["PlanOut"];
@@ -910,6 +970,28 @@ export type components = {
             requisiteKinds: components["schemas"]["RequisiteKind"][];
             /** Maxuploadbytes */
             maxUploadBytes: number;
+        };
+        /**
+         * ChangeKind
+         * @enum {string}
+         */
+        ChangeKind: "format" | "text";
+        /**
+         * ChangeOut
+         * @description One line of a correction's journal: before and after.
+         */
+        ChangeOut: {
+            /** Checkcode */
+            checkCode: string;
+            kind: components["schemas"]["ChangeKind"];
+            /** Blockordinal */
+            blockOrdinal: number | null;
+            /** Before */
+            before: string;
+            /** After */
+            after: string;
+            /** Places */
+            places: number;
         };
         /** CheckCatalogOut */
         CheckCatalogOut: {
@@ -1532,6 +1614,13 @@ export type components = {
                 [key: string]: number;
             };
         };
+        /** PlannedFixOut */
+        PlannedFixOut: {
+            /** Checkcode */
+            checkCode: string;
+            /** Places */
+            places: number;
+        };
         /**
          * Problem
          * @description RFC 9457 problem details with a stable machine-readable ``code``.
@@ -1730,6 +1819,19 @@ export type components = {
          * @enum {string}
          */
         Severity: "critical" | "important" | "advice";
+        /**
+         * SkipReason
+         * @enum {string}
+         */
+        SkipReason: "needs_person" | "legal" | "not_editable" | "unsafe";
+        /** SkippedFixOut */
+        SkippedFixOut: {
+            /** Checkcode */
+            checkCode: string;
+            reason: components["schemas"]["SkipReason"];
+            /** Findings */
+            findings: number;
+        };
         /** StructureOut */
         StructureOut: {
             version: components["schemas"]["VersionOut"];
@@ -1805,6 +1907,11 @@ export type components = {
             /** Limit */
             limit: number;
         };
+        /**
+         * VersionOrigin
+         * @enum {string}
+         */
+        VersionOrigin: "upload" | "autofix";
         /** VersionOut */
         VersionOut: {
             /** Number */
@@ -1833,6 +1940,9 @@ export type components = {
             blockCount: number | null;
             /** Ocrconfidence */
             ocrConfidence: number | null;
+            origin: components["schemas"]["VersionOrigin"];
+            /** Derivedfrom */
+            derivedFrom: number | null;
         };
         /**
          * WebhookEvent
@@ -5452,6 +5562,294 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    autofix_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                number: number;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutofixPreviewOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    apply_autofix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                number: number;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutofixOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    version_changes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                number: number;
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeOut"][];
                 };
             };
             /** @description Unauthorized */

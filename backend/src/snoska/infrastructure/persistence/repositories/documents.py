@@ -16,6 +16,7 @@ from snoska.domain.documents.version import (
     ParseStatus,
     ParseSummary,
     StoredFile,
+    VersionOrigin,
 )
 from snoska.domain.shared.errors import ConflictError
 from snoska.infrastructure.persistence.errors import violated_constraint
@@ -92,6 +93,8 @@ def _version(row: RowMapping) -> DocumentVersion:
         parsed_at=row["parsed_at"],
         failure_code=ParseFailureCode(failure) if failure else None,
         summary=_summary(row),
+        origin=VersionOrigin(row["origin"]),
+        derived_from=row["derived_from"],
     )
 
 
@@ -233,6 +236,8 @@ class SqlDocumentVersionRepository:
             "sha256": version.file.sha256,
             "uploaded_by": version.uploaded_by,
             "upload_key": upload_key,
+            "origin": version.origin.value,
+            "derived_from": version.derived_from,
             "created_at": version.created_at,
             **_version_state(version),
         }

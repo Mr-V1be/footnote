@@ -6,6 +6,7 @@ from uuid import UUID
 
 from snoska.domain.shared.errors import ConflictError
 from snoska.ports.audit.log import AuditLog
+from snoska.ports.autofix.journal import ChangeJournal
 from snoska.ports.billing.repositories import (
     InvoiceRepository,
     LedgerRepository,
@@ -109,6 +110,9 @@ class UnitOfWork(Protocol):
 
     @property
     def payment_events(self) -> PaymentEventLog: ...
+
+    @property
+    def changes(self) -> ChangeJournal: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -15,7 +15,7 @@ from snoska.domain.audit.targets import document_target
 from snoska.domain.documents.document import Document, DocumentNotFoundError, title_from_filename
 from snoska.domain.documents.formats import FormatRegistry
 from snoska.domain.documents.kinds import DocumentKindRegistry
-from snoska.domain.documents.version import DocumentVersion, StoredFile
+from snoska.domain.documents.version import DocumentVersion, StoredFile, VersionOrigin
 from snoska.domain.integrations.webhooks import WebhookEvent
 from snoska.domain.shared.errors import ConflictError
 from snoska.domain.shared.ids import new_id
@@ -52,6 +52,13 @@ class _StoredUpload:
     blob: StoredBlob
     format_code: str
     media_type: str
+
+
+async def _once(content: bytes) -> AsyncIterator[bytes]:
+    yield content
+
+
+GeneratedRecord = Callable[[UnitOfWork, Document, DocumentVersion], Awaitable[None]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,6 +213,49 @@ class DocumentUploads:
             raise
         return UploadResult(document_id=document_id, version_number=version.number, created=True)
 
+    async def add_generated_version(
+        self,
+        access: OrganizationAccess,
+        author: UserProfile,
+        *,
+        document_id: UUID,
+        filename: str,
+        content: bytes,
+        derived_from: int,
+        record: GeneratedRecord,
+    ) -> UploadResult:
+        """Store a file the platform made from a version (a correction) as the
+        document's next version. ``record`` adds what belongs to the same
+        transaction: the journal, the usage, the audit entry."""
+        version_id = new_id()
+        stored = await self._store(
+            access.organization_id, document_id, version_id, IncomingFile(filename, _once(content))
+        )
+        try:
+            async with self._uow_factory.for_tenant(access.organization_id) as uow:
+                document = await uow.documents.get(document_id)
+                if document is None:
+                    raise DocumentNotFoundError("document not found")
+                version = self._next_version(
+                    document,
+                    version_id,
+                    stored,
+                    filename,
+                    author,
+                    origin=VersionOrigin.AUTOFIX,
+                    derived_from=derived_from,
+                )
+                await uow.profiles.upsert(author, self._clock.now())
+                await uow.documents.save(document)
+                await uow.versions.add(version, upload_key=None)
+                await self._schedule_parsing(uow, version)
+                await record(uow, document, version)
+                await uow.commit()
+        except BaseException:
+            await self._blobs.delete(stored.blob.key)
+            raise
+        return UploadResult(document_id=document_id, version_number=version.number, created=True)
+
     async def _replay(
         self, access: OrganizationAccess, upload_key: str | None
     ) -> UploadResult | None:
@@ -250,6 +300,9 @@ class DocumentUploads:
         stored: _StoredUpload,
         filename: str,
         uploader: UserProfile,
+        *,
+        origin: VersionOrigin = VersionOrigin.UPLOAD,
+        derived_from: int | None = None,
     ) -> DocumentVersion:
         now = self._clock.now()
         return DocumentVersion.upload(
@@ -267,6 +320,8 @@ class DocumentUploads:
             ),
             uploaded_by=uploader.id,
             now=now,
+            origin=origin,
+            derived_from=derived_from,
         )
 
     async def _schedule_parsing(self, uow: UnitOfWork, version: DocumentVersion) -> None:
