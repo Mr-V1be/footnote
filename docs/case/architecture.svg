@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif">
+  <title>Архитектура «Сноски»</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4f5560"/>
+    </marker>
+    <style>
+      .box { fill: #fff; stroke: #cfcfc8; stroke-width: 1.5; }
+      .ink { fill: #eceefc; stroke: #2438c4; stroke-width: 1.5; }
+      .data { fill: #efefeb; stroke: #cfcfc8; stroke-width: 1.5; }
+      .ext { fill: #fff; stroke: #4f5560; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .h { font-size: 17px; font-weight: 600; fill: #1d2025; }
+      .t { font-size: 13px; fill: #4f5560; }
+      .s { font-size: 12px; fill: #5f646d; }
+      .label { font-size: 12px; fill: #2438c4; font-weight: 600; letter-spacing: 0.04em; }
+      .line { stroke: #4f5560; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #4f5560; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="780" fill="#f6f6f3"/>
+  <text x="40" y="48" font-size="26" font-weight="600" fill="#1d2025">Сноска<tspan font-size="15" dy="-10" fill="#2438c4">1</tspan></text>
+  <text x="152" y="47" class="t">проверка документов по 152-ФЗ и ГОСТ Р 7.0.97-2016 со ссылкой на норму к каждому замечанию</text>
+
+  <!-- Clients -->
+  <text x="40" y="92" class="label">КЛИЕНТЫ</text>
+  <rect x="40" y="104" width="360" height="70" rx="10" class="box"/>
+  <text x="58" y="132" class="h">Браузер</text>
+  <text x="58" y="155" class="t">лендинг, кабинет, демо-вход по ролям</text>
+  <rect x="420" y="104" width="300" height="70" rx="10" class="box"/>
+  <text x="438" y="132" class="h">Интеграции</text>
+  <text x="438" y="155" class="t">API-ключи, подписанные вебхуки</text>
+
+  <!-- Edge -->
+  <rect x="40" y="206" width="680" height="44" rx="10" class="box"/>
+  <text x="58" y="234" class="h">Caddy</text>
+  <text x="130" y="234" class="t">автоматический TLS, единственный открытый наружу сервис</text>
+  <path d="M220 174 V204" class="line"/>
+  <path d="M570 174 V204" class="line"/>
+
+  <!-- Web and API -->
+  <rect x="40" y="282" width="300" height="104" rx="10" class="box"/>
+  <text x="58" y="310" class="h">Web · Next.js 16, React 19</text>
+  <text x="58" y="333" class="t">BFF: OIDC на сервере, токены</text>
+  <text x="58" y="352" class="t">не попадают в браузер; сессии в Redis</text>
+  <text x="58" y="371" class="t">SSE с ходом проверки</text>
+  <rect x="380" y="282" width="340" height="104" rx="10" class="ink"/>
+  <text x="398" y="310" class="h">API · FastAPI, Python 3.13</text>
+  <text x="398" y="333" class="t">домен → сценарии → порты ← адаптеры,</text>
+  <text x="398" y="352" class="t">корень композиции; права ролей — реестр;</text>
+  <text x="398" y="371" class="t">ошибки RFC 9457</text>
+  <path d="M190 250 V280" class="line"/>
+  <path d="M550 250 V280" class="line"/>
+  <path d="M340 334 H378" class="line"/>
+
+  <!-- Keycloak -->
+  <rect x="760" y="206" width="400" height="104" rx="10" class="box"/>
+  <text x="778" y="234" class="h">Keycloak 26.8</text>
+  <text x="778" y="257" class="t">организации и роли по организациям в токене;</text>
+  <text x="778" y="276" class="t">своя тема входа; демо-клиент только на стенде;</text>
+  <text x="778" y="295" class="t">серверы ходят по внутренней сети</text>
+  <path d="M720 228 H758" class="line"/>
+  <path d="M720 334 C740 334 740 300 758 290" class="dash"/>
+
+  <!-- Worker -->
+  <rect x="380" y="418" width="340" height="150" rx="10" class="ink"/>
+  <text x="398" y="446" class="h">Воркер · Dramatiq</text>
+  <text x="398" y="469" class="t">разбор DOCX и PDF, сканы — Tesseract</text>
+  <text x="398" y="488" class="t">43 проверки: правила ГОСТ и требования</text>
+  <text x="398" y="507" class="t">152-ФЗ моделью только с дословной цитатой</text>
+  <text x="398" y="526" class="t">автоисправление оформления новой версией</text>
+  <text x="398" y="545" class="t">вебхуки, новые редакции закона, ночной сброс</text>
+  <path d="M550 386 V416" class="line"/>
+  <text x="560" y="406" class="s">outbox</text>
+
+  <!-- Model economy -->
+  <rect x="760" y="418" width="400" height="150" rx="10" class="box"/>
+  <text x="778" y="446" class="h">Запросы к модели</text>
+  <text x="778" y="469" class="t">требования документа — одним-двумя запросами</text>
+  <text x="778" y="488" class="t">кэш ответов: тот же текст — ноль запросов</text>
+  <text x="778" y="507" class="t">дневной бюджет и темп, общие для процессов</text>
+  <text x="778" y="526" class="t">цепочка бесплатных моделей; лимит исчерпан —</text>
+  <text x="778" y="545" class="t">правила работают, юридическое ждёт и догоняет</text>
+  <path d="M720 492 H758" class="line"/>
+
+  <!-- Data -->
+  <text x="40" y="612" class="label">ДАННЫЕ</text>
+  <rect x="40" y="624" width="300" height="118" rx="10" class="data"/>
+  <text x="58" y="652" class="h">PostgreSQL 18 + pgvector</text>
+  <text x="58" y="675" class="t">RLS по тенанту, составные ключи;</text>
+  <text x="58" y="694" class="t">корпус 152-ФЗ с редакциями,</text>
+  <text x="58" y="713" class="t">векторы фрагментов и норм</text>
+  <rect x="380" y="624" width="160" height="118" rx="10" class="data"/>
+  <text x="398" y="652" class="h">Redis</text>
+  <text x="398" y="675" class="t">очередь,</text>
+  <text x="398" y="694" class="t">сессии, бюджет</text>
+  <text x="398" y="713" class="t">запросов</text>
+  <rect x="560" y="624" width="160" height="118" rx="10" class="data"/>
+  <text x="578" y="652" class="h">Файлы</text>
+  <text x="578" y="675" class="t">S3 (MinIO)</text>
+  <text x="578" y="694" class="t">или диск;</text>
+  <text x="578" y="713" class="t">ночные копии</text>
+  <path d="M400 386 V402 H190 V622" class="line"/>
+  <path d="M460 568 V622" class="line"/>
+  <path d="M640 568 V622" class="line"/>
+
+  <!-- External -->
+  <text x="760" y="612" class="label">ВНЕШНИЕ СЕРВИСЫ</text>
+  <rect x="760" y="624" width="400" height="56" rx="10" class="ext"/>
+  <text x="778" y="648" class="h">API модели (OpenRouter)</text>
+  <text x="778" y="668" class="t">nemotron-3-super, запасная — ultra; эмбеддинги bge-m3</text>
+  <rect x="760" y="690" width="195" height="52" rx="10" class="ext"/>
+  <text x="776" y="713" class="h">pravo.gov.ru</text>
+  <text x="776" y="731" class="s">новые редакции</text>
+  <rect x="965" y="690" width="195" height="52" rx="10" class="ext"/>
+  <text x="981" y="713" class="h">SMTP</text>
+  <text x="981" y="731" class="s">приглашения, уведомления</text>
+  <path d="M960 568 V622" class="dash"/>
+</svg>
