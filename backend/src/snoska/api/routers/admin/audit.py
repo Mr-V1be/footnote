@@ -62,17 +62,26 @@ async def audit_log(
     )
 
 
+# A spreadsheet runs a cell starting with these as a formula; names and
+# titles come from users, so such a cell is written as text.
+FORMULA_STARTS = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _cell(value: str) -> str:
+    return f"'{value}" if value.startswith(FORMULA_STARTS) else value
+
+
 def _row(event: AuditEvent) -> str:
     buffer = io.StringIO()
     csv.writer(buffer).writerow(
         (
             event.occurred_at.isoformat(timespec="seconds"),
             event.actor.kind.value,
-            event.actor.label,
+            _cell(event.actor.label),
             event.action.value,
             event.target.type,
-            event.target.label,
-            "; ".join(f"{key}={value}" for key, value in event.details.items()),
+            _cell(event.target.label),
+            _cell("; ".join(f"{key}={value}" for key, value in event.details.items())),
         )
     )
     return buffer.getvalue()

@@ -17,13 +17,15 @@ BASE = "/api/v1/organizations/alpha"
 DEMO = anyio.Path(__file__).parents[2] / "demo" / "documents" / "polyarnaya-zvezda"
 
 
-async def upload(api: httpx.AsyncClient, tokens: TokenFactory, workspace: str) -> str:
+async def upload(
+    api: httpx.AsyncClient, tokens: TokenFactory, workspace: str, title: str | None = None
+) -> str:
     content = await (DEMO / "soglasie-pokupatelya.docx").read_bytes()
     created = await api.post(
         f"{BASE}/workspaces/{workspace}/documents",
         headers=auth(tokens, ALICE),
         files={"file": ("soglasie.docx", content, "application/octet-stream")},
-        data={"kind": "pd_consent"},
+        data={"kind": "pd_consent", **({"title": title} if title else {})},
     )
     assert created.status_code == 201, created.text
     return str(created.json()["documentId"])
@@ -119,7 +121,8 @@ async def test_only_an_owner_administers_and_an_owner_always_remains(
 async def test_the_audit_log_records_who_did_what_and_exports_it(
     api: httpx.AsyncClient, tokens: TokenFactory, container: Container
 ) -> None:
-    document_id = await upload(api, tokens, "main")
+    # A title a spreadsheet would run as a formula is exported as text.
+    document_id = await upload(api, tokens, "main", title="=HYPERLINK(1)")
     await run_jobs(container)
     await api.post(f"{BASE}/documents/{document_id}/versions/1/checks", headers=auth(tokens, ALICE))
     await api.post(
@@ -146,6 +149,7 @@ async def test_the_audit_log_records_who_did_what_and_exports_it(
     rows = list(csv.reader(io.StringIO(exported.text.lstrip("\ufeff"))))
     assert rows[0][0] == "occurred_at"
     assert len(rows) == 4
+    assert rows[-1][5] == "'=HYPERLINK(1)"
 
     assert (await api.get(f"{BASE}/audit", headers=auth(tokens, EVA))).status_code == 403
     other = await api.get("/api/v1/organizations/beta/audit", headers=auth(tokens, BOB))

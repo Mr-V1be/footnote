@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark watch demo-documents stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -13,7 +13,7 @@ help: ## Show available targets
 env: ## Create .env with random secrets (keeps existing values)
 	@python3 scripts/init-env.py
 
-up: ## Start PostgreSQL, Redis, Keycloak and Mailpit
+up: ## Start PostgreSQL, Redis, Keycloak, Mailpit and MinIO
 	$(COMPOSE) up -d --wait
 
 down: ## Stop the infrastructure containers (data is kept)
@@ -50,6 +50,9 @@ recheck: ## Check every document's latest version again (after the checks change
 
 benchmark: ## Measure the checks on the reference set (writes data/quality and docs/quality.md)
 	$(BACKEND) snoska checks benchmark --markdown ../docs/quality.md
+
+watch: ## Check now for a new edition of 152-FZ (weekly in the worker; mail goes to Mailpit)
+	$(BACKEND) snoska corpus watch
 
 demo-documents: ## Rebuild the demo documents and the reference set (needs LibreOffice)
 	backend/.venv/bin/python scripts/demo/build_documents.py
