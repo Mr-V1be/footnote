@@ -1211,9 +1211,10 @@ export type components = {
         };
         /**
          * ChangeKind
+         * @description What a journal line measures, so its values can be read with units.
          * @enum {string}
          */
-        ChangeKind: "format" | "text";
+        ChangeKind: "margins" | "font_size" | "line_spacing" | "first_line_indent" | "text" | "format";
         /**
          * ChangeOut
          * @description One line of a correction's journal: before and after.

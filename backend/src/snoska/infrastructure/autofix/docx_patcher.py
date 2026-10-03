@@ -124,7 +124,7 @@ class DocxPatcher:
             return None
         return AppliedChange(
             check_code=action.check_code,
-            kind=ChangeKind.FORMAT,
+            kind=ChangeKind.MARGINS,
             block_ordinal=None,
             before=";".join(dict.fromkeys(before)),
             after=";".join(dict.fromkeys(after)),
@@ -160,7 +160,7 @@ class DocxPatcher:
             return None
         return AppliedChange(
             check_code=action.check_code,
-            kind=ChangeKind.FORMAT,
+            kind=ChangeKind.FONT_SIZE,
             block_ordinal=None,
             before=", ".join(_number(size) for size in sorted(sizes)),
             after=", ".join(_number(size) for size in sorted(targets)),
@@ -187,7 +187,7 @@ class DocxPatcher:
             return None
         return AppliedChange(
             check_code=action.check_code,
-            kind=ChangeKind.FORMAT,
+            kind=ChangeKind.LINE_SPACING,
             block_ordinal=None,
             before=", ".join(_number(value) for value in sorted(before)),
             after=", ".join(_number(value) for value in sorted(after)),
@@ -209,7 +209,7 @@ class DocxPatcher:
             return None
         return AppliedChange(
             check_code=action.check_code,
-            kind=ChangeKind.FORMAT,
+            kind=ChangeKind.FIRST_LINE_INDENT,
             block_ordinal=None,
             before=", ".join(_number(value) for value in sorted(before)),
             after=_number(round(action.indent_mm / 10, 2)),

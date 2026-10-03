@@ -86,8 +86,15 @@ class FixPlan:
 
 
 class ChangeKind(StrEnum):
+    """What a journal line measures, so its values can be read with units."""
+
+    MARGINS = "margins"  # "left=20;right=10", millimetres per side
+    FONT_SIZE = "font_size"  # points
+    LINE_SPACING = "line_spacing"  # multiples of a line
+    FIRST_LINE_INDENT = "first_line_indent"  # centimetres
+    TEXT = "text"  # the words before and after
+    # A formatting change journaled before measures were told apart.
     FORMAT = "format"
-    TEXT = "text"
 
 
 @dataclass(frozen=True, slots=True)

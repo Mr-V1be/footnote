@@ -17,5 +17,8 @@ version_changes = Table(
     Column("after", Text, nullable=False),
     Column("places", Integer, nullable=False),
     PrimaryKeyConstraint("version_id", "ordinal"),
-    CheckConstraint("kind IN ('format', 'text')", name="kind_known"),
+    CheckConstraint(
+        "kind IN ('margins', 'font_size', 'line_spacing', 'first_line_indent', 'text', 'format')",
+        name="kind_known",
+    ),
 )

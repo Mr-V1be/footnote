@@ -49,6 +49,10 @@ async def test_formatting_is_corrected_into_a_new_version(
     assert journal["formatting.date_format"]["after"] == "01.02.2026"
     assert "left=15" in journal["formatting.page_margins"]["before"]
     assert journal["formatting.font_size"]["places"] > 1
+    # Each line says what it measures, so its values are read with units.
+    assert journal["formatting.page_margins"]["kind"] == "margins"
+    assert journal["formatting.font_size"]["kind"] == "font_size"
+    assert journal["formatting.date_format"]["kind"] == "text"
 
     details = (await api.get(f"{BASE}/documents/{document}", headers=auth(tokens, ALICE))).json()
     second = next(item for item in details["versions"] if item["number"] == 2)

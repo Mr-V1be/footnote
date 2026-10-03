@@ -8760,10 +8760,15 @@
       "ChangeKind": {
         "type": "string",
         "enum": [
-          "format",
-          "text"
+          "margins",
+          "font_size",
+          "line_spacing",
+          "first_line_indent",
+          "text",
+          "format"
         ],
-        "title": "ChangeKind"
+        "title": "ChangeKind",
+        "description": "What a journal line measures, so its values can be read with units."
       },
       "ChangeOut": {
         "properties": {
