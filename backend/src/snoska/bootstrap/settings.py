@@ -9,7 +9,6 @@ from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from snoska.domain.corpus.embedding import EmbeddingSpace
-from snoska.infrastructure.ai.rehearsal import REHEARSAL_SPACE
 from snoska.infrastructure.observability.tracing import TracingExporter
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -89,9 +88,6 @@ class AiProvider(StrEnum):
     NONE = "none"
     # Any server implementing the OpenAI chat completions and embeddings API.
     OPENAI_COMPATIBLE = "openai_compatible"
-    # Rules instead of a model, for preparing demo materials before an API is
-    # connected; answers say they are drafts. Never for real checks.
-    REHEARSAL = "rehearsal"
 
 
 _SPACE_UNSAFE = re.compile(r"[^a-z0-9]+")
@@ -118,8 +114,6 @@ class AiSettings(BaseSettings):
     def embedding_space(self) -> EmbeddingSpace:
         """The vector space of the configured model: vectors of different
         models or sizes are never compared, so each has its own space."""
-        if self.ai_provider is AiProvider.REHEARSAL:
-            return REHEARSAL_SPACE
         if not self.embedding_model or self.embedding_dimensions <= 0:
             return EmbeddingSpace(code=UNCONFIGURED_SPACE, dimensions=0)
         slug = _SPACE_UNSAFE.sub("-", self.embedding_model.lower()).strip("-")
