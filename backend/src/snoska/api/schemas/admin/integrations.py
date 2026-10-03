@@ -111,3 +111,8 @@ class DeliveryOut(ApiModel):
             last_duration_ms=delivery.last_duration_ms,
             payload=dict(delivery.payload),
         )
+
+
+class DeliveryPageOut(ApiModel):
+    items: list[DeliveryOut]
+    next_cursor: str | None

@@ -4,12 +4,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
+from snoska.api.cursors import decode_time_cursor, encode_time_cursor
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.admin.integrations import (
     ApiKeyIn,
     ApiKeyOut,
     DeliveryOut,
+    DeliveryPageOut,
     IssuedKeyOut,
     WebhookIn,
     WebhookOut,
@@ -103,16 +105,24 @@ async def delete_webhook(
 
 @router.get(
     "/webhooks/{endpoint_id}/deliveries",
-    response_model=list[DeliveryOut],
+    response_model=DeliveryPageOut,
     response_model_by_alias=True,
 )
 async def webhook_deliveries(
-    container: ContainerDep, access: OrganizationAccessDep, endpoint_id: UUID
-) -> list[DeliveryOut]:
-    """The latest deliveries to the endpoint, newest first."""
-    return [
-        DeliveryOut.of(item) for item in await container.webhooks.deliveries(access, endpoint_id)
-    ]
+    container: ContainerDep,
+    access: OrganizationAccessDep,
+    endpoint_id: UUID,
+    cursor: str | None = None,
+    limit: int | None = None,
+) -> DeliveryPageOut:
+    """Deliveries to the endpoint, newest first, a page at a time."""
+    page = await container.webhooks.deliveries(
+        access, endpoint_id, decode_time_cursor(cursor) if cursor else None, limit
+    )
+    return DeliveryPageOut(
+        items=[DeliveryOut.of(item) for item in page.items],
+        next_cursor=encode_time_cursor(page.next_cursor) if page.next_cursor else None,
+    )
 
 
 @router.post(

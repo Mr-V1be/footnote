@@ -1,0 +1,5 @@
+/* A plan chooser in a row: one width in every row. */
+.plan {
+  inline-size: 9.5rem;
+  max-inline-size: 100%;
+}

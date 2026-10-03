@@ -4,13 +4,14 @@ from collections.abc import AsyncIterator, Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, RowMapping, Select, and_, insert, or_, select, tuple_
+from sqlalchemy import ColumnElement, RowMapping, Select, and_, insert, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from snoska.domain.audit.event import AuditAction, AuditEvent, AuditTarget
 from snoska.domain.tenancy.access import Actor, ActorKind
 from snoska.infrastructure.persistence.tables.audit import audit_events
-from snoska.ports.audit.log import AuditCursor, AuditFilter
+from snoska.ports.audit.log import AuditFilter
+from snoska.ports.pagination import TimeCursor
 
 EXPORT_BATCH = 500
 
@@ -70,18 +71,12 @@ class SqlAuditLog:
         )
 
     async def page(
-        self, where: AuditFilter, after: AuditCursor | None, limit: int
+        self, where: AuditFilter, after: TimeCursor | None, limit: int
     ) -> Sequence[AuditEvent]:
         statement = _filtered(select(audit_events), where)
         if after is not None:
             statement = statement.where(
-                or_(
-                    audit_events.c.occurred_at < after.occurred_at,
-                    and_(
-                        audit_events.c.occurred_at == after.occurred_at,
-                        audit_events.c.id < after.id,
-                    ),
-                )
+                tuple_(audit_events.c.occurred_at, audit_events.c.id) < tuple_(after.at, after.id)
             )
         result = await self._connection.execute(_newest_first(statement).limit(limit))
         return [_event(row) for row in result.mappings()]

@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import RowMapping, delete, insert, select, update
+from sqlalchemy import RowMapping, delete, insert, select, tuple_, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from snoska.domain.integrations.api_keys import ApiKey, ApiScope
@@ -20,6 +20,7 @@ from snoska.infrastructure.persistence.tables.integrations import (
     webhook_endpoints,
 )
 from snoska.ports.integrations.transport import SecretBox
+from snoska.ports.pagination import TimeCursor
 
 
 def _key(row: RowMapping) -> ApiKey:
@@ -243,12 +244,15 @@ class SqlWebhookDeliveryRepository:
         )
 
     async def list_for_endpoint(
-        self, endpoint_id: UUID, *, limit: int
+        self, endpoint_id: UUID, *, after: TimeCursor | None, limit: int
     ) -> Sequence[WebhookDelivery]:
+        table = webhook_deliveries
+        statement = select(table).where(table.c.endpoint_id == endpoint_id)
+        if after is not None:
+            statement = statement.where(
+                tuple_(table.c.created_at, table.c.id) < (after.at, after.id)
+            )
         result = await self._connection.execute(
-            select(webhook_deliveries)
-            .where(webhook_deliveries.c.endpoint_id == endpoint_id)
-            .order_by(webhook_deliveries.c.created_at.desc())
-            .limit(limit)
+            statement.order_by(table.c.created_at.desc(), table.c.id.desc()).limit(limit)
         )
         return [_delivery(row) for row in result.mappings()]

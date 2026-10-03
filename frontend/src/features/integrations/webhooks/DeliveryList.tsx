@@ -90,11 +90,10 @@ function DeliveryRow({
   const Glyph = status.icon;
   const retry = useMutation({
     mutationFn: () => retryDelivery(api, organization, endpointId, delivery.id),
-    onSuccess: (saved) => {
-      queryClient.setQueryData<Delivery[]>(
-        integrationKeys.deliveries(organization, endpointId),
-        (current) => current?.map((item) => (item.id === saved.id ? saved : item)),
-      );
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: integrationKeys.deliveries(organization, endpointId),
+      });
       toast({ tone: "info", title: t("retryQueued") });
     },
     onError: (error) =>

@@ -31,8 +31,22 @@ async def test_a_check_books_its_pages_and_the_limit_stops_the_next(
     assert billing["plan"]["code"] == "start"
     assert usage_of(billing, "checks") == 1
     assert usage_of(billing, "pages") >= 1
-    entry = billing["ledger"][0]
-    assert entry["reason"] == "check_run"
+    ledger = (await api.get(f"{BASE}/billing/ledger", headers=auth(tokens, LEO))).json()
+    assert {entry["reason"] for entry in ledger["items"]} == {"check_run"}
+    assert {entry["metric"] for entry in ledger["items"]} == {"pages", "checks"}
+    # A page at a time: the cursor leads to the rest of the month.
+    first_page = (
+        await api.get(f"{BASE}/billing/ledger", headers=auth(tokens, LEO), params={"limit": 1})
+    ).json()
+    assert len(first_page["items"]) == 1
+    rest = (
+        await api.get(
+            f"{BASE}/billing/ledger",
+            headers=auth(tokens, LEO),
+            params={"limit": 1, "cursor": first_page["nextCursor"]},
+        )
+    ).json()
+    assert rest["items"][0]["id"] != first_page["items"][0]["id"]
 
     # Down to a plan that allows one check a month: the next one is refused.
     await container.billing.assign(ORG_A.id, "tiny", SYSTEM_ACTOR)

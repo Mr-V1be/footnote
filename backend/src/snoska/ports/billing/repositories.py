@@ -8,6 +8,7 @@ from uuid import UUID
 from snoska.domain.billing.plans import UsageMetric
 from snoska.domain.billing.subscription import Invoice, Subscription
 from snoska.domain.billing.usage import LedgerEntry
+from snoska.ports.pagination import TimeCursor
 
 
 class SubscriptionRepository(Protocol):
@@ -31,7 +32,11 @@ class LedgerRepository(Protocol):
 
     async def totals(self, period_start: date) -> Mapping[UsageMetric, int]: ...
 
-    async def recent(self, *, limit: int) -> Sequence[LedgerEntry]: ...
+    async def page(
+        self, period_start: date, *, after: TimeCursor | None, limit: int
+    ) -> Sequence[LedgerEntry]:
+        """Entries of a billing month, newest first, strictly after the cursor."""
+        ...
 
 
 class InvoiceRepository(Protocol):

@@ -7,6 +7,7 @@ from uuid import UUID
 
 from snoska.application.audit.trail import AuditTrail
 from snoska.application.billing.meter import UsageMeter
+from snoska.application.shared.pagination import Page, clamp_page_size, next_page
 from snoska.domain.audit.event import AuditAction, AuditTarget
 from snoska.domain.billing.plans import Plan, PlanCatalog, UsageMetric
 from snoska.domain.billing.subscription import Invoice, InvoiceStatus, Subscription
@@ -21,9 +22,9 @@ from snoska.ports.billing.payments import (
     PaymentStatus,
 )
 from snoska.ports.clock import Clock
+from snoska.ports.pagination import TimeCursor
 from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
 
-LEDGER_PAGE = 30
 INVOICE_PAGE = 24
 PAYMENT_ACTOR = Actor(kind=ActorKind.SYSTEM, id=None, label="Платёжный сервис")
 
@@ -39,7 +40,6 @@ class BillingOverview:
     pending: Plan | None
     used: Mapping[UsageMetric, int]
     members: int | None
-    ledger: Sequence[LedgerEntry]
     invoices: Sequence[Invoice]
     plans: Sequence[Plan]
     currency: str
@@ -96,7 +96,6 @@ class BillingService:
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             subscription = await self._meter.subscription(uow, access.organization_id, lock=True)
             used = await uow.ledger.totals(subscription.period_start)
-            ledger = await uow.ledger.recent(limit=LEDGER_PAGE)
             invoices = await uow.invoices.list(limit=INVOICE_PAGE)
             await uow.commit()
         pending = subscription.pending_plan_code
@@ -106,11 +105,21 @@ class BillingService:
             pending=self._plans.get(pending) if pending else None,
             used=used,
             members=members,
-            ledger=ledger,
             invoices=invoices,
             plans=self._plans.all(),
             currency=self._plans.currency,
         )
+
+    async def ledger(
+        self, access: OrganizationAccess, after: TimeCursor | None = None, limit: int | None = None
+    ) -> Page[LedgerEntry, TimeCursor]:
+        """This month's charges, newest first, a page at a time."""
+        access.require(Permission.BILLING_READ)
+        size = clamp_page_size(limit)
+        async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            subscription = await self._meter.subscription(uow, access.organization_id, lock=False)
+            rows = await uow.ledger.page(subscription.period_start, after=after, limit=size + 1)
+        return next_page(rows, size, lambda entry: TimeCursor(entry.created_at, entry.id))
 
     async def change_plan(self, access: OrganizationAccess, plan_code: str) -> PlanChangeOutcome:
         """A cheaper plan starts next month; a pricier one once its invoice is paid."""

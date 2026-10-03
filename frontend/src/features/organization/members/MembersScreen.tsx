@@ -22,6 +22,7 @@ import { PageHeader } from "@/shared/ui/page-header/PageHeader";
 import { Select } from "@/shared/ui/select/Select";
 import { useToast } from "@/shared/ui/toast/Toast";
 
+import styles from "../organization.module.css";
 import { useOrganizationAlias, useRoleOptions } from "../hooks";
 import { adminKeys, changeMemberRole, fetchMembers, removeMember } from "../queries";
 import { InviteDialog } from "./InviteDialog";
@@ -137,13 +138,16 @@ function MemberRow({
         </>
       }
       aside={
-        <Select
-          size="sm"
-          label={t("roleOf", { name: member.displayName })}
-          value={member.role ?? ""}
-          onValueChange={(role) => change.mutate(role)}
-          options={roleOptions}
-        />
+        <div className={styles.role}>
+          <Select
+            block
+            size="sm"
+            label={t("roleOf", { name: member.displayName })}
+            value={member.role ?? ""}
+            onValueChange={(role) => change.mutate(role)}
+            options={roleOptions}
+          />
+        </div>
       }
       actions={
         isMe ? undefined : (

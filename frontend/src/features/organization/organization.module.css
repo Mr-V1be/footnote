@@ -1,0 +1,5 @@
+/* A role chooser in a row: one width in every row, so the list reads as a column. */
+.role {
+  inline-size: 11rem;
+  max-inline-size: 100%;
+}

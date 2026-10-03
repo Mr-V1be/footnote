@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import RowMapping, func, insert, select, update
+from sqlalchemy import RowMapping, func, insert, select, tuple_, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -19,6 +19,7 @@ from snoska.infrastructure.persistence.tables.billing import (
     subscriptions,
     usage_ledger,
 )
+from snoska.ports.pagination import TimeCursor
 
 INVOICE_PREFIX = "СН"
 
@@ -114,11 +115,16 @@ class SqlLedgerRepository:
         )
         return {UsageMetric(metric): int(total) for metric, total in result}
 
-    async def recent(self, *, limit: int) -> Sequence[LedgerEntry]:
+    async def page(
+        self, period_start: date, *, after: TimeCursor | None, limit: int
+    ) -> Sequence[LedgerEntry]:
+        table = usage_ledger
+        statement = select(table).where(table.c.period_start == period_start)
+        if after is not None:
+            position = tuple_(table.c.created_at, table.c.id)
+            statement = statement.where(position < tuple_(after.at, after.id))
         result = await self._connection.execute(
-            select(usage_ledger)
-            .order_by(usage_ledger.c.created_at.desc(), usage_ledger.c.id)
-            .limit(limit)
+            statement.order_by(table.c.created_at.desc(), table.c.id.desc()).limit(limit)
         )
         return [_entry(row) for row in result.mappings()]
 

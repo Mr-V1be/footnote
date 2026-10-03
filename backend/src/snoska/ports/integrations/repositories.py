@@ -6,6 +6,7 @@ from uuid import UUID
 
 from snoska.domain.integrations.api_keys import ApiKey
 from snoska.domain.integrations.webhooks import WebhookDelivery, WebhookEndpoint
+from snoska.ports.pagination import TimeCursor
 
 
 class ApiKeyRepository(Protocol):
@@ -48,5 +49,7 @@ class WebhookDeliveryRepository(Protocol):
     async def save(self, delivery: WebhookDelivery) -> None: ...
 
     async def list_for_endpoint(
-        self, endpoint_id: UUID, *, limit: int
-    ) -> Sequence[WebhookDelivery]: ...
+        self, endpoint_id: UUID, *, after: TimeCursor | None, limit: int
+    ) -> Sequence[WebhookDelivery]:
+        """Newest first, strictly after the cursor."""
+        ...

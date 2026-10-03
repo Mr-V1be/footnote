@@ -6,6 +6,7 @@ from uuid import UUID
 
 from snoska.application.audit.trail import AuditTrail
 from snoska.application.integrations.events import OrganizationEvents, delivery_job
+from snoska.application.shared.pagination import Page, clamp_page_size, next_page
 from snoska.domain.audit.event import AuditAction, AuditTarget
 from snoska.domain.integrations.webhooks import (
     WebhookDelivery,
@@ -20,9 +21,8 @@ from snoska.domain.shared.ids import new_id
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.clock import Clock
+from snoska.ports.pagination import TimeCursor
 from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
-
-DELIVERY_LOG_LIMIT = 50
 
 
 class WebhookNotFoundError(NotFoundError):
@@ -135,14 +135,21 @@ class WebhookEndpoints:
             await uow.commit()
 
     async def deliveries(
-        self, access: OrganizationAccess, endpoint_id: UUID
-    ) -> Sequence[WebhookDelivery]:
+        self,
+        access: OrganizationAccess,
+        endpoint_id: UUID,
+        after: TimeCursor | None = None,
+        limit: int | None = None,
+    ) -> Page[WebhookDelivery, TimeCursor]:
+        """The delivery log of an endpoint, newest first, a page at a time."""
         access.require(Permission.INTEGRATIONS_MANAGE)
+        size = clamp_page_size(limit)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             await self._existing(uow, endpoint_id)
-            return await uow.webhook_deliveries.list_for_endpoint(
-                endpoint_id, limit=DELIVERY_LOG_LIMIT
+            rows = await uow.webhook_deliveries.list_for_endpoint(
+                endpoint_id, after=after, limit=size + 1
             )
+        return next_page(rows, size, lambda delivery: TimeCursor(delivery.created_at, delivery.id))
 
     async def ping(self, access: OrganizationAccess, endpoint_id: UUID) -> WebhookDelivery:
         """Send a test event to one endpoint."""

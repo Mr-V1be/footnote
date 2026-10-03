@@ -54,6 +54,11 @@ class LedgerEntryOut(ApiModel):
         )
 
 
+class LedgerPageOut(ApiModel):
+    items: list[LedgerEntryOut]
+    next_cursor: str | None
+
+
 class InvoiceOut(ApiModel):
     id: UUID
     number: str
@@ -88,7 +93,6 @@ class BillingOut(ApiModel):
     period_end: date
     currency: str
     usage: list[UsageOut]
-    ledger: list[LedgerEntryOut]
     invoices: list[InvoiceOut]
     plans: list[PlanOut]
 
@@ -113,7 +117,6 @@ class BillingOut(ApiModel):
             period_end=overview.subscription.period_end,
             currency=overview.currency,
             usage=usage,
-            ledger=[LedgerEntryOut.of(entry) for entry in overview.ledger],
             invoices=[InvoiceOut.of(invoice) for invoice in overview.invoices],
             plans=[PlanOut.of(item) for item in overview.plans],
         )

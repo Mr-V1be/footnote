@@ -34,6 +34,7 @@ import { Skeleton } from "@/shared/ui/skeleton/Skeleton";
 import { StatePanel } from "@/shared/ui/state-panel/StatePanel";
 import { useToast } from "@/shared/ui/toast/Toast";
 
+import styles from "../organization.module.css";
 import { useOrganizationAlias, useRoleOptions } from "../hooks";
 import {
   adminKeys,
@@ -274,13 +275,16 @@ function WorkspaceMemberRow({
         </>
       }
       aside={
-        <Select
-          size="sm"
-          label={t("roleOf", { name })}
-          value={assignment.role}
-          onValueChange={(role) => change.mutate(role)}
-          options={roleOptions}
-        />
+        <div className={styles.role}>
+          <Select
+            block
+            size="sm"
+            label={t("roleOf", { name })}
+            value={assignment.role}
+            onValueChange={(role) => change.mutate(role)}
+            options={roleOptions}
+          />
+        </div>
       }
       actions={
         <Menu>

@@ -9,7 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 
-from snoska.api.cursors import decode_audit_cursor, encode_audit_cursor
+from snoska.api.cursors import decode_time_cursor, encode_time_cursor
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.admin.audit import AuditEventOut, AuditPageOut
@@ -53,12 +53,12 @@ async def audit_log(
     page = await container.audit.page(
         access,
         _filter(category, action, actor_kind, since, until),
-        decode_audit_cursor(cursor) if cursor else None,
+        decode_time_cursor(cursor) if cursor else None,
         limit,
     )
     return AuditPageOut(
         items=[AuditEventOut.of(event) for event in page.items],
-        next_cursor=encode_audit_cursor(page.next_cursor) if page.next_cursor else None,
+        next_cursor=encode_time_cursor(page.next_cursor) if page.next_cursor else None,
     )
 
 

@@ -19,6 +19,7 @@ import { PageHeader } from "@/shared/ui/page-header/PageHeader";
 import { Select } from "@/shared/ui/select/Select";
 import { useToast } from "@/shared/ui/toast/Toast";
 
+import styles from "./platform.module.css";
 import { assignPlan, fetchOrganizationRows, fetchPlatformPlans, platformKeys } from "./queries";
 
 /** The metrics an organization's row shows against its plan. */
@@ -120,13 +121,16 @@ function OrganizationItem({
       }
       aside={
         canAssign ? (
-          <Select
-            size="sm"
-            label={t("planOf", { name: row.name })}
-            value={row.planCode}
-            onValueChange={(code) => code !== row.planCode && onAssign(code)}
-            options={plans.map((item) => ({ value: item.code, label: planLabel(item.code) }))}
-          />
+          <div className={styles.plan}>
+            <Select
+              block
+              size="sm"
+              label={t("planOf", { name: row.name })}
+              value={row.planCode}
+              onValueChange={(code) => code !== row.planCode && onAssign(code)}
+              options={plans.map((item) => ({ value: item.code, label: planLabel(item.code) }))}
+            />
+          </div>
         ) : (
           <span>{planLabel(row.planCode)}</span>
         )

@@ -89,7 +89,7 @@ export function BillingScreen() {
         <InvoiceList billing={data} canPay={canManage} />
       </Section>
       <Section title={t("ledger")}>
-        <LedgerList billing={data} />
+        <LedgerList organization={organization} />
       </Section>
     </Page>
   );

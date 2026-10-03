@@ -8,6 +8,7 @@ from uuid import UUID
 
 from snoska.domain.audit.event import AuditAction, AuditEvent
 from snoska.domain.tenancy.access import ActorKind
+from snoska.ports.pagination import TimeCursor
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,19 +20,13 @@ class AuditFilter:
     until: datetime | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class AuditCursor:
-    occurred_at: datetime
-    id: UUID
-
-
 class AuditLog(Protocol):
     """Tenant-scoped, append-only."""
 
     async def record(self, event: AuditEvent) -> None: ...
 
     async def page(
-        self, where: AuditFilter, after: AuditCursor | None, limit: int
+        self, where: AuditFilter, after: TimeCursor | None, limit: int
     ) -> Sequence[AuditEvent]:
         """Newest first."""
         ...

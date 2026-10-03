@@ -8,7 +8,7 @@ import {
   IconTrash,
   IconTruckDelivery,
 } from "@tabler/icons-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import { LoadFailure } from "@/features/access/LoadFailure";
 import { useOrganizationAlias } from "@/features/organization/hooks";
 import { useApi } from "@/shared/api/ApiProvider";
 import { ApiError } from "@/shared/api/errors";
-import type { Delivery, Webhook } from "@/shared/api/types";
+import type { Webhook } from "@/shared/api/types";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 import { useErrorText } from "@/shared/i18n/useErrorText";
 import { BackLink } from "@/shared/ui/back-link/BackLink";
@@ -104,19 +104,24 @@ function WebhookDetails({
   const [secret, setSecret] = useState<string | null>(null);
   const [rotating, setRotating] = useState(false);
   const deliveriesKey = integrationKeys.deliveries(organization, webhook.id);
-  const deliveries = useQuery({
+  const deliveries = useInfiniteQuery({
     queryKey: deliveriesKey,
-    queryFn: () => fetchDeliveries(api, organization, webhook.id),
+    queryFn: ({ pageParam }) => fetchDeliveries(api, organization, webhook.id, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (page) => page.nextCursor,
     refetchInterval: (query) =>
-      query.state.data?.some((delivery) => isInFlight(delivery.status)) ? DELIVERY_POLL_MS : false,
+      query.state.data?.pages.some((page) =>
+        page.items.some((delivery) => isInFlight(delivery.status)),
+      )
+        ? DELIVERY_POLL_MS
+        : false,
   });
+  const items = deliveries.data?.pages.flatMap((page) => page.items) ?? [];
 
   const ping = useMutation({
     mutationFn: () => pingWebhook(api, organization, webhook.id),
-    onSuccess: (delivery) => {
-      queryClient.setQueryData<Delivery[]>(deliveriesKey, (current) =>
-        current ? [delivery, ...current] : [delivery],
-      );
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: deliveriesKey });
       toast({ tone: "info", title: t("pingQueued") });
     },
     onError: (error) =>
@@ -143,7 +148,7 @@ function WebhookDetails({
     if (deliveries.isError) {
       return <LoadFailure error={deliveries.error} onRetry={() => void deliveries.refetch()} />;
     }
-    if (deliveries.data.length === 0) {
+    if (items.length === 0) {
       return (
         <StatePanel
           icon={<IconTruckDelivery stroke={1.75} />}
@@ -153,11 +158,18 @@ function WebhookDetails({
       );
     }
     return (
-      <DeliveryList
-        organization={organization}
-        endpointId={webhook.id}
-        deliveries={deliveries.data}
-      />
+      <>
+        <DeliveryList organization={organization} endpointId={webhook.id} deliveries={items} />
+        {deliveries.hasNextPage ? (
+          <Button
+            variant="secondary"
+            loading={deliveries.isFetchingNextPage}
+            onClick={() => void deliveries.fetchNextPage()}
+          >
+            {t("loadMore")}
+          </Button>
+        ) : null}
+      </>
     );
   }
 

@@ -4,6 +4,7 @@ import type {
   ApiKey,
   ApiScope,
   Delivery,
+  DeliveryPage,
   DeliveryStatus,
   IssuedKey,
   Webhook,
@@ -119,16 +120,21 @@ export async function rotateWebhookSecret(
   );
 }
 
+export const DELIVERY_PAGE_SIZE = 20;
+
 export async function fetchDeliveries(
   api: ApiClient,
   organization: string,
   endpointId: string,
-): Promise<Delivery[]> {
+  cursor: string | null,
+): Promise<DeliveryPage> {
   return unwrap(
-    await api.GET(
-      "/api/v1/organizations/{organization}/webhooks/{endpoint_id}/deliveries",
-      endpoint(organization, endpointId),
-    ),
+    await api.GET("/api/v1/organizations/{organization}/webhooks/{endpoint_id}/deliveries", {
+      params: {
+        path: { organization, endpoint_id: endpointId },
+        query: { limit: DELIVERY_PAGE_SIZE, ...(cursor ? { cursor } : {}) },
+      },
+    }),
   );
 }
 

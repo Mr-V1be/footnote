@@ -331,7 +331,7 @@ export type paths = {
         };
         /**
          * Webhook Deliveries
-         * @description The latest deliveries to the endpoint, newest first.
+         * @description Deliveries to the endpoint, newest first, a page at a time.
          */
         get: operations["webhook_deliveries"];
         put?: never;
@@ -388,6 +388,26 @@ export type paths = {
          * @description Plan, this month's usage against its limits, the ledger and invoices.
          */
         get: operations["billing_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{organization}/billing/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Billing Ledger
+         * @description This month's charges, each with its reason, newest first.
+         */
+        get: operations["billing_ledger"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1151,8 +1171,6 @@ export type components = {
             currency: string;
             /** Usage */
             usage: components["schemas"]["UsageOut"][];
-            /** Ledger */
-            ledger: components["schemas"]["LedgerEntryOut"][];
             /** Invoices */
             invoices: components["schemas"]["InvoiceOut"][];
             /** Plans */
@@ -1348,6 +1366,13 @@ export type components = {
             payload: {
                 [key: string]: unknown;
             };
+        };
+        /** DeliveryPageOut */
+        DeliveryPageOut: {
+            /** Items */
+            items: components["schemas"]["DeliveryOut"][];
+            /** Nextcursor */
+            nextCursor: string | null;
         };
         /**
          * DeliveryStatus
@@ -1666,6 +1691,13 @@ export type components = {
              * Format: date-time
              */
             createdAt: string;
+        };
+        /** LedgerPageOut */
+        LedgerPageOut: {
+            /** Items */
+            items: components["schemas"]["LedgerEntryOut"][];
+            /** Nextcursor */
+            nextCursor: string | null;
         };
         /**
          * LedgerReason
@@ -4867,7 +4899,10 @@ export interface operations {
     };
     webhook_deliveries: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string | null;
+                limit?: number | null;
+            };
             header?: never;
             path: {
                 endpoint_id: string;
@@ -4883,7 +4918,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeliveryOut"][];
+                    "application/json": components["schemas"]["DeliveryPageOut"];
                 };
             };
             /** @description Unauthorized */
@@ -5169,6 +5204,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BillingOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    billing_ledger: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number | null;
+            };
+            header?: never;
+            path: {
+                organization: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerPageOut"];
                 };
             };
             /** @description Unauthorized */

@@ -4,10 +4,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, Request
 
+from snoska.api.cursors import decode_time_cursor, encode_time_cursor
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.billing.billing import (
     BillingOut,
+    LedgerEntryOut,
+    LedgerPageOut,
     PlanChangeIn,
     PlanChangeOut,
     TestDecisionIn,
@@ -29,6 +32,27 @@ async def billing_overview(container: ContainerDep, access: OrganizationAccessDe
     if access.can(Permission.MEMBERS_MANAGE):
         members = len(await container.members.list(access))
     return BillingOut.of(await container.billing.overview(access, members))
+
+
+@router.get(
+    "/organizations/{organization}/billing/ledger",
+    response_model=LedgerPageOut,
+    response_model_by_alias=True,
+)
+async def billing_ledger(
+    container: ContainerDep,
+    access: OrganizationAccessDep,
+    cursor: str | None = None,
+    limit: int | None = None,
+) -> LedgerPageOut:
+    """This month's charges, each with its reason, newest first."""
+    page = await container.billing.ledger(
+        access, decode_time_cursor(cursor) if cursor else None, limit
+    )
+    return LedgerPageOut(
+        items=[LedgerEntryOut.of(entry) for entry in page.items],
+        next_cursor=encode_time_cursor(page.next_cursor) if page.next_cursor else None,
+    )
 
 
 @router.post(

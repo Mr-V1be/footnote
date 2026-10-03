@@ -63,6 +63,7 @@ export type WebhookInput = Schemas["WebhookIn"];
 export type WebhookWithSecret = Schemas["WebhookWithSecretOut"];
 export type WebhookEvent = Schemas["WebhookEvent"];
 export type Delivery = Schemas["DeliveryOut"];
+export type DeliveryPage = Schemas["DeliveryPageOut"];
 export type DeliveryStatus = Schemas["DeliveryStatus"];
 
 // Plans, usage and payments.
@@ -72,6 +73,7 @@ export type Usage = Schemas["UsageOut"];
 export type UsageMetric = Schemas["UsageMetric"];
 export type Invoice = Schemas["InvoiceOut"];
 export type LedgerEntry = Schemas["LedgerEntryOut"];
+export type LedgerPage = Schemas["LedgerPageOut"];
 export type PlanChangeResult = Schemas["PlanChangeOut"];
 export type TestPayment = Schemas["TestPaymentOut"];
 

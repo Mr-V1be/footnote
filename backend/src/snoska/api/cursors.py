@@ -6,8 +6,8 @@ from datetime import datetime
 from uuid import UUID
 
 from snoska.domain.shared.errors import ValidationError
-from snoska.ports.audit.log import AuditCursor
 from snoska.ports.document_repositories import DocumentCursor
+from snoska.ports.pagination import TimeCursor
 
 
 class InvalidCursorError(ValidationError):
@@ -28,15 +28,15 @@ def decode_cursor(value: str) -> DocumentCursor:
         raise InvalidCursorError("cursor is malformed") from exc
 
 
-def encode_audit_cursor(cursor: AuditCursor) -> str:
-    raw = json.dumps({"t": cursor.occurred_at.isoformat(), "i": str(cursor.id)}).encode()
+def encode_time_cursor(cursor: TimeCursor) -> str:
+    raw = json.dumps({"t": cursor.at.isoformat(), "i": str(cursor.id)}).encode()
     return base64.urlsafe_b64encode(raw).decode().rstrip("=")
 
 
-def decode_audit_cursor(value: str) -> AuditCursor:
+def decode_time_cursor(value: str) -> TimeCursor:
     try:
         padded = value + "=" * (-len(value) % 4)
         data = json.loads(base64.urlsafe_b64decode(padded))
-        return AuditCursor(occurred_at=datetime.fromisoformat(data["t"]), id=UUID(data["i"]))
+        return TimeCursor(at=datetime.fromisoformat(data["t"]), id=UUID(data["i"]))
     except (ValueError, KeyError, TypeError) as exc:
         raise InvalidCursorError("cursor is malformed") from exc

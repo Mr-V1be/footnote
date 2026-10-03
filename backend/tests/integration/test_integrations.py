@@ -114,7 +114,14 @@ async def test_events_are_signed_delivered_and_retried_with_backoff(
     deliveries = await api.get(
         f"{BASE}/webhooks/{endpoint['id']}/deliveries", headers=auth(tokens, ALICE)
     )
-    assert {item["status"] for item in deliveries.json()} == {"delivered"}
+    assert {item["status"] for item in deliveries.json()["items"]} == {"delivered"}
+    older = await api.get(
+        f"{BASE}/webhooks/{endpoint['id']}/deliveries",
+        headers=auth(tokens, ALICE),
+        params={"limit": 1},
+    )
+    assert len(older.json()["items"]) == 1
+    assert older.json()["nextCursor"] is not None
 
     # The receiver fails: the delivery waits for its next try instead of looping.
     receiver.respond_with(500)
@@ -123,7 +130,7 @@ async def test_events_are_signed_delivered_and_retried_with_backoff(
     await run_jobs(container)
     latest = (
         await api.get(f"{BASE}/webhooks/{endpoint['id']}/deliveries", headers=auth(tokens, ALICE))
-    ).json()[0]
+    ).json()["items"][0]
     assert (latest["event"], latest["status"], latest["attempts"]) == ("ping", "retrying", 1)
     assert latest["lastStatusCode"] == 500
     assert latest["nextAttemptAt"] is not None
