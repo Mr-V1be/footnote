@@ -2,13 +2,20 @@
 // organization, integrations, plan and usage, automatic correction of
 // formatting, questions to the corpus and the platform console.
 //   MILESTONE=m3 node e2e/screenshots.mjs
-import { BASE } from "../runner.mjs";
+import { BASE, documentIdByTitle } from "../runner.mjs";
 
 const OWNER = "polyarnaya-zvezda";
 const ZARYA = "zarya";
 
 async function open(page, path) {
   await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
+}
+
+const POLICY = "Политика обработки персональных данных";
+
+async function openPolicy(page, query = "") {
+  const id = await documentIdByTitle(page, ZARYA, POLICY);
+  await open(page, `/o/${ZARYA}/documents/${id}${query}`);
 }
 
 export const SCREENS = [
@@ -150,10 +157,37 @@ export const SCREENS = [
       await page.getByText("Оплата подтверждена").waitFor({ timeout: 20_000 });
     },
   },
+  {
+    name: "14-autofix-preview",
+    user: "lawyer",
+    run: async (page) => {
+      await openPolicy(page, "?v=1");
+      await page.getByRole("button", { name: "Исправить оформление" }).click();
+      await page.getByRole("dialog").getByText("Исправим").waitFor();
+    },
+  },
+  {
+    // The correction is made once; later captures open the version it made.
+    name: "15-autofix-compare",
+    user: "lawyer",
+    run: async (page) => {
+      await openPolicy(page);
+      if (!(await page.getByText(/Оформление исправлено автоматически/).count())) {
+        await open(page, `${new URL(page.url()).pathname}?v=1`);
+        await page.getByRole("button", { name: "Исправить оформление" }).click();
+        await page.getByRole("button", { name: "Создать исправленную версию" }).click();
+        await page.waitForURL(/v=2/);
+      }
+      await page.getByText(/Проверено|замечани/).first().waitFor({ timeout: 60_000 });
+      await page.getByRole("button", { name: /Было и стало/ }).click();
+      await page.getByRole("dialog").waitFor();
+    },
+  },
 ];
 
 export const USERS = {
   owner: "kovaleva@polyarnaya-zvezda.example",
   zarya: "ershov@zarya.example",
+  lawyer: "polyakova@zarya.example",
   operator: "operator@snoska.example",
 };

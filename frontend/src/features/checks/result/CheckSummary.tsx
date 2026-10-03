@@ -6,6 +6,7 @@ import {
   IconPlugConnectedX,
   IconReceipt,
   IconRefresh,
+  IconWand,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
@@ -33,6 +34,7 @@ export function CheckSummary({
   rechecking,
   onRecheck,
   billingHref,
+  onAutofix,
 }: {
   report: CheckReport | null;
   counts: Record<Severity, number>;
@@ -43,6 +45,8 @@ export function CheckSummary({
   onRecheck: () => void;
   /** The plan and usage page, when the person may see it. */
   billingHref: string | null;
+  /** Correct the formatting automatically, where that is possible. */
+  onAutofix?: () => void;
 }) {
   const t = useTranslations("checks");
   const format = useFormatter();
@@ -158,7 +162,19 @@ export function CheckSummary({
           </Notice>
         ) : null}
       </div>
-      {recheck}
+      <div className={styles.summaryActions}>
+        {onAutofix ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<IconWand stroke={1.75} />}
+            onClick={onAutofix}
+          >
+            {t("summary.autofix")}
+          </Button>
+        ) : null}
+        {recheck}
+      </div>
     </section>
   );
 }

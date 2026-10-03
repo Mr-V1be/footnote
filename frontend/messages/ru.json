@@ -179,7 +179,8 @@
     "page": "Стр. {number}",
     "footnotes": "Сноски на реквизиты",
     "actions": "Действия с документом",
-    "uploadedBy": "{date}, {name}"
+    "uploadedBy": "{date}, {name}",
+    "versionOptionAutofix": "Версия {number} · исправлена · {date}"
   },
   "requisites": {
     "organization_name": "Наименование организации",
@@ -294,7 +295,8 @@
       "quotaExceeded": "Лимит проверок на этот месяц исчерпан",
       "quotaHint": "Документ не проверен. Перейдите на тариф больше или дождитесь нового месяца.",
       "toBilling": "Тариф",
-      "recheckFailed": "Проверку не запустить"
+      "recheckFailed": "Проверку не запустить",
+      "autofix": "Исправить оформление"
     },
     "results": {
       "passed": "Пройдено",
@@ -769,5 +771,36 @@
     "failed": "Решение не принято — ссылка устарела или платёж уже обработан.",
     "invalidTitle": "Ссылка на оплату недействительна",
     "invalidDescription": "Вернитесь в Сноску и откройте счёт заново."
+  },
+  "autofix": {
+    "title": "Исправить оформление",
+    "planned": "Исправим",
+    "skipped": "Оставим как есть",
+    "places": "{count, plural, one {# место} few {# места} many {# мест} other {# места}}",
+    "paragraphs": "{count, plural, one {# абзац} few {# абзаца} many {# абзацев} other {# абзаца}}",
+    "apply": "Создать исправленную версию",
+    "applied": "Версия {number} создана",
+    "appliedDescription": "Версия {source} не изменилась. Новую версию проверяем.",
+    "nothingTitle": "Исправлять автоматически нечего",
+    "notEditable": "Этот файл нельзя исправить автоматически: исправления делаются только в DOCX.",
+    "reasons": {
+      "needs_person": "Нужно решение человека",
+      "legal": "Юридическое замечание — правит юрист",
+      "not_editable": "Не меняется в этом файле",
+      "unsafe": "Автоматическая правка небезопасна"
+    },
+    "origin": "Оформление исправлено автоматически из версии {source}",
+    "compare": "Было и стало",
+    "compareCount": "Было и стало: {count}",
+    "compareTitle": "Было и стало",
+    "before": "Было",
+    "after": "Стало",
+    "showInText": "Показать в тексте",
+    "values": {
+      "margin": "{side, select, left {слева} right {справа} top {сверху} bottom {снизу} other {{side}}} {size} мм",
+      "points": "{size} пт",
+      "spacing": "интервал {size}",
+      "centimetres": "{size} см"
+    }
   }
 }

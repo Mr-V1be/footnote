@@ -254,13 +254,19 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
                 label={t("viewer.versionSelect")}
                 value={String(version)}
                 onValueChange={(value) => selectVersion(Number(value))}
-                options={document.versions.map((item) => ({
-                  value: String(item.number),
-                  label: t("viewer.versionOption", {
+                options={document.versions.map((item) => {
+                  const values = {
                     number: item.number,
                     date: format.dateTime(new Date(item.uploadedAt), { dateStyle: "medium" }),
-                  }),
-                }))}
+                  };
+                  return {
+                    value: String(item.number),
+                    label:
+                      item.origin === "autofix"
+                        ? t("viewer.versionOptionAutofix", values)
+                        : t("viewer.versionOption", values),
+                  };
+                })}
               />
             ) : (
               <span className={styles.versionTag}>

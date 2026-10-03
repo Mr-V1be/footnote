@@ -4,6 +4,9 @@ import { IconListCheck, IconListTree, IconQuote } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 
+import { AutofixDialog } from "@/features/autofix/AutofixDialog";
+import { useAutofixPreview } from "@/features/autofix/useAutofixPreview";
+import { VersionChanges } from "@/features/autofix/VersionChanges";
 import { CheckSummary } from "@/features/checks/result/CheckSummary";
 import type { CardHandlers } from "@/features/checks/result/FindingList";
 import { useCheckReport, useFindingReview } from "@/features/checks/useCheckReport";
@@ -16,7 +19,7 @@ import {
   type CardPlace,
 } from "@/features/documents/viewer/FootnoteContext";
 import { OutlineNav } from "@/features/documents/viewer/OutlineNav";
-import type { DocumentStructure } from "@/shared/api/types";
+import type { CheckDefinition, DocumentStructure } from "@/shared/api/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { Button } from "@/shared/ui/button/Button";
 import { BottomBar } from "@/shared/ui/bottom-bar/BottomBar";
@@ -200,6 +203,32 @@ function Workspace({
   );
 }
 
+/** For a version made by an automatic correction: its origin and the comparison. */
+function OriginNotice({
+  organization,
+  documentId,
+  structure,
+  checks,
+}: {
+  organization: string;
+  documentId: string;
+  structure: DocumentStructure;
+  checks: readonly CheckDefinition[];
+}) {
+  const { revealBlock } = useFootnotes();
+  if (structure.version.origin !== "autofix") return null;
+  return (
+    <VersionChanges
+      organization={organization}
+      documentId={documentId}
+      version={structure.version.number}
+      source={structure.version.derivedFrom}
+      checks={checks}
+      onLocate={revealBlock}
+    />
+  );
+}
+
 /**
  * The result of a check: the document in the middle, markers of findings in
  * its text and the findings themselves in the margin — beside the sheet on a
@@ -225,6 +254,17 @@ export function ReviewWorkspace({
   const errorText = useErrorText();
   const t = useTranslations("checks");
   const [panel, setPanel] = useState<Panel>(null);
+  const [autofixOpen, setAutofixOpen] = useState(false);
+  // The correction is offered only when it has something to correct.
+  const autofix = useAutofixPreview(
+    organization,
+    documentId,
+    version,
+    useCan("documents.upload") &&
+      structure.version.format === "docx" &&
+      data?.run.status === "completed",
+  );
+  const canAutofix = (autofix.data?.planned.length ?? 0) > 0;
   const settled = data ? !isRunPending(data.run.status) : false;
 
   // A marker in the text opens its finding: in the margin, or in the drawer.
@@ -244,6 +284,12 @@ export function ReviewWorkspace({
   return (
     <FootnoteProvider onRevealCard={revealCard}>
       <div className={styles.review}>
+        <OriginNotice
+          organization={organization}
+          documentId={documentId}
+          structure={structure}
+          checks={data?.checks ?? []}
+        />
         <CheckSummary
           report={data}
           counts={state.counts}
@@ -262,6 +308,7 @@ export function ReviewWorkspace({
             })
           }
           billingHref={canSeeBilling ? `/o/${organization}/settings/billing` : null}
+          onAutofix={canAutofix ? () => setAutofixOpen(true) : undefined}
         />
         <Workspace
           organization={organization}
@@ -274,6 +321,14 @@ export function ReviewWorkspace({
           setPanel={setPanel}
         />
       </div>
+      <AutofixDialog
+        organization={organization}
+        documentId={documentId}
+        version={version}
+        checks={data?.checks ?? []}
+        open={autofixOpen}
+        onOpenChange={setAutofixOpen}
+      />
     </FootnoteProvider>
   );
 }
