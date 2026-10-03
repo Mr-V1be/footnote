@@ -30,6 +30,7 @@ def api(reload: bool = False) -> None:
         host=settings.api.host,
         port=settings.api.port,
         reload=reload,
+        workers=None if reload else settings.api.workers,
         log_config=None,
         proxy_headers=True,
         server_header=False,

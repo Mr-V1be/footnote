@@ -193,6 +193,9 @@ class ApiSettings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 46301
     max_upload_mb: int = 25
+    # Server processes: one serves about a hundred requests a second
+    # (docs/performance.md); production runs one per CPU core it is given.
+    workers: int = Field(default=1, ge=1)
 
 
 class WorkerSettings(BaseSettings):
