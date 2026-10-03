@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Callable, Collection, Sequence
 from dataclasses import replace
@@ -37,6 +38,10 @@ _NOT_RUN = frozenset({CheckErrorCode.MODEL_NOT_CONFIGURED, CheckErrorCode.MODEL_
 DocumentDone = Callable[[DocumentTiming], None]
 
 
+class BenchmarkIncompleteError(Exception):
+    """The measurement could not finish; the last one is kept."""
+
+
 def _elapsed_ms(started: float) -> int:
     return round((time.perf_counter() - started) * MILLISECONDS)
 
@@ -71,6 +76,27 @@ class CheckBenchmark:
         self._clock = clock
         self._model_name = model_name
 
+    def model_requests(self, per_request: int, *, only: Collection[str] = ()) -> int:
+        """Requests a measurement makes to the model: one per batch of a
+        document's legal requirements (answers found invalid ask again)."""
+        total = 0
+        for reference in self._selected(only):
+            legal = sum(
+                1 for check in self._checks_for(reference) if check.method is CheckMethod.MODEL
+            )
+            total += math.ceil(legal / per_request)
+        return total
+
+    def _selected(self, only: Collection[str]) -> list[ReferenceDocument]:
+        references = [
+            reference
+            for reference in self._references.documents()
+            if not only or reference.file_name in only
+        ]
+        if not references:
+            raise ReferenceSetError("no reference document to measure")
+        return references
+
     async def run(
         self,
         on_document: DocumentDone | None = None,
@@ -80,18 +106,21 @@ class CheckBenchmark:
     ) -> QualityReport:
         """Measure on the whole set, or on the files named in ``only``; the
         result goes to ``store`` (a model's trial) or the main measurement."""
-        references = [
-            reference
-            for reference in self._references.documents()
-            if not only or reference.file_name in only
-        ]
-        if not references:
-            raise ReferenceSetError("no reference document to measure")
+        references = self._selected(only)
         timings: list[DocumentTiming] = []
         observations: list[Observation] = []
         for reference in references:
             checks = self._checks_for(reference)
             timing, outcomes = await self._measure(reference, checks)
+            if any(
+                outcome.error_code == CheckErrorCode.MODEL_DAILY_LIMIT
+                for outcome in outcomes.values()
+            ):
+                # A measurement with unanswered requirements would understate
+                # the model: nothing is kept, the last measurement stays.
+                raise BenchmarkIncompleteError(
+                    f"{reference.file_name}: the model's requests for today ran out"
+                )
             timings.append(timing)
             observations.extend(
                 Observation(

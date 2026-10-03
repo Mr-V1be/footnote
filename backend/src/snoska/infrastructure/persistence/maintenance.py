@@ -1,4 +1,5 @@
-"""Removing a tenant's rows as the schema owner (demo stand reset)."""
+"""Work across every tenant as the schema owner: removing a tenant's rows
+(demo stand reset) and counting the background work still in progress."""
 
 from __future__ import annotations
 
@@ -6,6 +7,10 @@ from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
+
+from snoska.domain.checks.run import RunStatus
+from snoska.domain.documents.version import ParseStatus
+from snoska.ports.operations.maintenance import Backlog
 
 # Tenant tables not reached by the cascade from `organizations` (append-only
 # ones among them: the application role may not delete from those).
@@ -49,3 +54,33 @@ class OwnerTenantPurge:
             await connection.execute(
                 text("DELETE FROM organizations WHERE id = :organization"), parameters
             )
+
+
+class OwnerBacklogProbe:
+    """Counts unfinished work in every tenant at once: the schema owner is
+    not bound by row-level security."""
+
+    def __init__(self, engine: AsyncEngine) -> None:
+        self._engine = engine
+
+    async def backlog(self) -> Backlog:
+        async with self._engine.connect() as connection:
+            row = (
+                await connection.execute(
+                    text(
+                        "SELECT"
+                        " (SELECT count(*) FROM outbox_messages WHERE dispatched_at IS NULL),"
+                        " (SELECT count(*) FROM document_versions"
+                        "   WHERE status IN (:queued_version, :parsing)),"
+                        " (SELECT count(*) FROM check_runs"
+                        "   WHERE status IN (:queued_run, :running))"
+                    ),
+                    {
+                        "queued_version": ParseStatus.QUEUED.value,
+                        "parsing": ParseStatus.PARSING.value,
+                        "queued_run": RunStatus.QUEUED.value,
+                        "running": RunStatus.RUNNING.value,
+                    },
+                )
+            ).one()
+        return Backlog(jobs=int(row[0]), versions=int(row[1]), checks=int(row[2]))

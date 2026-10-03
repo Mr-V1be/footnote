@@ -12,6 +12,7 @@ import httpx
 import pytest
 
 from snoska.api.app import create_app
+from snoska.application.checks.quality.benchmark import BenchmarkIncompleteError
 from snoska.bootstrap.container import Container, Overrides, build_container
 from snoska.bootstrap.settings import Settings
 from snoska.infrastructure.ai.budget import UnlimitedBudget
@@ -129,3 +130,23 @@ async def test_an_answer_is_kept_by_its_request(container: Container) -> None:
     again = await model.complete(request)
     assert first.text == again.text
     assert len(inner.requests) == 1
+
+
+async def test_a_benchmark_cut_short_by_the_allowance_keeps_nothing(
+    stand: tuple[Container, httpx.AsyncClient], model: AllowanceModel
+) -> None:
+    container, _ = stand
+    await container.corpus_sync.sync("152-fz", "snapshot")
+    await run_jobs(container)
+    benchmark = container.benchmark
+    policy = {"politika-zarya.docx"}
+    per_request = container.settings.checks.checks_per_request
+    assert benchmark.model_requests(per_request, only=policy) >= 1
+    assert benchmark.model_requests(1, only=policy) > benchmark.model_requests(
+        per_request, only=policy
+    )
+    model.spent = True
+    before = container.settings.checks.quality_report.read_bytes()
+    with pytest.raises(BenchmarkIncompleteError):
+        await benchmark.run(only=policy)
+    assert container.settings.checks.quality_report.read_bytes() == before

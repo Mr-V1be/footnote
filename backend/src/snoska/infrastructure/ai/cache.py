@@ -26,19 +26,27 @@ def request_key(chain: tuple[str, ...], request: CompletionRequest) -> str:
 
 class CachingLanguageModel:
     """A language model that answers a repeated request from its cache: a
-    document checked again, unchanged, costs no request at all."""
+    document checked again, unchanged, costs no request at all. With
+    ``read`` off every request goes to the model and only its answer is
+    kept (a measurement of the model's own time)."""
 
     def __init__(
-        self, inner: LanguageModel, cache: CompletionCache, chain: tuple[str, ...]
+        self,
+        inner: LanguageModel,
+        cache: CompletionCache,
+        chain: tuple[str, ...],
+        *,
+        read: bool = True,
     ) -> None:
         self._inner = inner
         self._cache = cache
         self._chain = chain
+        self._read = read
         self.model = inner.model
 
     async def complete(self, request: CompletionRequest) -> Completion:
         key = request_key(self._chain, request)
-        cached = await self._cache.get(key)
+        cached = await self._cache.get(key) if self._read else None
         if cached is not None:
             return cached
         completion = await self._inner.complete(request)

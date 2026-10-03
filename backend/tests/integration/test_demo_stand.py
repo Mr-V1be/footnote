@@ -18,7 +18,7 @@ from snoska.bootstrap.container import Container, Overrides, build_container
 from snoska.bootstrap.settings import DemoSettings, Settings
 from snoska.domain.tenancy.members import Member
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from snoska.infrastructure.persistence.maintenance import OwnerTenantPurge
+from snoska.infrastructure.persistence.maintenance import OwnerBacklogProbe, OwnerTenantPurge
 from tests.support.fakes import FakeDirectory
 from tests.support.scenario import (
     ALICE,
@@ -144,3 +144,17 @@ async def test_a_demo_sign_in_account_keeps_its_role(
         f"/api/v1/organizations/alpha/members/{LEO.user_id}", headers=auth(tokens, ALICE)
     )
     assert removal.status_code == 409
+
+
+async def test_the_backlog_counts_work_until_the_worker_is_done(
+    api: httpx.AsyncClient, tokens: TokenFactory, container: Container, settings: Settings
+) -> None:
+    engine = owner_engine(settings)
+    try:
+        probe = OwnerBacklogProbe(engine)
+        await upload(api, tokens, "alpha", ALICE)
+        assert not (await probe.backlog()).idle
+        await run_jobs(container)
+        assert (await probe.backlog()).idle
+    finally:
+        await engine.dispose()

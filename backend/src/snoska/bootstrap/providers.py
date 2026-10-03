@@ -102,16 +102,21 @@ def _openai_compatible(settings: AiSettings, services: AiServices) -> AiAdapters
                 extra_body=settings.extra_body(),
             ),
             services.cache,
+            read=settings.llm_cache_reads,
         ),
         budget=services.budget,
         close=close,
     )
 
 
-def _cached(model: OpenAiCompatibleLanguageModel, cache: CompletionCache | None) -> LanguageModel:
+def _cached(
+    model: OpenAiCompatibleLanguageModel, cache: CompletionCache | None, *, read: bool
+) -> LanguageModel:
     # Keyed by the first model only: an answer a fallback gave in its place
     # is as good as its own, and a trial of the model alone shares the cache.
-    return model if cache is None else CachingLanguageModel(model, cache, (model.model,))
+    if cache is None:
+        return model
+    return CachingLanguageModel(model, cache, (model.model,), read=read)
 
 
 AI_PROVIDERS: Mapping[AiProvider, Callable[[AiSettings, AiServices], AiAdapters]] = {

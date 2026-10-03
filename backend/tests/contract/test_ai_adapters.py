@@ -188,3 +188,17 @@ async def test_a_repeated_request_is_answered_from_the_cache() -> None:
         )
     assert first.text == again.text == other.text
     assert chat.call_count == 2, "the repeated request cost nothing"
+
+
+@respx.mock
+async def test_without_reading_every_request_reaches_the_model_and_is_kept() -> None:
+    chat = respx.post("http://llm.test/v1/chat/completions").mock(return_value=answered("first"))
+    cache = MemoryCache()
+    async with httpx.AsyncClient(base_url="http://llm.test/v1/") as client:
+        inner = OpenAiCompatibleLanguageModel(client, "first", POLICY)
+        measuring = CachingLanguageModel(inner, cache, inner.chain, read=False)
+        await measuring.complete(REQUEST)
+        await measuring.complete(REQUEST)
+        serving = CachingLanguageModel(inner, cache, inner.chain)
+        await serving.complete(REQUEST)
+    assert chat.call_count == 2, "the stand is answered from what the measurement kept"

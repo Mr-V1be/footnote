@@ -6,9 +6,11 @@ from typing import Annotated
 
 import typer
 
+from snoska.application.checks.quality.benchmark import BenchmarkIncompleteError
+from snoska.application.operations.backlog import wait_until_idle
 from snoska.bootstrap.container import load_check_catalog
 from snoska.cli.quality_markdown import render
-from snoska.cli.support import container_scope, settings_for_cli
+from snoska.cli.support import container_scope, owner_engine, settings_for_cli
 from snoska.domain.checks.quality import DocumentTiming, QualityReport
 from snoska.domain.documents.formats import SUPPORTED_FORMATS
 from snoska.infrastructure.checks.quality_store import (
@@ -16,6 +18,7 @@ from snoska.infrastructure.checks.quality_store import (
     JsonQualityReportStore,
 )
 from snoska.infrastructure.checks.reference import YamlReferenceSet
+from snoska.infrastructure.persistence.maintenance import OwnerBacklogProbe
 
 app = typer.Typer(help="Document checks.", no_args_is_help=True)
 
@@ -29,6 +32,30 @@ def recheck() -> None:
             scheduled = await container.recheck.all_organizations()
         for alias, count in scheduled.items():
             typer.echo(f"{alias}: {count} documents queued")
+
+    asyncio.run(run())
+
+
+@app.command()
+def wait(
+    timeout: Annotated[int, typer.Option(help="Give up after this many seconds.")] = 900,
+) -> None:
+    """Wait until uploaded documents are read and their checks are done."""
+
+    async def run() -> None:
+        engine = owner_engine(settings_for_cli())
+        try:
+            left = await wait_until_idle(OwnerBacklogProbe(engine), timeout_seconds=timeout)
+        finally:
+            await engine.dispose()
+        if not left.idle:
+            typer.echo(
+                f"still in progress: {left.jobs} jobs, {left.versions} versions, "
+                f"{left.checks} checks",
+                err=True,
+            )
+            raise typer.Exit(code=1)
+        typer.echo("no work in progress")
 
     asyncio.run(run())
 
@@ -65,18 +92,36 @@ def benchmark(
     the product runs on; the main measurement stays as it was.
     """
     settings = settings_for_cli()
+    # The model's own time is measured: no answer comes from the cache, and
+    # each fresh answer is kept there for the documents of the stand.
+    update: dict[str, object] = {"llm_cache_reads": False}
     if model:
         # A trial measures one model: no other model may answer in its place.
-        ai = settings.ai.model_copy(update={"llm_model": model, "llm_fallback_models": ""})
-        settings = settings.model_copy(update={"ai": ai})
+        update |= {"llm_model": model, "llm_fallback_models": ""}
+    settings = settings.model_copy(update={"ai": settings.ai.model_copy(update=update)})
     files = frozenset(item.strip() for item in only.split(",") if item.strip())
 
     async def run() -> QualityReport:
         async with container_scope(settings) as container:
-            store = JsonModelTrialStore(settings.checks.model_trials) if trial else None
-            return await container.benchmark.run(
-                on_document=_echo_document, only=files, store=store
+            needed = container.benchmark.model_requests(
+                settings.checks.checks_per_request, only=files
             )
+            left = await container.ai.budget.remaining_today()
+            if left is not None and left < needed:
+                typer.echo(
+                    f"the measurement needs about {needed} model requests, {left} are left "
+                    "today: run it tomorrow or with a paid model",
+                    err=True,
+                )
+                raise typer.Exit(code=1)
+            store = JsonModelTrialStore(settings.checks.model_trials) if trial else None
+            try:
+                return await container.benchmark.run(
+                    on_document=_echo_document, only=files, store=store
+                )
+            except BenchmarkIncompleteError as exc:
+                typer.echo(f"not saved: {exc}", err=True)
+                raise typer.Exit(code=1) from exc
 
     report = asyncio.run(run())
     for method, metrics in report.by_method().items():

@@ -122,6 +122,9 @@ class AiSettings(BaseSettings):
     llm_requests_per_day: int = Field(default=0, ge=0)
     # A cached answer is reused for this many days.
     llm_cache_days: int = Field(default=30, ge=0)
+    # Answer repeated requests from the cache. The benchmark turns reading
+    # off to time the model itself; its answers are stored all the same.
+    llm_cache_reads: bool = True
 
     def extra_body(self) -> dict[str, object]:
         if not self.llm_extra_body.strip():
