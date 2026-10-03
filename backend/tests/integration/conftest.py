@@ -81,8 +81,15 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     payments = base.payments.model_copy(update={"test_secret": SecretStr("test-payments")})
     # Tests never reach a real model, whatever the stand's .env configures.
     ai = AiSettings(_env_file=None, ai_provider=AiProvider.NONE)
+    # Measurements of a test run go to a copy of the published one.
+    quality = Path(tmp_path_factory.mktemp("quality"))
+    (quality / "benchmark.json").write_bytes(base.checks.quality_report.read_bytes())
+    checks = base.checks.model_copy(
+        update={"quality_report": quality / "benchmark.json", "model_trials": quality / "models"}
+    )
     return base.model_copy(
         update={
+            "checks": checks,
             "keycloak": keycloak,
             "storage": storage,
             "integrations": integrations,

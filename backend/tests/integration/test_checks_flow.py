@@ -138,19 +138,19 @@ async def test_catalogue_lists_every_check_with_what_it_cites(
 
 
 async def test_quality_of_the_checks_is_published_from_the_last_benchmark(
-    api: httpx.AsyncClient, tokens: TokenFactory
+    api: httpx.AsyncClient, tokens: TokenFactory, settings: Settings
 ) -> None:
+    published = json.loads(settings.checks.quality_report.read_text("utf-8"))
     quality = (await api.get("/api/v1/checks/quality", headers=auth(tokens, ALICE))).json()
     methods = {group["code"]: group["metrics"] for group in quality["methods"]}
     assert methods["deterministic"]["recall"] == 1.0
-    # Measured while no model was connected: the model checks did not run.
-    assert quality["model"] is None
-    assert methods["model"]["errors"] == methods["model"]["observations"]
-    assert methods["model"]["precision"] is None
+    assert quality["model"] == published["model"]
     assert quality["current"] is True
     [typical] = [item for item in quality["documents"] if item["typical"]]
     assert typical["pages"] >= 8
-    assert typical["modelMs"] is None
+    # The model's time is shown only when the model part ran.
+    measured = {item["file"]: item["model_ms"] for item in published["documents"]}
+    assert typical["modelMs"] == measured[typical["fileName"]]
 
 
 async def test_without_a_model_api_model_checks_say_so_and_rules_still_run(
