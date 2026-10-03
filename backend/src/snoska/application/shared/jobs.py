@@ -25,4 +25,18 @@ RUN_CHECKS = JobSpec(
     min_backoff_ms=5_000,
 )
 
-JOB_SPECS: tuple[JobSpec, ...] = (PARSE_DOCUMENT_VERSION, INDEX_CORPUS_EDITION, RUN_CHECKS)
+# One try of one webhook delivery; retries are scheduled by the delivery
+# itself (its backoff is visible to the owner), not by the queue.
+DELIVER_WEBHOOK = JobSpec(
+    name="webhooks.deliver",
+    queue="webhooks",
+    max_retries=2,
+    time_limit_seconds=60,
+)
+
+JOB_SPECS: tuple[JobSpec, ...] = (
+    PARSE_DOCUMENT_VERSION,
+    INDEX_CORPUS_EDITION,
+    RUN_CHECKS,
+    DELIVER_WEBHOOK,
+)

@@ -7,6 +7,7 @@ from uuid import UUID
 import structlog
 
 from snoska.application.audit.trail import AuditTrail
+from snoska.application.integrations.events import OrganizationEvents
 from snoska.application.shared.jobs import PARSE_DOCUMENT_VERSION
 from snoska.application.tenancy.gate import WorkspaceGate
 from snoska.domain.audit.event import AuditAction
@@ -15,6 +16,7 @@ from snoska.domain.documents.document import Document, DocumentNotFoundError, ti
 from snoska.domain.documents.formats import FormatRegistry
 from snoska.domain.documents.kinds import DocumentKindRegistry
 from snoska.domain.documents.version import DocumentVersion, StoredFile
+from snoska.domain.integrations.webhooks import WebhookEvent
 from snoska.domain.shared.errors import ConflictError
 from snoska.domain.shared.ids import new_id
 from snoska.domain.tenancy.access import OrganizationAccess
@@ -79,6 +81,7 @@ class DocumentUploads:
         limits: UploadLimits,
         gate: WorkspaceGate,
         audit: AuditTrail,
+        events: OrganizationEvents,
     ) -> None:
         self._uow_factory = uow_factory
         self._blobs = blobs
@@ -88,6 +91,7 @@ class DocumentUploads:
         self._limits = limits
         self._gate = gate
         self._audit = audit
+        self._events = events
 
     async def upload_document(
         self,
@@ -136,6 +140,17 @@ class DocumentUploads:
                     AuditAction.DOCUMENT_UPLOADED,
                     document_target(document),
                     {"workspace": workspace.slug, "kind": kind.code, "file": incoming.filename},
+                )
+                await self._events.emit(
+                    uow,
+                    access.organization_id,
+                    WebhookEvent.DOCUMENT_UPLOADED,
+                    {
+                        "document_id": str(document.id),
+                        "title": document.title,
+                        "kind": kind.code,
+                        "workspace": workspace.slug,
+                    },
                 )
                 await uow.commit()
         except BaseException:

@@ -18,6 +18,8 @@ class OutboxMessage:
     payload: JobPayload
     created_at: datetime
     attempts: int = 0
+    # Not before this moment (a delayed retry); None means at once.
+    available_at: datetime | None = None
 
 
 class OutboxRepository(Protocol):

@@ -62,7 +62,8 @@ async def run_jobs(container: Container) -> int:
                 await connection.execute(
                     text(
                         "UPDATE outbox_messages SET dispatched_at = now() WHERE id IN "
-                        "(SELECT id FROM outbox_messages WHERE dispatched_at IS NULL LIMIT 20) "
+                        "(SELECT id FROM outbox_messages WHERE dispatched_at IS NULL "
+                        "AND available_at <= now() LIMIT 20) "
                         "RETURNING job_name, payload"
                     )
                 )

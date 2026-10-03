@@ -14,6 +14,7 @@ from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.tenancy.members import Member
 from snoska.ports.ai import Completion, CompletionRequest
 from snoska.ports.identity import Invitation, OrganizationProfile
+from snoska.ports.integrations.transport import TransportResult
 
 
 class FakeDirectory:
@@ -129,3 +130,20 @@ class RecordedLanguageModel:
             prompt_tokens=None,
             completion_tokens=None,
         )
+
+
+class RecordingTransport:
+    """A webhook receiver that answers with the given status codes in turn
+    (the last one repeats) and keeps what it was sent."""
+
+    def __init__(self, *status_codes: int) -> None:
+        self._codes = list(status_codes) or [204]
+        self.sent: list[tuple[str, bytes, dict[str, str]]] = []
+
+    def respond_with(self, *status_codes: int) -> None:
+        self._codes = list(status_codes)
+
+    async def post(self, url: str, body: bytes, headers: Mapping[str, str]) -> TransportResult:
+        self.sent.append((url, body, dict(headers)))
+        code = self._codes.pop(0) if len(self._codes) > 1 else self._codes[0]
+        return TransportResult(status_code=code, duration_ms=3)

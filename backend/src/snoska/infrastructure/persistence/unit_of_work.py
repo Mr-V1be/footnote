@@ -19,6 +19,11 @@ from snoska.infrastructure.persistence.repositories.documents import (
     SqlDocumentVersionRepository,
 )
 from snoska.infrastructure.persistence.repositories.embeddings import SqlTextEmbeddingRepository
+from snoska.infrastructure.persistence.repositories.integrations import (
+    SqlApiKeyRepository,
+    SqlWebhookDeliveryRepository,
+    SqlWebhookEndpointRepository,
+)
 from snoska.infrastructure.persistence.repositories.outbox import SqlOutboxRepository
 from snoska.infrastructure.persistence.repositories.structures import (
     SqlDocumentStructureRepository,
@@ -30,6 +35,17 @@ from snoska.infrastructure.persistence.repositories.tenancy import (
     SqlWorkspaceRepository,
 )
 from snoska.infrastructure.persistence.tables.metadata import TENANT_SETTING
+from snoska.ports.integrations.transport import SecretBox
+
+
+class _NoSecretBox:
+    """Stands in where no sealing key is configured (some test setups)."""
+
+    def seal(self, secret: str) -> str:  # noqa: ARG002 - the port's signature
+        raise RuntimeError("no secret box is configured")
+
+    def open(self, sealed: str) -> str:  # noqa: ARG002 - the port's signature
+        raise RuntimeError("no secret box is configured")
 
 
 class SqlUnitOfWork:
@@ -55,10 +71,14 @@ class SqlUnitOfWork:
     embeddings: SqlTextEmbeddingRepository
     workspace_members: SqlWorkspaceMemberRepository
     audit: SqlAuditLog
+    api_keys: SqlApiKeyRepository
+    webhook_endpoints: SqlWebhookEndpointRepository
+    webhook_deliveries: SqlWebhookDeliveryRepository
 
-    def __init__(self, engine: AsyncEngine, tenant_id: UUID | None) -> None:
+    def __init__(self, engine: AsyncEngine, tenant_id: UUID | None, box: SecretBox) -> None:
         self._engine = engine
         self._tenant_id = tenant_id
+        self._box = box
         self._connection: AsyncConnection | None = None
         self._transaction: AsyncTransaction | None = None
         self._committed = False
@@ -83,6 +103,9 @@ class SqlUnitOfWork:
         self.embeddings = SqlTextEmbeddingRepository(connection, self._tenant_id)
         self.workspace_members = SqlWorkspaceMemberRepository(connection, self._tenant_id)
         self.audit = SqlAuditLog(connection)
+        self.api_keys = SqlApiKeyRepository(connection)
+        self.webhook_endpoints = SqlWebhookEndpointRepository(connection, self._box)
+        self.webhook_deliveries = SqlWebhookDeliveryRepository(connection)
         return self
 
     async def commit(self) -> None:
@@ -108,11 +131,12 @@ class SqlUnitOfWork:
 
 
 class SqlUnitOfWorkFactory:
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: AsyncEngine, box: SecretBox | None = None) -> None:
         self._engine = engine
+        self._box: SecretBox = box or _NoSecretBox()
 
     def for_tenant(self, organization_id: UUID) -> SqlUnitOfWork:
-        return SqlUnitOfWork(self._engine, organization_id)
+        return SqlUnitOfWork(self._engine, organization_id, self._box)
 
     def for_platform(self) -> SqlUnitOfWork:
-        return SqlUnitOfWork(self._engine, None)
+        return SqlUnitOfWork(self._engine, None, self._box)

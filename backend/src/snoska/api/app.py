@@ -9,8 +9,8 @@ from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
 from snoska.api.errors import install_error_handlers
 from snoska.api.middleware import BodySizeLimitMiddleware, RequestContextMiddleware
-from snoska.api.routers import checks, corpus, documents, health, me, workspaces
-from snoska.api.routers.admin import audit, members
+from snoska.api.routers import checks, corpus, demo, documents, health, me, workspaces
+from snoska.api.routers.admin import audit, integrations, members
 from snoska.api.routers.admin import workspaces as workspace_admin
 from snoska.bootstrap.container import Container, build_container
 from snoska.bootstrap.settings import Settings
@@ -65,11 +65,14 @@ def create_app(
         workspace_admin,
         members,
         audit,
+        integrations,
         documents,
         checks,
         corpus,
     ):
         app.include_router(module.router, prefix=API_PREFIX)
+    if settings.integrations.demo_receiver:
+        app.include_router(demo.router, prefix=API_PREFIX)
     app.add_middleware(
         BodySizeLimitMiddleware, max_bytes=settings.max_upload_bytes + MULTIPART_OVERHEAD_BYTES
     )

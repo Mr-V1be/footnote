@@ -9,7 +9,7 @@ from fastapi import APIRouter, File, Form, Header, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from snoska.api.cursors import decode_cursor, encode_cursor
-from snoska.api.dependencies import ContainerDep, OrganizationAccessDep, PrincipalDep
+from snoska.api.dependencies import ActorProfileDep, ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.documents import (
     DocumentListItemOut,
@@ -75,7 +75,7 @@ async def list_documents(
 async def upload_document(
     container: ContainerDep,
     access: OrganizationAccessDep,
-    principal: PrincipalDep,
+    uploader: ActorProfileDep,
     workspace: str,
     file: Annotated[UploadFile, File()],
     idempotency_key: IdempotencyKey = None,
@@ -84,7 +84,7 @@ async def upload_document(
 ) -> UploadOut:
     result = await container.uploads.upload_document(
         access,
-        principal.profile,
+        uploader,
         workspace_slug=workspace,
         incoming=IncomingFile(filename=file.filename or "document", chunks=_chunks(file)),
         kind_code=kind,
@@ -112,14 +112,14 @@ async def get_document(
 async def upload_version(
     container: ContainerDep,
     access: OrganizationAccessDep,
-    principal: PrincipalDep,
+    uploader: ActorProfileDep,
     document_id: UUID,
     file: Annotated[UploadFile, File()],
     idempotency_key: IdempotencyKey = None,
 ) -> UploadOut:
     result = await container.uploads.upload_version(
         access,
-        principal.profile,
+        uploader,
         document_id=document_id,
         incoming=IncomingFile(filename=file.filename or "document", chunks=_chunks(file)),
         upload_key=idempotency_key,

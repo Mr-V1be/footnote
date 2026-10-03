@@ -22,7 +22,7 @@ class SqlOutboxRepository:
                 job_name=message.job_name,
                 payload=dict(message.payload),
                 created_at=message.created_at,
-                available_at=message.created_at,
+                available_at=message.available_at or message.created_at,
                 attempts=message.attempts,
             )
         )

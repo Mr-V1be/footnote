@@ -7,7 +7,9 @@ from fastapi import Depends, Path, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from snoska.bootstrap.container import Container
+from snoska.domain.integrations.api_keys import prefix_of
 from snoska.domain.tenancy.access import OrganizationAccess, PlatformAccess, Principal
+from snoska.domain.tenancy.organization import UserProfile
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.identity import AuthenticationError
 
@@ -38,10 +40,26 @@ OrganizationAlias = Annotated[str, Path(min_length=1, max_length=63, pattern=r"^
 
 
 async def get_organization_access(
-    container: ContainerDep, principal: PrincipalDep, organization: OrganizationAlias
+    request: Request,
+    container: ContainerDep,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+    organization: OrganizationAlias,
 ) -> OrganizationAccess:
-    access = await container.tenant_access.organization_access(principal, organization)
-    structlog.contextvars.bind_contextvars(organization_id=str(access.organization_id))
+    """A member's access from their token, or an integration's from its API key."""
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise AuthenticationError("bearer token required")
+    token = credentials.credentials
+    if prefix_of(token) is not None:
+        tenant = await container.tenant_access.organization_by_alias(organization)
+        access = await container.api_keys.authenticate(token, tenant)
+    else:
+        principal = await container.verifier.verify(token)
+        structlog.contextvars.bind_contextvars(user_id=str(principal.user_id))
+        access = await container.tenant_access.organization_access(principal, organization)
+        request.state.principal = principal
+    structlog.contextvars.bind_contextvars(
+        organization_id=str(access.organization_id), actor=access.actor.kind.value
+    )
     return access
 
 
@@ -61,3 +79,14 @@ def require_corpus_reader(container: ContainerDep, principal: PrincipalDep) -> P
 
 
 CorpusReaderDep = Annotated[Principal, Depends(require_corpus_reader)]
+
+
+def get_actor_profile(request: Request, access: OrganizationAccessDep) -> UserProfile:
+    """Who is named as the author of an upload: the member, or the API key."""
+    principal = getattr(request.state, "principal", None)
+    if isinstance(principal, Principal):
+        return principal.profile
+    return UserProfile(id=access.user_id, email=None, display_name=access.actor.label)
+
+
+ActorProfileDep = Annotated[UserProfile, Depends(get_actor_profile)]

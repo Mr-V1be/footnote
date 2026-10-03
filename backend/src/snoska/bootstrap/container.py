@@ -27,7 +27,16 @@ from snoska.application.documents.catalog import CatalogQuery
 from snoska.application.documents.parsing import ParseDocumentVersion
 from snoska.application.documents.queries import DocumentQueries
 from snoska.application.documents.upload import DocumentUploads, UploadLimits
-from snoska.application.shared.jobs import INDEX_CORPUS_EDITION, PARSE_DOCUMENT_VERSION, RUN_CHECKS
+from snoska.application.integrations.api_keys import ApiKeys
+from snoska.application.integrations.delivery import DeliverWebhook
+from snoska.application.integrations.events import EventFollowUps, FollowUps, OrganizationEvents
+from snoska.application.integrations.webhooks import WebhookEndpoints
+from snoska.application.shared.jobs import (
+    DELIVER_WEBHOOK,
+    INDEX_CORPUS_EDITION,
+    PARSE_DOCUMENT_VERSION,
+    RUN_CHECKS,
+)
 from snoska.application.shared.outbox_relay import OutboxRelay
 from snoska.application.tenancy.access import DefaultWorkspace, TenantAccessService
 from snoska.application.tenancy.gate import WorkspaceGate
@@ -58,6 +67,8 @@ from snoska.infrastructure.identity.claims import KeycloakClaimsMapper
 from snoska.infrastructure.identity.jwks import JwksKeySource
 from snoska.infrastructure.identity.jwt_verifier import JwtTokenVerifier, KeySource, TokenPolicy
 from snoska.infrastructure.identity.keycloak_admin import KeycloakAdminClient, KeycloakAdminConfig
+from snoska.infrastructure.integrations.http_transport import HttpWebhookTransport
+from snoska.infrastructure.integrations.secret_box import FernetSecretBox
 from snoska.infrastructure.parsing.docx.parser import DocxParser
 from snoska.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
 from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
@@ -77,6 +88,7 @@ from snoska.ports.identity import (
     OrganizationDirectory,
     TokenVerifier,
 )
+from snoska.ports.integrations.transport import WebhookTransport
 from snoska.ports.jobs import JobHandler, JobPublisher
 
 HTTP_TIMEOUT_SECONDS = 30.0
@@ -128,6 +140,7 @@ class Overrides:
     key_source: KeySource | None = None
     directory: OrganizationDirectory | None = None
     administration: MemberAdministration | None = None
+    webhook_transport: WebhookTransport | None = None
     embedder: Embedder | None = None
     language_model: LanguageModel | None = None
 
@@ -142,6 +155,8 @@ class Container:
     workspaces: Workspaces
     members: OrganizationMembers
     audit: AuditQueries
+    api_keys: ApiKeys
+    webhooks: WebhookEndpoints
     uploads: DocumentUploads
     documents: DocumentQueries
     catalog: CatalogQuery
@@ -180,7 +195,8 @@ async def build_container(
         raise
 
     clock = SystemClock()
-    uow = SqlUnitOfWorkFactory(engine)
+    secret_box = FernetSecretBox(settings.integrations.secrets_key.get_secret_value())
+    uow = SqlUnitOfWorkFactory(engine, secret_box)
     blobs = build_blob_storage(settings.storage)
     directory = KeycloakAdminClient(
         http,
@@ -214,6 +230,8 @@ async def build_container(
     norms = NormLibrary(uow)
     gate = WorkspaceGate(ORGANIZATION_ROLES)
     audit = AuditTrail(clock)
+    events = OrganizationEvents(clock)
+    follow_ups = EventFollowUps(events)
     engine_of_checks = check_engine(settings.checks, embedder, language_model, norms)
     quality_store = JsonQualityReportStore(settings.checks.quality_report)
     scheduler = CheckScheduler(check_catalog, clock)
@@ -249,7 +267,7 @@ async def build_container(
         ),
         audit=AuditQueries(uow),
         uploads=DocumentUploads(
-            uow, blobs, SUPPORTED_FORMATS, DOCUMENT_KINDS, clock, limits, gate, audit
+            uow, blobs, SUPPORTED_FORMATS, DOCUMENT_KINDS, clock, limits, gate, audit, events
         ),
         documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS, RequisiteDetector(), gate),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),
@@ -257,7 +275,15 @@ async def build_container(
         corpus_indexing=corpus_indexing,
         corpus=CorpusQueries(uow),
         norm_search=NormSearch(uow, embedder),
-        checks=CheckService(uow, check_catalog, scheduler, norms, clock, gate, audit),
+        checks=CheckService(uow, check_catalog, scheduler, norms, clock, gate, audit, events),
+        api_keys=ApiKeys(uow, audit, clock),
+        webhooks=WebhookEndpoints(
+            uow,
+            events,
+            audit,
+            clock,
+            allow_http=settings.integrations.webhooks_allow_private,
+        ),
         check_progress=RunProgress(uow, run_feed, gate),
         recheck=RecheckDocuments(uow, scheduler),
         quality=QualityQueries(quality_store, check_catalog),
@@ -278,7 +304,7 @@ async def build_container(
         health_checks=(DatabaseHealth(engine), StorageHealth(blobs)),
         job_handlers={
             PARSE_DOCUMENT_VERSION.name: ParseDocumentVersion(
-                uow, blobs, parsers, clock, follow_up=scheduler
+                uow, blobs, parsers, clock, follow_up=FollowUps(scheduler, follow_ups)
             ),
             INDEX_CORPUS_EDITION.name: corpus_indexing,
             RUN_CHECKS.name: RunChecks(
@@ -288,6 +314,15 @@ async def build_container(
                 RequisiteDetector(),
                 clock,
                 language_model.model,
+                settled=follow_ups,
+            ),
+            DELIVER_WEBHOOK.name: DeliverWebhook(
+                uow,
+                overrides.webhook_transport
+                or HttpWebhookTransport(
+                    http, allow_private=settings.integrations.webhooks_allow_private
+                ),
+                clock,
             ),
         },
         relay=OutboxRelay(uow, publisher, clock) if publisher is not None else None,

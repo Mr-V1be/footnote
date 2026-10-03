@@ -17,7 +17,7 @@ from snoska.domain.tenancy.organization import Organization, Workspace
 from snoska.domain.tenancy.permissions import Permission
 from snoska.domain.tenancy.roles import RoleDefinition
 from snoska.ports.clock import Clock
-from snoska.ports.identity import OrganizationDirectory
+from snoska.ports.identity import AuthenticationError, OrganizationDirectory
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 
@@ -74,6 +74,14 @@ class TenantAccessService:
             raise NotAMemberError(f"not a member of organization {alias!r}")
         organization = await self._ensure_tenant(membership)
         return self._policy.organization_access(principal, organization)
+
+    async def organization_by_alias(self, alias: str) -> Organization:
+        """A provisioned tenant by its alias (for requests made with an API key)."""
+        async with self._uow_factory.for_platform() as uow:
+            organization = await uow.organizations.get_by_alias(alias)
+        if organization is None:
+            raise AuthenticationError("unknown organization")
+        return organization
 
     def platform_access(self, principal: Principal) -> PlatformAccess:
         return self._policy.platform_access(principal)

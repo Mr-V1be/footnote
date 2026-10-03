@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import Protocol
 from uuid import UUID
 
 import structlog
@@ -17,7 +18,7 @@ from snoska.domain.documents.structure import DocumentStructure
 from snoska.domain.documents.version import ParseStatus
 from snoska.ports.clock import Clock
 from snoska.ports.jobs import JobPayload
-from snoska.ports.unit_of_work import UnitOfWorkFactory
+from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
 
 log = structlog.get_logger(__name__)
 
@@ -32,6 +33,12 @@ class _Prepared:
     pending: tuple[CheckDefinition, ...]
     next_ordinal: int
     earlier: dict[str, Finding]
+
+
+class RunSettledHook(Protocol):
+    """Called in the transaction that settles a run (completed or failed)."""
+
+    async def on_settled(self, uow: UnitOfWork, run: CheckRun) -> None: ...
 
 
 class RunChecks:
@@ -50,6 +57,7 @@ class RunChecks:
         detector: RequisiteDetector,
         clock: Clock,
         model_name: str,
+        settled: RunSettledHook | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._catalog = catalog
@@ -57,6 +65,7 @@ class RunChecks:
         self._detector = detector
         self._clock = clock
         self._model_name = model_name
+        self._settled = settled
 
     async def __call__(self, payload: JobPayload) -> None:
         organization_id = UUID(payload["organization_id"])
@@ -87,6 +96,7 @@ class RunChecks:
                 log.error("checks.run_failed_finally", run_id=str(run_id))
                 run.fail(RunFailureCode.INTERNAL_ERROR, self._clock.now())
                 await uow.check_runs.save(run)
+                await self._announce(uow, run)
                 await uow.commit()
                 return None
             version = await uow.versions.get(run.version_id)
@@ -100,6 +110,7 @@ class RunChecks:
             ):
                 run.fail(RunFailureCode.VERSION_NOT_PARSED, self._clock.now())
                 await uow.check_runs.save(run)
+                await self._announce(uow, run)
                 await uow.commit()
                 return None
             checks = self._catalog.applicable(document.kind_code)
@@ -151,4 +162,9 @@ class RunChecks:
                 return
             run.complete(self._clock.now())
             await uow.check_runs.save(run)
+            await self._announce(uow, run)
             await uow.commit()
+
+    async def _announce(self, uow: UnitOfWork, run: CheckRun) -> None:
+        if self._settled is not None:
+            await self._settled.on_settled(uow, run)

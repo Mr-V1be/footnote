@@ -209,6 +209,18 @@ class StorageSettings(BaseSettings):
         return root if root.is_absolute() else REPO_ROOT / root
 
 
+class IntegrationsSettings(BaseSettings):
+    model_config = _config("SNOSKA_")
+
+    # Seals stored secrets (webhook signing keys); `make env` generates it.
+    secrets_key: SecretStr = SecretStr("")
+    # The demo stand delivers webhooks to its own receiver on loopback over
+    # plain http; anywhere else endpoints are https and public.
+    webhooks_allow_private: bool = False
+    # Serves a receiver that accepts the stand's own signed webhooks.
+    demo_receiver: bool = False
+
+
 class TenancySettings(BaseSettings):
     model_config = _config("SNOSKA_TENANCY_")
 
@@ -232,6 +244,7 @@ class Settings(BaseSettings):
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
     tenancy: TenancySettings = Field(default_factory=TenancySettings)
+    integrations: IntegrationsSettings = Field(default_factory=IntegrationsSettings)
     # Where people open the product (links in emails and invitations).
     web_url: str = "http://localhost:46300"
     corpus_catalog: Path = BACKEND_ROOT / "data" / "corpus" / "acts.yaml"

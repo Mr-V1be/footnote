@@ -62,6 +62,13 @@ class SqlOrganizationRepository:
         row = result.mappings().first()
         return _organization(row) if row else None
 
+    async def get_by_alias(self, alias: str) -> Organization | None:
+        result = await self._connection.execute(
+            select(organizations).where(organizations.c.alias == alias)
+        )
+        row = result.mappings().first()
+        return _organization(row) if row else None
+
     async def add_if_absent(self, organization: Organization) -> None:
         await self._connection.execute(
             insert(organizations)

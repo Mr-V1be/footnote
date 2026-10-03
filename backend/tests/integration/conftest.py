@@ -16,6 +16,7 @@ import httpx
 import pytest
 from alembic import command
 from alembic.config import Config
+from pydantic import SecretStr
 from sqlalchemy import text
 
 os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
@@ -26,12 +27,17 @@ from snoska.bootstrap.settings import BACKEND_ROOT, Settings, StorageBackend
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
 from snoska.infrastructure.persistence.vector_index import ensure_space
-from tests.support.fakes import FakeDirectory, HashEmbedder, RecordedLanguageModel
+from tests.support.fakes import (
+    FakeDirectory,
+    HashEmbedder,
+    RecordedLanguageModel,
+    RecordingTransport,
+)
 from tests.support.scenario import MEMBERS, ORG_A, ORG_B, member_of
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
-    "audit_events, workspace_members, "
+    "webhook_deliveries, webhook_endpoints, api_keys, audit_events, workspace_members, "
     "findings, check_results, check_runs, text_embeddings, edition_indexes, "
     "document_blocks, document_structures, document_versions, documents, workspaces, "
     "organizations, user_profiles, outbox_messages, norm_embeddings, norm_units, "
@@ -59,7 +65,12 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
             "storage_root": Path(tmp_path_factory.mktemp("blobs")),
         }
     )
-    return base.model_copy(update={"keycloak": keycloak, "storage": storage})
+    integrations = base.integrations.model_copy(
+        update={"secrets_key": SecretStr("test-secrets-key"), "webhooks_allow_private": True}
+    )
+    return base.model_copy(
+        update={"keycloak": keycloak, "storage": storage, "integrations": integrations}
+    )
 
 
 def _owner(settings: Settings) -> DatabaseConfig:
@@ -112,8 +123,14 @@ def directory() -> FakeDirectory:
 
 
 @pytest.fixture
+def receiver() -> RecordingTransport:
+    """Where webhooks go in tests: answers 204 unless a test says otherwise."""
+    return RecordingTransport(204)
+
+
+@pytest.fixture
 async def container(
-    settings: Settings, tokens: TokenFactory, directory: FakeDirectory
+    settings: Settings, tokens: TokenFactory, directory: FakeDirectory, receiver: RecordingTransport
 ) -> AsyncIterator[Container]:
     built = await build_container(
         settings,
@@ -121,6 +138,7 @@ async def container(
             key_source=StaticKeys(tokens),
             directory=directory,
             administration=directory,
+            webhook_transport=receiver,
             embedder=HashEmbedder(TEST_SPACE),
             language_model=RecordedLanguageModel(RECORDED_VERDICTS),
         ),

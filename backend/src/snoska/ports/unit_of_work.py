@@ -18,6 +18,11 @@ from snoska.ports.document_repositories import (
     DocumentStructureRepository,
     DocumentVersionRepository,
 )
+from snoska.ports.integrations.repositories import (
+    ApiKeyRepository,
+    WebhookDeliveryRepository,
+    WebhookEndpointRepository,
+)
 from snoska.ports.outbox import OutboxRepository
 from snoska.ports.tenancy_repositories import (
     OrganizationRepository,
@@ -77,6 +82,15 @@ class UnitOfWork(Protocol):
 
     @property
     def audit(self) -> AuditLog: ...
+
+    @property
+    def api_keys(self) -> ApiKeyRepository: ...
+
+    @property
+    def webhook_endpoints(self) -> WebhookEndpointRepository: ...
+
+    @property
+    def webhook_deliveries(self) -> WebhookDeliveryRepository: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

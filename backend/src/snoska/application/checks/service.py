@@ -8,6 +8,7 @@ from snoska.application.audit.trail import AuditTrail
 from snoska.application.checks.norms import NormLibrary
 from snoska.application.checks.scheduling import CheckScheduler
 from snoska.application.documents.queries import VersionNotFoundError
+from snoska.application.integrations.events import OrganizationEvents
 from snoska.application.tenancy.gate import WorkspaceGate
 from snoska.domain.audit.event import AuditAction
 from snoska.domain.audit.targets import document_target
@@ -16,6 +17,7 @@ from snoska.domain.checks.finding import REVIEW_PERMISSIONS, Finding, ReviewStat
 from snoska.domain.checks.result import CheckResult
 from snoska.domain.checks.run import CheckRun
 from snoska.domain.documents.version import ParseStatus
+from snoska.domain.integrations.webhooks import WebhookEvent
 from snoska.domain.shared.errors import InvalidStateError, NotFoundError
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
@@ -62,6 +64,7 @@ class CheckService:
         clock: Clock,
         gate: WorkspaceGate,
         audit: AuditTrail,
+        events: OrganizationEvents,
     ) -> None:
         self._uow_factory = uow_factory
         self.catalog = catalog
@@ -70,6 +73,7 @@ class CheckService:
         self._clock = clock
         self._gate = gate
         self._audit = audit
+        self._events = events
 
     async def request(
         self, access: OrganizationAccess, document_id: UUID, version_number: int
@@ -180,6 +184,17 @@ class CheckService:
                 AuditAction.FINDING_REVIEWED,
                 document_target(document),
                 {"finding": finding.title, "from": previous.value, "to": status.value},
+            )
+            await self._events.emit(
+                uow,
+                access.organization_id,
+                WebhookEvent.FINDING_REVIEWED,
+                {
+                    "finding_id": str(finding.id),
+                    "document_id": str(document.id),
+                    "check": finding.check_code,
+                    "review": status.value,
+                },
             )
             await uow.commit()
         return finding

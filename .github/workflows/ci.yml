@@ -43,6 +43,7 @@ jobs:
       SNOSKA_TEST_S3_ENDPOINT: 127.0.0.1:9000
       SNOSKA_TEST_S3_ACCESS_KEY: ci-access
       SNOSKA_TEST_S3_SECRET_KEY: ci-secret-key
+      SNOSKA_SECRETS_KEY: ci-secrets-key
     steps:
       - uses: actions/checkout@v7
       - name: Tesseract with Russian data
