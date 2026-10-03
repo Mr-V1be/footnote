@@ -23,6 +23,28 @@ function credentials(kind: OidcClient): [string, string] {
     : [config.SNOSKA_WEB_CLIENT_ID, config.SNOSKA_WEB_CLIENT_SECRET];
 }
 
+/**
+ * Keycloak's metadata read over the private network: Keycloak answers with
+ * the public issuer and puts its back-channel endpoints (token, keys) on the
+ * address it was asked on, so the server never goes out to the internet.
+ */
+async function internalConfiguration(
+  internal: string,
+  issuer: URL,
+  [id, secret]: [string, string],
+): Promise<client.Configuration> {
+  const realm = issuer.pathname.split("/").pop();
+  const response = await fetch(`${internal}/realms/${realm}/.well-known/openid-configuration`);
+  if (!response.ok) throw new Error(`Keycloak metadata: ${response.status}`);
+  const metadata = (await response.json()) as client.ServerMetadata;
+  if (metadata.issuer !== issuer.href) {
+    throw new Error(`Keycloak issues tokens as ${metadata.issuer}, expected ${issuer.href}`);
+  }
+  const configuration = new client.Configuration(metadata, id, secret);
+  if (new URL(internal).protocol === "http:") client.allowInsecureRequests(configuration);
+  return configuration;
+}
+
 /** Discovered Keycloak configuration for one of the web server's clients. */
 export function oidc(kind: OidcClient = "web"): Promise<client.Configuration> {
   const cache = (globalForOidc.snoskaOidc ??= {});
@@ -30,6 +52,9 @@ export function oidc(kind: OidcClient = "web"): Promise<client.Configuration> {
     const config = serverConfig();
     const issuer = new URL(`${config.SNOSKA_KEYCLOAK_URL}/realms/${config.SNOSKA_KEYCLOAK_REALM}`);
     const [id, secret] = credentials(kind);
+    if (config.SNOSKA_KEYCLOAK_INTERNAL_URL) {
+      return internalConfiguration(config.SNOSKA_KEYCLOAK_INTERNAL_URL, issuer, [id, secret]);
+    }
     return client.discovery(
       issuer,
       id,

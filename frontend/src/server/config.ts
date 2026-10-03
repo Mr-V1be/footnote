@@ -9,6 +9,9 @@ const schema = z.object({
   SNOSKA_WEB_URL: z.url(),
   SNOSKA_API_URL: z.url(),
   SNOSKA_KEYCLOAK_URL: z.url(),
+  // Where the web server reaches Keycloak inside a private network; the
+  // public URL stays the issuer. Empty: the public URL serves both.
+  SNOSKA_KEYCLOAK_INTERNAL_URL: z.union([z.url(), z.literal("")]).default(""),
   SNOSKA_KEYCLOAK_REALM: z.string().min(1),
   SNOSKA_WEB_CLIENT_ID: z.string().min(1).default("snoska-web"),
   SNOSKA_WEB_CLIENT_SECRET: z.string().min(1),

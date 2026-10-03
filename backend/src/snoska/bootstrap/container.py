@@ -199,6 +199,9 @@ async def build_container(
                 host=operations.smtp_host,
                 port=operations.smtp_port,
                 sender=operations.smtp_sender,
+                username=operations.smtp_username or None,
+                password=operations.smtp_password.get_secret_value() or None,
+                start_tls=operations.smtp_start_tls,
             )
         ),
         clock,
@@ -220,7 +223,9 @@ async def build_container(
         DatabaseHealth(core.engine),
         StorageHealth(core.blobs),
         RedisHealth(settings.redis.url()),
-        IdentityHealth(core.http, settings.keycloak.issuer),
+        IdentityHealth(
+            core.http, f"{settings.keycloak.backchannel_url}/realms/{settings.keycloak.realm}"
+        ),
     )
 
     async def close() -> None:

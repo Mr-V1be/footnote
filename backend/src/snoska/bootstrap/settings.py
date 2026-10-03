@@ -63,6 +63,9 @@ class KeycloakSettings(BaseSettings):
 
     # Public base URL: it is the token issuer the browser and the API agree on.
     url: str = "http://localhost:46320"
+    # Where the servers themselves reach Keycloak, inside a private network
+    # (production: http://keycloak:8080); the public URL when empty.
+    internal_url: str = ""
     realm: str = "snoska"
     api_client_id: str = "snoska-api"
     # The web app's client: invitation links lead back to it.
@@ -73,8 +76,12 @@ class KeycloakSettings(BaseSettings):
         return f"{self.url}/realms/{self.realm}"
 
     @property
+    def backchannel_url(self) -> str:
+        return self.internal_url or self.url
+
+    @property
     def jwks_url(self) -> str:
-        return f"{self.issuer}/protocol/openid-connect/certs"
+        return f"{self.backchannel_url}/realms/{self.realm}/protocol/openid-connect/certs"
 
 
 class DirectorySettings(BaseSettings):
@@ -273,6 +280,10 @@ class OperationsSettings(BaseSettings):
     smtp_host: str = "127.0.0.1"
     smtp_port: int = 46331
     smtp_sender: str = "Сноска <no-reply@snoska.example>"
+    # A real mail server asks for an account and STARTTLS; Mailpit does not.
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_start_tls: bool = False
     # How often the official portal is checked for new redactions.
     corpus_watch_interval_hours: int = 168
     # The realm role whose holders get the platform's notices.

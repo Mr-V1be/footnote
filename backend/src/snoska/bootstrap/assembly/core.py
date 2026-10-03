@@ -166,7 +166,7 @@ async def build_core(settings: Settings, overrides: Overrides) -> Core:
         keycloak=KeycloakAdminClient(
             http,
             KeycloakAdminConfig(
-                base_url=settings.keycloak.url,
+                base_url=settings.keycloak.backchannel_url,
                 realm=settings.keycloak.realm,
                 client_id=settings.directory.client_id,
                 client_secret=settings.directory.client_secret.get_secret_value(),
