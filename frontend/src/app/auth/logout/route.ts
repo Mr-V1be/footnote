@@ -10,7 +10,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await readSession(request.cookies.get(SESSION_COOKIE)?.value);
   const base = serverConfig().SNOSKA_WEB_URL;
   let destination = new URL("/", base);
-  if (session) {
+  if (session?.tokens.client === "demo") {
+    // A demo session has no login page to return through: end it at the provider.
+    await destroySession(session.id);
+    if (session.tokens.refreshToken) {
+      await client
+        .tokenRevocation(await oidc("demo"), session.tokens.refreshToken)
+        .catch(() => undefined);
+    }
+  } else if (session) {
     await destroySession(session.id);
     destination = client.buildEndSessionUrl(await oidc(), {
       post_logout_redirect_uri: `${base}/`,

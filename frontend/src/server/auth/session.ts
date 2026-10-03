@@ -3,6 +3,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 
 import { redis } from "../redis";
+import type { OidcClient } from "./oidc";
 import { seal, unseal } from "./seal";
 
 export { SESSION_COOKIE } from "./cookie";
@@ -17,6 +18,8 @@ export interface SessionTokens {
   idToken: string | null;
   /** Unix seconds. */
   expiresAt: number;
+  /** The client that issued the tokens and refreshes them; `web` when absent. */
+  client?: OidcClient;
 }
 
 export interface Session {

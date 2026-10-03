@@ -30,10 +30,14 @@ export async function accessToken(session: Session): Promise<string | null> {
   if (!session.tokens.refreshToken) return null;
   try {
     const refreshed = tokensFrom(
-      await client.refreshTokenGrant(await oidc(), session.tokens.refreshToken),
+      await client.refreshTokenGrant(
+        await oidc(session.tokens.client ?? "web"),
+        session.tokens.refreshToken,
+      ),
     );
     const tokens: SessionTokens = {
       ...refreshed,
+      client: session.tokens.client,
       refreshToken: refreshed.refreshToken ?? session.tokens.refreshToken,
       idToken: refreshed.idToken ?? session.tokens.idToken,
     };
