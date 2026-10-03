@@ -34,4 +34,8 @@ TENANT_TABLES: tuple[str, ...] = (
     "api_keys",
     "webhook_endpoints",
     "webhook_deliveries",
+    "subscriptions",
+    "usage_ledger",
+    "invoices",
+    "payment_events",
 )

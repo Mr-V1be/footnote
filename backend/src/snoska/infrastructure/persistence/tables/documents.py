@@ -82,6 +82,7 @@ document_versions = Table(
     Column("method", Text, nullable=True),
     Column("page_count", Integer, nullable=True),
     Column("block_count", Integer, nullable=True),
+    Column("character_count", Integer, nullable=True),
     Column("ocr_confidence", Float, nullable=True),
     ForeignKeyConstraint(
         ["document_id", "organization_id"],

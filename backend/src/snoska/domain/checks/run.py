@@ -20,6 +20,8 @@ class RunFailureCode(StrEnum):
 
     VERSION_NOT_PARSED = "version_not_parsed"
     INTERNAL_ERROR = "internal_error"
+    # The plan's monthly allowance was used up when the run was due.
+    QUOTA_EXCEEDED = "quota_exceeded"
 
 
 @dataclass(slots=True)

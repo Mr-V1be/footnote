@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from snoska.api.schemas.common import Problem
+from snoska.domain.billing.usage import QuotaExceededError
 from snoska.domain.shared.errors import (
     AccessDeniedError,
     ConflictError,
@@ -18,6 +19,7 @@ from snoska.domain.shared.errors import (
     ValidationError,
 )
 from snoska.ports.ai import AiProviderError
+from snoska.ports.billing.payments import InvalidNotificationError
 from snoska.ports.identity import AuthenticationError, IdentityProviderError
 
 log = structlog.get_logger(__name__)
@@ -27,6 +29,7 @@ PROBLEM_MEDIA_TYPE = "application/problem+json"
 # Resolved through the class hierarchy, so a new error subclass inherits the
 # status of its family without touching this table.
 _STATUS_BY_FAMILY: tuple[tuple[type[DomainError], HTTPStatus], ...] = (
+    (QuotaExceededError, HTTPStatus.PAYMENT_REQUIRED),
     (AuthenticationError, HTTPStatus.UNAUTHORIZED),
     (AccessDeniedError, HTTPStatus.FORBIDDEN),
     (NotFoundError, HTTPStatus.NOT_FOUND),
@@ -69,6 +72,10 @@ def install_error_handlers(app: FastAPI) -> None:
         log.warning("api.dependency_unavailable", error=repr(exc))
         return problem_response(HTTPStatus.SERVICE_UNAVAILABLE, "dependency_unavailable")
 
+    async def forged_notification(_: Request, exc: Exception) -> JSONResponse:
+        log.warning("api.payment_notification_refused", error=repr(exc))
+        return problem_response(HTTPStatus.BAD_REQUEST, "invalid_notification")
+
     async def unexpected(_: Request, exc: Exception) -> JSONResponse:
         log.error("api.unhandled_error", exc_info=exc)
         return problem_response(HTTPStatus.INTERNAL_SERVER_ERROR, "internal_error")
@@ -77,11 +84,12 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_error)
     app.add_exception_handler(IdentityProviderError, dependency_unavailable)
     app.add_exception_handler(AiProviderError, dependency_unavailable)
+    app.add_exception_handler(InvalidNotificationError, forged_notification)
     app.add_exception_handler(Exception, unexpected)
 
 
 # Documented error shapes; every router declares them for its operations.
 PROBLEM_RESPONSES: dict[int | str, dict[str, object]] = {
     status: {"model": Problem, "description": HTTPStatus(status).phrase}
-    for status in (401, 403, 404, 409, 413, 422, 503)
+    for status in (401, 402, 403, 404, 409, 413, 422, 503)
 }

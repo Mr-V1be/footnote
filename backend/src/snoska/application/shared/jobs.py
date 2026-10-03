@@ -34,9 +34,18 @@ DELIVER_WEBHOOK = JobSpec(
     time_limit_seconds=60,
 )
 
+# The test payment provider's webhook to the platform.
+NOTIFY_TEST_PAYMENT = JobSpec(
+    name="payments.test_notify",
+    queue="payments",
+    max_retries=5,
+    time_limit_seconds=60,
+)
+
 JOB_SPECS: tuple[JobSpec, ...] = (
     PARSE_DOCUMENT_VERSION,
     INDEX_CORPUS_EDITION,
     RUN_CHECKS,
     DELIVER_WEBHOOK,
+    NOTIFY_TEST_PAYMENT,
 )

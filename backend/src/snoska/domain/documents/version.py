@@ -49,6 +49,8 @@ class ParseSummary:
     page_count: int | None
     block_count: int
     ocr_confidence: float | None
+    # Characters of text: how long a document without pages (DOCX) is.
+    character_count: int = 0
 
 
 @dataclass(slots=True)

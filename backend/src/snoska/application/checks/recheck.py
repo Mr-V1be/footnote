@@ -27,7 +27,11 @@ class RecheckDocuments:
                 async with self._uow_factory.for_tenant(organization.id) as uow:
                     versions = await uow.versions.latest_parsed()
                     for version in versions:
-                        await self._scheduler.schedule(uow, version, requested_by=None)
+                        # Re-checking after a catalogue change is the operator's,
+                        # not counted against the organization's plan.
+                        await self._scheduler.schedule(
+                            uow, version, requested_by=None, charge=False
+                        )
                     await uow.commit()
                 scheduled[organization.alias] = len(versions)
             offset += page

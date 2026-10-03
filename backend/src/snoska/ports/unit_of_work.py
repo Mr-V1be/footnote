@@ -6,6 +6,12 @@ from uuid import UUID
 
 from snoska.domain.shared.errors import ConflictError
 from snoska.ports.audit.log import AuditLog
+from snoska.ports.billing.repositories import (
+    InvoiceRepository,
+    LedgerRepository,
+    PaymentEventLog,
+    SubscriptionRepository,
+)
 from snoska.ports.checks.embeddings import EmbeddingCache
 from snoska.ports.checks.repositories import (
     CheckResultRepository,
@@ -91,6 +97,18 @@ class UnitOfWork(Protocol):
 
     @property
     def webhook_deliveries(self) -> WebhookDeliveryRepository: ...
+
+    @property
+    def subscriptions(self) -> SubscriptionRepository: ...
+
+    @property
+    def ledger(self) -> LedgerRepository: ...
+
+    @property
+    def invoices(self) -> InvoiceRepository: ...
+
+    @property
+    def payment_events(self) -> PaymentEventLog: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

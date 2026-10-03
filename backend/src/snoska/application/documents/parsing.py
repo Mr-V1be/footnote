@@ -79,6 +79,7 @@ class ParseDocumentVersion:
             page_count=parsed.page_count,
             block_count=len(parsed.blocks),
             ocr_confidence=parsed.ocr_confidence,
+            character_count=sum(len(block.text) for block in parsed.blocks),
         )
         async with self._uow_factory.for_tenant(organization_id) as uow:
             locked = await uow.versions.lock(version_id)

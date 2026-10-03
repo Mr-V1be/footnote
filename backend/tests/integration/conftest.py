@@ -37,12 +37,14 @@ from tests.support.scenario import MEMBERS, ORG_A, ORG_B, member_of
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
+    "payment_events, invoices, usage_ledger, subscriptions, "
     "webhook_deliveries, webhook_endpoints, api_keys, audit_events, workspace_members, "
     "findings, check_results, check_runs, text_embeddings, edition_indexes, "
     "document_blocks, document_structures, document_versions, documents, workspaces, "
     "organizations, user_profiles, outbox_messages, norm_embeddings, norm_units, "
     "corpus_editions, legal_acts"
 )
+TEST_PLANS = Path(__file__).parents[1] / "support" / "data" / "plans.yaml"
 # A small space for the deterministic test embedder, registered like any model's.
 TEST_SPACE = EmbeddingSpace("test-hash-64", 64)
 # Verdicts of the recorded language model by words of a check's question.
@@ -68,8 +70,16 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     integrations = base.integrations.model_copy(
         update={"secrets_key": SecretStr("test-secrets-key"), "webhooks_allow_private": True}
     )
+    billing = base.billing.model_copy(update={"plans": TEST_PLANS})
+    payments = base.payments.model_copy(update={"test_secret": SecretStr("test-payments")})
     return base.model_copy(
-        update={"keycloak": keycloak, "storage": storage, "integrations": integrations}
+        update={
+            "keycloak": keycloak,
+            "storage": storage,
+            "integrations": integrations,
+            "billing": billing,
+            "payments": payments,
+        }
     )
 
 

@@ -8,6 +8,12 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncTransaction
 
 from snoska.infrastructure.persistence.repositories.audit import SqlAuditLog
+from snoska.infrastructure.persistence.repositories.billing import (
+    SqlInvoiceRepository,
+    SqlLedgerRepository,
+    SqlPaymentEventLog,
+    SqlSubscriptionRepository,
+)
 from snoska.infrastructure.persistence.repositories.checks import (
     SqlCheckResultRepository,
     SqlCheckRunRepository,
@@ -74,6 +80,10 @@ class SqlUnitOfWork:
     api_keys: SqlApiKeyRepository
     webhook_endpoints: SqlWebhookEndpointRepository
     webhook_deliveries: SqlWebhookDeliveryRepository
+    subscriptions: SqlSubscriptionRepository
+    ledger: SqlLedgerRepository
+    invoices: SqlInvoiceRepository
+    payment_events: SqlPaymentEventLog
 
     def __init__(self, engine: AsyncEngine, tenant_id: UUID | None, box: SecretBox) -> None:
         self._engine = engine
@@ -106,6 +116,10 @@ class SqlUnitOfWork:
         self.api_keys = SqlApiKeyRepository(connection)
         self.webhook_endpoints = SqlWebhookEndpointRepository(connection, self._box)
         self.webhook_deliveries = SqlWebhookDeliveryRepository(connection)
+        self.subscriptions = SqlSubscriptionRepository(connection)
+        self.ledger = SqlLedgerRepository(connection)
+        self.invoices = SqlInvoiceRepository(connection)
+        self.payment_events = SqlPaymentEventLog(connection, self._tenant_id)
         return self
 
     async def commit(self) -> None:

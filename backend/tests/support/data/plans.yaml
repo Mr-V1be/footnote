@@ -1,0 +1,16 @@
+# Plans of the integration tests: small limits, so they are reached quickly.
+currency: RUB
+default: start
+plans:
+  - code: tiny
+    rank: 0
+    price: 0
+    limits: {pages: 2, checks: 1, questions: 1, autofixes: 1, members: 4}
+  - code: start
+    rank: 1
+    price: 0
+    limits: {pages: 100, checks: 3, questions: 5, autofixes: 2, members: 10}
+  - code: team
+    rank: 2
+    price: 490000
+    limits: {pages: 1000, checks: 100, questions: 100, autofixes: 50, members: 20}

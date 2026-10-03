@@ -1,0 +1,23 @@
+# Plans of the service. Prices are in kopecks per month; limits are what an
+# organization may use in one billing month. A new plan is a new entry; the
+# code reads every number from here.
+#
+# Metrics: pages — pages of documents checked (a PDF's pages; for DOCX one
+# page per 1 800 characters of text, as printed at 14 pt); checks — check
+# runs; questions — questions to the corpus; autofixes — automatic
+# corrections of formatting; members — people in the organization.
+currency: RUB
+default: start
+plans:
+  - code: start
+    rank: 0
+    price: 0
+    limits: {pages: 60, checks: 15, questions: 20, autofixes: 5, members: 3}
+  - code: team
+    rank: 1
+    price: 490000
+    limits: {pages: 600, checks: 150, questions: 300, autofixes: 60, members: 10}
+  - code: business
+    rank: 2
+    price: 1490000
+    limits: {pages: 3000, checks: 800, questions: 2000, autofixes: 400, members: 50}

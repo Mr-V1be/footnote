@@ -221,6 +221,20 @@ class IntegrationsSettings(BaseSettings):
     demo_receiver: bool = False
 
 
+class PaymentsSettings(BaseSettings):
+    model_config = _config("SNOSKA_PAYMENTS_")
+
+    # Only the test provider exists until a live one is chosen and contracted.
+    provider: str = "test"
+    test_secret: SecretStr = SecretStr("")
+
+
+class BillingSettings(BaseSettings):
+    model_config = _config("SNOSKA_BILLING_")
+
+    plans: Path = BACKEND_ROOT / "data" / "billing" / "plans.yaml"
+
+
 class TenancySettings(BaseSettings):
     model_config = _config("SNOSKA_TENANCY_")
 
@@ -245,8 +259,13 @@ class Settings(BaseSettings):
     storage: StorageSettings = Field(default_factory=StorageSettings)
     tenancy: TenancySettings = Field(default_factory=TenancySettings)
     integrations: IntegrationsSettings = Field(default_factory=IntegrationsSettings)
+    payments: PaymentsSettings = Field(default_factory=PaymentsSettings)
+    billing: BillingSettings = Field(default_factory=BillingSettings)
     # Where people open the product (links in emails and invitations).
     web_url: str = "http://localhost:46300"
+    # Where the API answers for calls made by the platform itself (webhooks
+    # of the test payment provider).
+    api_url: str = "http://127.0.0.1:46301"
     corpus_catalog: Path = BACKEND_ROOT / "data" / "corpus" / "acts.yaml"
     demo_root: Path = BACKEND_ROOT / "demo"
 

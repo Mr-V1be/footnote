@@ -2,6 +2,7 @@
 
 from snoska.infrastructure.persistence.tables import (
     audit,
+    billing,
     checks,
     corpus,
     documents,
@@ -13,6 +14,7 @@ from snoska.infrastructure.persistence.tables.metadata import metadata
 
 __all__ = [
     "audit",
+    "billing",
     "checks",
     "corpus",
     "documents",

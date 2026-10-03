@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from snoska.application.audit.trail import AuditTrail
+from snoska.application.billing.meter import UsageMeter
 from snoska.domain.audit.event import AuditAction, AuditTarget
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.members import (
@@ -37,12 +38,14 @@ class OrganizationMembers:
         administration: MemberAdministration,
         roles: RoleCatalog,
         audit: AuditTrail,
+        meter: UsageMeter,
     ) -> None:
         self._uow_factory = uow_factory
         self._directory = directory
         self._administration = administration
         self._roles = roles
         self._audit = audit
+        self._meter = meter
 
     async def list(self, access: OrganizationAccess) -> Sequence[Member]:
         access.require(Permission.MEMBERS_MANAGE)
@@ -52,6 +55,11 @@ class OrganizationMembers:
     async def invite(self, access: OrganizationAccess, invitation: Invitation) -> Member:
         access.require(Permission.MEMBERS_MANAGE)
         require_role(self._roles, invitation.role_code)
+        members = await self._directory.list_members(access.organization_id)
+        async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            # The plan caps the number of members.
+            await self._meter.ensure_members(uow, access.organization_id, len(members))
+            await uow.commit()
         user_id = await self._administration.invite(access.organization_id, invitation)
         member = Member(
             user_id=user_id,

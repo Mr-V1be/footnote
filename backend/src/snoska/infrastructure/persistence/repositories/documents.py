@@ -64,6 +64,7 @@ def _summary(row: RowMapping) -> ParseSummary | None:
         method=ExtractionMethod(row["method"]),
         page_count=row["page_count"],
         block_count=row["block_count"],
+        character_count=row["character_count"] or 0,
         ocr_confidence=row["ocr_confidence"],
     )
 
@@ -105,6 +106,7 @@ def _version_state(version: DocumentVersion) -> dict[str, Any]:
         "method": summary.method.value if summary else None,
         "page_count": summary.page_count if summary else None,
         "block_count": summary.block_count if summary else None,
+        "character_count": summary.character_count if summary else None,
         "ocr_confidence": summary.ocr_confidence if summary else None,
     }
 
