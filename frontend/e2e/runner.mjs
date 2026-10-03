@@ -23,7 +23,7 @@ const THEMES = ["light", "dark"];
 const SETTLE_MS = 700;
 
 /** Demo passwords by email, read from the project's seed file. */
-async function credentials() {
+export async function credentials() {
   const seed = await readFile(resolve(ROOT, "backend/demo/seed.yaml"), "utf8");
   const pairs = new Map();
   for (const match of seed.matchAll(
@@ -34,10 +34,11 @@ async function credentials() {
   return pairs;
 }
 
-async function signIn(browser, email, password) {
+export async function signIn(browser, email, password) {
   const context = await browser.newContext({ viewport: VIEWPORTS.desktop });
   const page = await context.newPage();
-  await page.goto(`${BASE}/`);
+  // The root is the public landing now; sign-in is its own route.
+  await page.goto(`${BASE}/auth/login`);
   await page.fill("#username", email);
   if (!(await page.locator("#password").isVisible())) {
     await page.click("#kc-login");
