@@ -5,8 +5,9 @@ import unicodedata
 
 # A quote must be found in the passage it claims to come from. Matching
 # forgives what a reader would not notice (case, spacing, the kind of quote
-# marks and dashes, «ё») and an ellipsis standing for omitted words.
-_ELLIPSIS = re.compile(r"\s*(?:\u2026|\.{3})\s*")
+# marks and dashes, «ё») and an ellipsis standing for omitted words, bare or
+# in the brackets an editor puts around it: "…", "...", "[...]", "(…)".
+_ELLIPSIS = re.compile(r"\s*[\[(<]?\s*(?:\u2026|\.{3})\s*[\])>]?\s*")
 _EQUIVALENT = str.maketrans(
     {
         "«": '"',
@@ -55,12 +56,12 @@ def _normalized(text: str) -> tuple[str, list[int]]:
     return "".join(folded), origin
 
 
-def locate_quote(text: str, quote: str) -> tuple[int, int] | None:
-    """The span of ``text`` the quote reproduces, or None if it does not.
+def locate_parts(text: str, quote: str) -> tuple[tuple[int, int], ...] | None:
+    """The spans of ``text`` each part of the quote reproduces, in order, or
+    None if the quote is not the text's.
 
-    Parts separated by an ellipsis must appear in order; the span runs from
-    the first part to the last. Quotes shorter than a few characters prove
-    nothing and are rejected.
+    Parts are separated by an ellipsis and must appear in order. Quotes
+    shorter than a few characters prove nothing and are rejected.
     """
     parts = [
         trimmed
@@ -71,17 +72,21 @@ def locate_quote(text: str, quote: str) -> tuple[int, int] | None:
         return None
     haystack, origin = _normalized(text)
     cursor = 0
-    first_start: int | None = None
-    last_end = 0
+    spans: list[tuple[int, int]] = []
     for part in parts:
         needle, _ = _normalized(part)
-        found = haystack.find(needle, cursor)
+        found = haystack.find(needle, cursor) if needle else -1
         if found < 0:
             return None
-        if first_start is None:
-            first_start = found
         cursor = found + len(needle)
-        last_end = cursor
-    if first_start is None or last_end == 0:
+        spans.append((origin[found], origin[cursor - 1] + 1))
+    return tuple(spans)
+
+
+def locate_quote(text: str, quote: str) -> tuple[int, int] | None:
+    """The span of ``text`` the quote reproduces, from its first part to its
+    last, or None if it does not."""
+    spans = locate_parts(text, quote)
+    if spans is None:
         return None
-    return origin[first_start], origin[last_end - 1] + 1
+    return spans[0][0], spans[-1][1]

@@ -9,7 +9,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
-from snoska.domain.checks.grounding import locate_quote
+from snoska.domain.checks.grounding import locate_parts
 
 QUESTION_MAX_LENGTH = 1_000
 TITLE_LENGTH = 80
@@ -62,6 +62,12 @@ class UngroundedAnswerError(ValueError):
         self.problem = problem
 
 
+def _closed_by_footnote(text: str) -> str:
+    body = text.rstrip()
+    stop = body[-1] if body and body[-1] in ".!?" else ""
+    return f"{body[: len(body) - len(stop)].rstrip()} [1]{stop}"
+
+
 def read_answer(raw: str, sources: Sequence[SourceProvision]) -> Answer:
     """Accept an answer only if every citation names a given provision and
     quotes it word for word, and every footnote in the text has a citation."""
@@ -86,8 +92,8 @@ def read_answer(raw: str, sources: Sequence[SourceProvision]) -> Answer:
             raise UngroundedAnswerError(
                 f"ссылка {number} указывает на положение, которого не было."
             )
-        span = locate_quote(source.text, quote)
-        if span is None:
+        spans = locate_parts(source.text, quote)
+        if spans is None:
             raise UngroundedAnswerError(
                 f"цитата {number} не найдена дословно в положении {source.key}."
             )
@@ -98,10 +104,15 @@ def read_answer(raw: str, sources: Sequence[SourceProvision]) -> Answer:
                 edition_id=source.edition_id,
                 anchor=source.anchor,
                 citation=source.citation,
-                quote=source.text[span[0] : span[1]],
+                # Words the model left out stay out of the footnote.
+                quote=" … ".join(source.text[start:end] for start, end in spans),
             )
         )
     used = {int(found) for found in _MARKER.findall(text)}
+    if not used and len(citations) == 1:
+        # One citation carries the whole answer: its footnote closes the text.
+        text = _closed_by_footnote(text)
+        used = {1}
     if not used or not used <= set(range(1, len(citations) + 1)):
         raise UngroundedAnswerError(
             "в тексте ответа должны стоять сноски [1], [2]… на приведённые ссылки."

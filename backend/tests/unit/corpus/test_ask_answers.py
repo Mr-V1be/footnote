@@ -51,15 +51,39 @@ def test_a_grounded_answer_keeps_its_footnotes() -> None:
             {
                 "found": True,
                 "answer": "Без сносок.",
-                "citations": [{"norm": "N1", "quote": "принимает решение"}],
+                "citations": [
+                    {"norm": "N1", "quote": "принимает решение"},
+                    {"norm": "N1", "quote": "предоставлении его данных"},
+                ],
             }
         ),
+        answer(citations=[{"norm": "N1", "quote": "принимает [...] о предоставлении чужих"}]),
         "не json",
     ],
 )
 def test_an_ungrounded_answer_is_refused(raw: str) -> None:
     with pytest.raises(UngroundedAnswerError):
         read_answer(raw, [SOURCE])
+
+
+def test_an_editorial_ellipsis_skips_words_of_the_provision() -> None:
+    read = read_answer(
+        answer(citations=[{"norm": "N1", "quote": "Субъект [...] принимает решение"}]),
+        [SOURCE],
+    )
+    assert read.citations[0].quote == "Субъект … принимает решение"
+
+
+def test_a_single_citation_carries_an_answer_without_footnotes() -> None:
+    raw = json.dumps(
+        {
+            "found": True,
+            "answer": "Решение принимает сам субъект.",
+            "citations": [{"norm": "N1", "quote": "принимает решение"}],
+        },
+        ensure_ascii=False,
+    )
+    assert read_answer(raw, [SOURCE]).text == "Решение принимает сам субъект [1]."
 
 
 def test_the_norm_may_be_silent() -> None:
