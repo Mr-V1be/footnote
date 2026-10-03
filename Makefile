@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark watch demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark wait demo-refresh watch demo-documents stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -48,8 +48,14 @@ gate: ## Lint, typecheck, tests and source limits
 recheck: ## Check every document's latest version again (after the checks change)
 	$(BACKEND) snoska checks recheck
 
-benchmark: ## Measure the checks on the reference set (writes data/quality and docs/quality.md)
+benchmark: ## Measure the checks on the reference set, the model timed (writes data/quality and docs/quality.md)
 	$(BACKEND) snoska checks benchmark --markdown ../docs/quality.md
+
+wait: ## Wait until uploaded documents are read and checked
+	$(BACKEND) snoska checks wait
+
+demo-refresh: ## Refresh all that depends on the model: index, reset, recheck, benchmark, screenshots, landing media, video
+	scripts/demo-refresh.sh
 
 watch: ## Check now for a new edition of 152-FZ (weekly in the worker; mail goes to Mailpit)
 	$(BACKEND) snoska corpus watch
