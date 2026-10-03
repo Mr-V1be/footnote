@@ -38,6 +38,11 @@ class BlobStorage(Protocol):
 
     async def exists(self, key: str) -> bool: ...
 
+    def keys(self, prefix: str = "") -> AsyncIterator[str]:
+        """Stored keys under a prefix: for copying the store elsewhere or
+        removing everything of one tenant."""
+        ...
+
     async def available(self) -> bool:
         """The store answers and accepts writes; never raises."""
         ...

@@ -117,6 +117,7 @@
           "session"
         ],
         "summary": "Catalog",
+        "description": "Document kinds and formats the product accepts (public).",
         "operationId": "catalog",
         "responses": {
           "200": {
@@ -209,12 +210,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/organizations/{organization}/workspaces": {
@@ -3913,6 +3909,108 @@
         }
       }
     },
+    "/api/v1/plans": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Plans On Offer",
+        "description": "The plans and their limits, as the data defines them (public).",
+        "operationId": "plans_on_offer",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlansOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/{organization}/billing/ledger": {
       "get": {
         "tags": [
@@ -6469,7 +6567,7 @@
           "checks"
         ],
         "summary": "Check Catalog",
-        "description": "Every check the product runs, what it requires and what it cites.",
+        "description": "Every check the product runs, what it requires and what it cites\n(public: the methodology is shown to guests too).",
         "operationId": "check_catalog",
         "responses": {
           "200": {
@@ -6562,12 +6660,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/checks/quality": {
@@ -6576,7 +6669,7 @@
           "checks"
         ],
         "summary": "Check Quality",
-        "description": "Precision, recall and timing of the checks on the labelled reference set;\nnull until the benchmark has been run.",
+        "description": "Precision, recall and timing of the checks on the labelled reference set;\nnull until the benchmark has been run (public, like the methodology).",
         "operationId": "check_quality",
         "responses": {
           "200": {
@@ -6677,12 +6770,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/corpus/acts": {
@@ -11107,6 +11195,27 @@
           "places"
         ],
         "title": "PlannedFixOut"
+      },
+      "PlansOut": {
+        "properties": {
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanOut"
+            },
+            "type": "array",
+            "title": "Plans"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plans",
+          "currency"
+        ],
+        "title": "PlansOut"
       },
       "Problem": {
         "properties": {

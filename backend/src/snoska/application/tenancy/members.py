@@ -10,6 +10,7 @@ from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.members import (
     Member,
     MemberNotFoundError,
+    ensure_not_protected,
     ensure_owner_remains,
     require_role,
 )
@@ -39,6 +40,7 @@ class OrganizationMembers:
         roles: RoleCatalog,
         audit: AuditTrail,
         meter: UsageMeter,
+        protected_emails: frozenset[str] = frozenset(),
     ) -> None:
         self._uow_factory = uow_factory
         self._directory = directory
@@ -46,6 +48,8 @@ class OrganizationMembers:
         self._roles = roles
         self._audit = audit
         self._meter = meter
+        # Demo sign-in accounts (demo stands only): their roles stay as seeded.
+        self._protected = frozenset(email.casefold() for email in protected_emails)
 
     async def list(self, access: OrganizationAccess) -> Sequence[Member]:
         access.require(Permission.MEMBERS_MANAGE)
@@ -81,6 +85,7 @@ class OrganizationMembers:
         require_role(self._roles, role_code)
         members = await self._directory.list_members(access.organization_id)
         member = self._find(members, user_id)
+        ensure_not_protected(member, self._protected)
         ensure_owner_remains(members, user_id, new_role=role_code)
         await self._administration.set_role(access.organization_id, user_id, role_code)
         await self._record(
@@ -102,6 +107,7 @@ class OrganizationMembers:
         access.require(Permission.MEMBERS_MANAGE)
         members = await self._directory.list_members(access.organization_id)
         member = self._find(members, user_id)
+        ensure_not_protected(member, self._protected)
         ensure_owner_remains(members, user_id, new_role=None)
         await self._administration.remove(access.organization_id, user_id)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:

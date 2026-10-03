@@ -39,7 +39,8 @@ async def me(container: ContainerDep, principal: PrincipalDep) -> MeOut:
 
 
 @router.get("/catalog", response_model=CatalogOut, response_model_by_alias=True)
-async def catalog(container: ContainerDep, _: PrincipalDep) -> CatalogOut:
+async def catalog(container: ContainerDep) -> CatalogOut:
+    """Document kinds and formats the product accepts (public)."""
     data = container.catalog.get()
     return CatalogOut(
         kinds=[

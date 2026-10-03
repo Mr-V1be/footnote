@@ -71,3 +71,12 @@ async def test_an_oversized_upload_leaves_nothing_behind(storage: BlobStorage) -
 async def test_keys_cannot_escape_the_store(storage: BlobStorage) -> None:
     with pytest.raises(ValueError, match="invalid blob key"):
         await storage.read("../etc/passwd")
+
+
+async def test_keys_are_listed_under_a_prefix(storage: BlobStorage) -> None:
+    tenant = f"tenants/{uuid4()}"
+    for name in ("a/original.docx", "b/original.pdf"):
+        await storage.put(f"{tenant}/{name}", chunks(b"data"), max_bytes=1024)
+    await storage.put(f"tenants/{uuid4()}/c/original.docx", chunks(b"other"), max_bytes=1024)
+    listed = sorted([key async for key in storage.keys(f"{tenant}/")])
+    assert listed == [f"{tenant}/a/original.docx", f"{tenant}/b/original.pdf"]

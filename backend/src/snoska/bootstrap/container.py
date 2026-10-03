@@ -63,6 +63,7 @@ from snoska.infrastructure.corpus_sources.pravo_ips import (
     PravoIpsSource,
 )
 from snoska.infrastructure.corpus_sources.snapshot import SnapshotSource
+from snoska.infrastructure.demo.seed_file import demo_login_emails, read_seed
 from snoska.infrastructure.identity.admins import KeycloakPlatformAdmins
 from snoska.infrastructure.identity.health import IdentityHealth
 from snoska.infrastructure.integrations.http_transport import HttpWebhookTransport
@@ -70,9 +71,15 @@ from snoska.infrastructure.notifications.smtp import SmtpConfig, SmtpMailer
 from snoska.infrastructure.persistence.health import DatabaseHealth
 from snoska.infrastructure.queue.health import RedisHealth
 from snoska.infrastructure.storage.health import StorageHealth
+from snoska.ports.blob_storage import BlobStorage
 from snoska.ports.corpus_source import CorpusSource
 from snoska.ports.health import HealthCheck
-from snoska.ports.identity import IdentityProvisioning, TokenVerifier
+from snoska.ports.identity import (
+    IdentityProvisioning,
+    MemberAdministration,
+    OrganizationDirectory,
+    TokenVerifier,
+)
 from snoska.ports.jobs import JobHandler, JobPublisher
 
 __all__ = [
@@ -119,6 +126,9 @@ class Container:
     corpus_watch: WatchCorpusEditions
     verifier: TokenVerifier
     provisioning: IdentityProvisioning
+    directory: OrganizationDirectory
+    administration: MemberAdministration
+    blobs: BlobStorage
     ai: AiAdapters
     health_checks: Sequence[HealthCheck]
     job_handlers: Mapping[str, JobHandler]
@@ -133,6 +143,13 @@ def _corpus_sources(core: Core, catalog: YamlActCatalog) -> dict[str, CorpusSour
         ),
         "snapshot": SnapshotSource(catalog),
     }
+
+
+def _demo_accounts(settings: Settings) -> frozenset[str]:
+    """On a demo stand, the accounts of one-click sign-in (from the seed)."""
+    if not settings.demo.mode:
+        return frozenset()
+    return demo_login_emails(read_seed(settings.demo_root / "seed.yaml"))
 
 
 async def build_container(
@@ -220,7 +237,13 @@ async def build_container(
         ),
         workspaces=Workspaces(uow, core.gate, ORGANIZATION_ROLES, core.audit, clock),
         members=OrganizationMembers(
-            uow, core.directory, core.administration, ORGANIZATION_ROLES, core.audit, core.meter
+            uow,
+            core.directory,
+            core.administration,
+            ORGANIZATION_ROLES,
+            core.audit,
+            core.meter,
+            protected_emails=_demo_accounts(settings),
         ),
         audit=AuditQueries(uow),
         api_keys=ApiKeys(uow, core.audit, clock),
@@ -280,6 +303,9 @@ async def build_container(
         corpus_watch=corpus_watch,
         verifier=core.verifier,
         provisioning=core.keycloak,
+        directory=core.directory,
+        administration=core.administration,
+        blobs=core.blobs,
         ai=core.ai,
         health_checks=health,
         job_handlers={

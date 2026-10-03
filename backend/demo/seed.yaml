@@ -4,6 +4,15 @@
 # test roles of the demo stand only. Apply with `snoska demo seed`; the
 # command is idempotent (Keycloak objects are ensured, uploads are keyed).
 
+# One-click sign-in on the demo stand (SNOSKA_DEMO_MODE): the seeded account
+# each role opens. These accounts keep their roles while the stand is up, and
+# the nightly reset returns everything else to this file.
+demo_login:
+  owner: ershov@zarya.example
+  lawyer: polyakova@zarya.example
+  observer: gusev@zarya.example
+  operator: operator@snoska.example
+
 platform_admin:
   email: operator@snoska.example
   first_name: Ольга
@@ -130,6 +139,11 @@ organizations:
         last_name: Полякова
         password: Snoska-Demo-2026
         role: lawyer
+      - email: gusev@zarya.example
+        first_name: Пётр
+        last_name: Гусев
+        password: Snoska-Demo-2026
+        role: observer
     documents:
       - file: reference/prikaz-zarya.docx
         kind: order

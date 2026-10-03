@@ -135,6 +135,17 @@ class S3BlobStorage:
             response.close()
             response.release_conn()
 
+    async def keys(self, prefix: str = "") -> AsyncIterator[str]:
+        """Stored keys under a prefix, listed in a worker thread."""
+        await self.ensure_bucket()
+        names = await self._run(self._list, prefix)
+        for name in names:
+            yield name
+
+    def _list(self, prefix: str) -> list[str]:
+        objects = self._client.list_objects(self._config.bucket, prefix=prefix, recursive=True)
+        return [item.object_name for item in objects if item.object_name]
+
     async def delete(self, key: str) -> None:
         validate_key(key)
         await self._run(self._client.remove_object, self._config.bucket, key)

@@ -25,7 +25,10 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Catalog */
+        /**
+         * Catalog
+         * @description Document kinds and formats the product accepts (public).
+         */
         get: operations["catalog"];
         put?: never;
         post?: never;
@@ -396,6 +399,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Plans On Offer
+         * @description The plans and their limits, as the data defines them (public).
+         */
+        get: operations["plans_on_offer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/organizations/{organization}/billing/ledger": {
         parameters: {
             query?: never;
@@ -709,7 +732,8 @@ export type paths = {
         };
         /**
          * Check Catalog
-         * @description Every check the product runs, what it requires and what it cites.
+         * @description Every check the product runs, what it requires and what it cites
+         *     (public: the methodology is shown to guests too).
          */
         get: operations["check_catalog"];
         put?: never;
@@ -730,7 +754,7 @@ export type paths = {
         /**
          * Check Quality
          * @description Precision, recall and timing of the checks on the labelled reference set;
-         *     null until the benchmark has been run.
+         *     null until the benchmark has been run (public, like the methodology).
          */
         get: operations["check_quality"];
         put?: never;
@@ -1988,6 +2012,13 @@ export type components = {
             checkCode: string;
             /** Places */
             places: number;
+        };
+        /** PlansOut */
+        PlansOut: {
+            /** Plans */
+            plans: components["schemas"]["PlanOut"][];
+            /** Currency */
+            currency: string;
         };
         /**
          * Problem
@@ -5204,6 +5235,98 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BillingOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    plans_on_offer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlansOut"];
                 };
             };
             /** @description Unauthorized */

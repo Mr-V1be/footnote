@@ -391,12 +391,27 @@
       "roles": [
         "platform-admin"
       ]
+    },
+    {
+      "client": "snoska-demo",
+      "roles": [
+        "platform-admin"
+      ]
     }
   ],
   "clientScopeMappings": {
     "snoska-api": [
       {
         "client": "snoska-web",
+        "roles": [
+          "owner",
+          "lawyer",
+          "executor",
+          "observer"
+        ]
+      },
+      {
+        "client": "snoska-demo",
         "roles": [
           "owner",
           "lawyer",
@@ -454,6 +469,45 @@
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "${SNOSKA_WEB_URL}/*"
       },
+      "protocolMappers": [
+        {
+          "name": "snoska-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "snoska-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "basic",
+        "profile",
+        "email",
+        "roles",
+        "web-origins",
+        "acr"
+      ],
+      "optionalClientScopes": [
+        "organization",
+        "offline_access"
+      ],
+      "fullScopeAllowed": false
+    },
+    {
+      "clientId": "snoska-demo",
+      "name": "Snoska Demo Sign-in",
+      "description": "One-click sign-in by role on the demo stand (SNOSKA_DEMO_MODE). Only the web server knows its secret; an installation without the demo may disable it.",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${SNOSKA_DEMO_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
       "protocolMappers": [
         {
           "name": "snoska-api-audience",

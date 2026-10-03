@@ -253,6 +253,19 @@ class OperationsSettings(BaseSettings):
     platform_admin_role: str = "platform-admin"
 
 
+class DemoSettings(BaseSettings):
+    """The demo stand: one-click sign-in by role, accounts that keep their
+    roles and a nightly return to the seed. Off unless set: a production
+    installation never enables it."""
+
+    model_config = _config("SNOSKA_DEMO_")
+
+    mode: bool = False
+    # Local time of the nightly reset to the seed.
+    reset_hour: int = Field(default=3, ge=0, le=23)
+    timezone: str = "Europe/Moscow"
+
+
 class TenancySettings(BaseSettings):
     model_config = _config("SNOSKA_TENANCY_")
 
@@ -280,6 +293,7 @@ class Settings(BaseSettings):
     payments: PaymentsSettings = Field(default_factory=PaymentsSettings)
     billing: BillingSettings = Field(default_factory=BillingSettings)
     operations: OperationsSettings = Field(default_factory=OperationsSettings)
+    demo: DemoSettings = Field(default_factory=DemoSettings)
     # Where people open the product (links in emails and invitations).
     web_url: str = "http://localhost:46300"
     # Where the API answers for calls made by the platform itself (webhooks

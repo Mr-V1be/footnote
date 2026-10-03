@@ -68,14 +68,16 @@ class FileSystemBlobStorage:
     async def exists(self, key: str) -> bool:
         return await anyio.Path(self._path(key)).is_file()
 
-    async def keys(self) -> AsyncIterator[str]:
-        """Every stored key, for copying the store elsewhere."""
+    async def keys(self, prefix: str = "") -> AsyncIterator[str]:
+        """Stored keys under a prefix (every key without one)."""
         root = anyio.Path(self._root)
         if not await root.is_dir():
             return
         async for path in root.rglob("*"):
             if await path.is_file() and not path.name.startswith("."):
-                yield str(Path(path).relative_to(self._root))
+                key = Path(path).relative_to(self._root).as_posix()
+                if key.startswith(prefix):
+                    yield key
 
     async def available(self) -> bool:
         try:

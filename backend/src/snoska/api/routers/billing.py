@@ -13,6 +13,8 @@ from snoska.api.schemas.billing.billing import (
     LedgerPageOut,
     PlanChangeIn,
     PlanChangeOut,
+    PlanOut,
+    PlansOut,
     TestDecisionIn,
     TestDecisionOut,
     TestPaymentOut,
@@ -32,6 +34,13 @@ async def billing_overview(container: ContainerDep, access: OrganizationAccessDe
     if access.can(Permission.MEMBERS_MANAGE):
         members = len(await container.members.list(access))
     return BillingOut.of(await container.billing.overview(access, members))
+
+
+@router.get("/plans", response_model=PlansOut, response_model_by_alias=True)
+async def plans_on_offer(container: ContainerDep) -> PlansOut:
+    """The plans and their limits, as the data defines them (public)."""
+    catalog = container.billing.plans
+    return PlansOut(plans=[PlanOut.of(plan) for plan in catalog.all()], currency=catalog.currency)
 
 
 @router.get(

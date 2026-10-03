@@ -1,39 +1,16 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Any
-from uuid import UUID
 
-import anyio
 import typer
-import yaml
 
-from snoska.application.documents.upload import IncomingFile
-from snoska.cli.demo_setup import ensure_integrations, ensure_plan, ensure_workspaces
+from snoska.cli.demo_reset import reset_stand, run_nightly
+from snoska.cli.demo_seed import apply_seed
 from snoska.cli.support import container_scope, settings_for_cli
-from snoska.domain.tenancy.access import MembershipClaim, Principal
-from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, OWNER_ROLE
-from snoska.ports.identity import MemberSpec
+from snoska.infrastructure.demo.seed_file import read_seed
 
 app = typer.Typer(help="Demo stand.", no_args_is_help=True)
-
-READ_CHUNK_BYTES = 256 * 1024
-
-
-async def _file_chunks(path: Path) -> AsyncIterator[bytes]:
-    async with await anyio.open_file(path, "rb") as handle:
-        while chunk := await handle.read(READ_CHUNK_BYTES):
-            yield chunk
-
-
-def _state(created: bool) -> str:
-    return "uploaded" if created else "already present"
-
-
-def _display_name(member: dict[str, Any]) -> str:
-    return f"{member['first_name']} {member['last_name']}"
 
 
 @app.command()
@@ -42,101 +19,20 @@ def seed(file: Path | None = None) -> None:
 
     async def run() -> None:
         settings = settings_for_cli()
-        seed_file = file or settings.demo_root / "seed.yaml"
-        data: dict[str, Any] = yaml.safe_load(seed_file.read_text(encoding="utf-8"))
-        role_codes = tuple(role.code for role in ORGANIZATION_ROLES.all())
+        data = read_seed(file or settings.demo_root / "seed.yaml")
         async with container_scope(settings) as container:
-            provisioning = container.provisioning
-            admin = data["platform_admin"]
-            await provisioning.ensure_platform_user(
-                admin["email"],
-                admin["first_name"],
-                admin["last_name"],
-                admin["password"],
-                admin["realm_role"],
-            )
-            typer.echo(f"platform admin: {admin['email']}")
-            for organization in data["organizations"]:
-                alias = organization["alias"]
-                profile = await provisioning.ensure_organization(
-                    alias, organization["name"], organization["domain"]
-                )
-                await provisioning.ensure_role_groups(profile.id, role_codes)
-                members: dict[str, Principal] = {}
-                for member in organization["members"]:
-                    user_id = await provisioning.ensure_member(
-                        profile.id,
-                        MemberSpec(
-                            email=member["email"],
-                            first_name=member["first_name"],
-                            last_name=member["last_name"],
-                            password=member["password"],
-                            role_code=member["role"],
-                        ),
-                    )
-                    members[member["email"]] = Principal(
-                        user_id=user_id,
-                        email=member["email"],
-                        display_name=_display_name(member),
-                        memberships=(
-                            MembershipClaim(
-                                organization_id=profile.id,
-                                organization_alias=alias,
-                                role_codes=frozenset({member["role"]}),
-                            ),
-                        ),
-                        platform_role_codes=frozenset(),
-                    )
-                    typer.echo(f"{alias}: {member['email']} ({member['role']})")
-                owner = next(
-                    members[member["email"]]
-                    for member in organization["members"]
-                    if member["role"] == OWNER_ROLE
-                )
-                owner_access = await container.tenant_access.organization_access(owner, alias)
-                await ensure_workspaces(
-                    container, owner_access, alias, organization.get("workspaces", []), members
-                )
-                if "plan" in organization:
-                    await ensure_plan(container, profile.id, alias, organization["plan"])
-                uploaded: dict[str, UUID] = {}
-                for document in organization.get("documents", []):
-                    uploader = members[document["uploaded_by"]]
-                    access = await container.tenant_access.organization_access(uploader, alias)
-                    path = settings.demo_root / document["file"]
-                    result = await container.uploads.upload_document(
-                        access,
-                        uploader.profile,
-                        workspace_slug=document.get(
-                            "workspace", settings.tenancy.default_workspace_slug
-                        ),
-                        incoming=IncomingFile(filename=path.name, chunks=_file_chunks(path)),
-                        kind_code=document["kind"],
-                        title=document.get("title"),
-                        upload_key=f"demo-seed:{alias}:{document['file']}",
-                    )
-                    uploaded[document["file"]] = result.document_id
-                    typer.echo(f"{alias}: {path.name} {_state(result.created)}")
-                for version in organization.get("versions", []):
-                    uploader = members[version["uploaded_by"]]
-                    access = await container.tenant_access.organization_access(uploader, alias)
-                    path = settings.demo_root / version["file"]
-                    result = await container.uploads.upload_version(
-                        access,
-                        uploader.profile,
-                        document_id=uploaded[version["document"]],
-                        incoming=IncomingFile(filename=path.name, chunks=_file_chunks(path)),
-                        upload_key=f"demo-seed:{alias}:{version['file']}",
-                    )
-                    state = _state(result.created)
-                    typer.echo(f"{alias}: {path.name} v{result.version_number} {state}")
-                if "integrations" in organization:
-                    await ensure_integrations(
-                        container,
-                        owner_access,
-                        alias,
-                        organization["integrations"],
-                        settings.api_url,
-                    )
+            await apply_seed(settings, container, data)
 
     asyncio.run(run())
+
+
+@app.command()
+def reset() -> None:
+    """Return the demo stand to its seed now (SNOSKA_DEMO_MODE only)."""
+    asyncio.run(reset_stand(settings_for_cli()))
+
+
+@app.command()
+def nightly() -> None:
+    """Return the demo stand to its seed every night at SNOSKA_DEMO_RESET_HOUR."""
+    asyncio.run(run_nightly(settings_for_cli()))

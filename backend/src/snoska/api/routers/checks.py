@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, status
 from fastapi.responses import StreamingResponse
 
-from snoska.api.dependencies import ContainerDep, CorpusReaderDep, OrganizationAccessDep
+from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
 from snoska.api.schemas.checks import (
     CheckCatalogOut,
@@ -122,8 +122,9 @@ async def review_finding(
 
 
 @router.get("/checks/catalog", response_model=CheckCatalogOut, response_model_by_alias=True)
-async def check_catalog(container: ContainerDep, _: CorpusReaderDep) -> CheckCatalogOut:
-    """Every check the product runs, what it requires and what it cites."""
+async def check_catalog(container: ContainerDep) -> CheckCatalogOut:
+    """Every check the product runs, what it requires and what it cites
+    (public: the methodology is shown to guests too)."""
     ai = container.ai
     models = ModelsOut(
         configured=ai.configured,
@@ -134,7 +135,7 @@ async def check_catalog(container: ContainerDep, _: CorpusReaderDep) -> CheckCat
 
 
 @router.get("/checks/quality", response_model=QualityOut | None, response_model_by_alias=True)
-async def check_quality(container: ContainerDep, _: CorpusReaderDep) -> QualityOut | None:
+async def check_quality(container: ContainerDep) -> QualityOut | None:
     """Precision, recall and timing of the checks on the labelled reference set;
-    null until the benchmark has been run."""
+    null until the benchmark has been run (public, like the methodology)."""
     return QualityOut.of(container.quality.latest())

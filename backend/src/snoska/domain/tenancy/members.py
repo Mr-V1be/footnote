@@ -18,6 +18,13 @@ class LastOwnerError(ConflictError):
     code = "last_owner"
 
 
+class DemoAccountProtectedError(ConflictError):
+    """On the demo stand the accounts of one-click sign-in keep their roles,
+    so that every visitor finds them as described."""
+
+    code = "demo_account_protected"
+
+
 class MemberNotFoundError(NotFoundError):
     code = "member_not_found"
 
@@ -53,3 +60,8 @@ def ensure_owner_remains(members: Sequence[Member], user_id: UUID, *, new_role: 
         return
     if len(owners) <= 1:
         raise LastOwnerError("the organization would be left without an owner")
+
+
+def ensure_not_protected(member: Member, protected_emails: frozenset[str]) -> None:
+    if member.email and member.email.casefold() in protected_emails:
+        raise DemoAccountProtectedError(f"{member.email} is a demo sign-in account")

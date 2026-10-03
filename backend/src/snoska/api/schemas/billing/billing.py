@@ -54,6 +54,11 @@ class LedgerEntryOut(ApiModel):
         )
 
 
+class PlansOut(ApiModel):
+    plans: list[PlanOut]
+    currency: str
+
+
 class LedgerPageOut(ApiModel):
     items: list[LedgerEntryOut]
     next_cursor: str | None
