@@ -14,6 +14,7 @@ class AskStatusOut(ApiModel):
     configured: bool
     language_model: str | None
     embedding_model: str | None
+    requests_left_today: int | None
 
     @classmethod
     def of(cls, status: AskStatus) -> AskStatusOut:
@@ -21,6 +22,7 @@ class AskStatusOut(ApiModel):
             configured=status.configured,
             language_model=status.language_model,
             embedding_model=status.embedding_model,
+            requests_left_today=status.requests_left_today,
         )
 
 

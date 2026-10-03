@@ -6,13 +6,14 @@ from dataclasses import dataclass
 import httpx
 
 from snoska.bootstrap.settings import AiProvider, AiSettings
+from snoska.infrastructure.ai.cache import CachingLanguageModel
 from snoska.infrastructure.ai.http import HttpPolicy
 from snoska.infrastructure.ai.openai_compatible import (
     OpenAiCompatibleEmbedder,
     OpenAiCompatibleLanguageModel,
 )
 from snoska.infrastructure.ai.unconfigured import UnconfiguredEmbedder, UnconfiguredLanguageModel
-from snoska.ports.ai import Embedder, LanguageModel
+from snoska.ports.ai import CompletionCache, Embedder, LanguageModel, RequestBudget
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +28,7 @@ class AiAdapters:
     provider: AiProvider
     embedder: Embedder
     language_model: LanguageModel
+    budget: RequestBudget
     close: Callable[[], Awaitable[None]]
 
     @property
@@ -35,18 +37,29 @@ class AiAdapters:
 
 
 def _policy(settings: AiSettings) -> HttpPolicy:
-    return HttpPolicy(read_timeout=settings.request_timeout_seconds)
+    # Two tries per model: on a free tier every request counts.
+    return HttpPolicy(read_timeout=settings.request_timeout_seconds, attempts=2)
 
 
 async def _nothing_to_close() -> None:
     return None
 
 
-def _unconfigured(settings: AiSettings) -> AiAdapters:
+@dataclass(frozen=True, slots=True)
+class AiServices:
+    """What the adapters share with the rest of the process: the budget of
+    requests and the cache of answers (unused when no API is configured)."""
+
+    budget: RequestBudget
+    cache: CompletionCache | None
+
+
+def _unconfigured(settings: AiSettings, services: AiServices) -> AiAdapters:
     return AiAdapters(
         provider=AiProvider.NONE,
         embedder=UnconfiguredEmbedder(settings.embedding_space()),
         language_model=UnconfiguredLanguageModel(),
+        budget=services.budget,
         close=_nothing_to_close,
     )
 
@@ -59,7 +72,7 @@ def _client(base_url: str, api_key: str, policy: HttpPolicy) -> httpx.AsyncClien
     )
 
 
-def _openai_compatible(settings: AiSettings) -> AiAdapters:
+def _openai_compatible(settings: AiSettings, services: AiServices) -> AiAdapters:
     settings.require_api()
     policy = _policy(settings)
     llm_key = settings.llm_api_key.get_secret_value()
@@ -79,16 +92,31 @@ def _openai_compatible(settings: AiSettings) -> AiAdapters:
         embedder=OpenAiCompatibleEmbedder(
             embeddings, settings.embedding_model, settings.embedding_space(), policy
         ),
-        language_model=OpenAiCompatibleLanguageModel(chat, settings.llm_model, policy),
+        language_model=_cached(
+            OpenAiCompatibleLanguageModel(
+                chat,
+                settings.llm_model,
+                policy,
+                fallbacks=settings.fallback_models(),
+                budget=services.budget,
+                extra_body=settings.extra_body(),
+            ),
+            services.cache,
+        ),
+        budget=services.budget,
         close=close,
     )
 
 
-AI_PROVIDERS: Mapping[AiProvider, Callable[[AiSettings], AiAdapters]] = {
+def _cached(model: OpenAiCompatibleLanguageModel, cache: CompletionCache | None) -> LanguageModel:
+    return model if cache is None else CachingLanguageModel(model, cache, model.chain)
+
+
+AI_PROVIDERS: Mapping[AiProvider, Callable[[AiSettings, AiServices], AiAdapters]] = {
     AiProvider.NONE: _unconfigured,
     AiProvider.OPENAI_COMPATIBLE: _openai_compatible,
 }
 
 
-def build_ai_adapters(settings: AiSettings) -> AiAdapters:
-    return AI_PROVIDERS[settings.ai_provider](settings)
+def build_ai_adapters(settings: AiSettings, services: AiServices) -> AiAdapters:
+    return AI_PROVIDERS[settings.ai_provider](settings, services)

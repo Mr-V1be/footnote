@@ -33,6 +33,7 @@ from snoska.ports.ai import (
     LanguageModel,
     MessageRole,
     ModelOutputError,
+    RequestBudget,
 )
 from snoska.ports.clock import Clock
 from snoska.ports.unit_of_work import UnitOfWorkFactory
@@ -66,6 +67,8 @@ class AskStatus:
     configured: bool
     language_model: str | None
     embedding_model: str | None
+    # Model requests left today on a free tier; None without a daily allowance.
+    requests_left_today: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +92,7 @@ class NormQuestions:
         clock: Clock,
         *,
         configured: bool,
+        budget: RequestBudget | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._norms = norms
@@ -97,12 +101,14 @@ class NormQuestions:
         self._meter = meter
         self._clock = clock
         self._configured = configured
+        self._budget = budget
 
-    def status(self) -> AskStatus:
+    async def status(self) -> AskStatus:
         return AskStatus(
             configured=self._configured,
             language_model=self._model.model or None,
             embedding_model=self._embedder.model or None,
+            requests_left_today=await self._budget.remaining_today() if self._budget else None,
         )
 
     async def conversations(self, access: OrganizationAccess) -> Sequence[Conversation]:

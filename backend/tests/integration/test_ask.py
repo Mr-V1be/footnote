@@ -91,6 +91,7 @@ async def test_without_a_model_api_the_question_is_refused_plainly(
                 "configured": False,
                 "languageModel": None,
                 "embeddingModel": None,
+                "requestsLeftToday": None,
             }
             refused = await api.post(BASE, headers=auth(tokens, EVA), json={"question": "Что?"})
     finally:

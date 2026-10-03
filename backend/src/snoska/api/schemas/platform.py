@@ -81,6 +81,7 @@ class SystemOut(ApiModel):
     edition_checks: list[EditionCheckOut]
     next_corpus_watch: datetime | None
     outbox_pending: int
+    model_requests_left: int | None
 
     @classmethod
     def of(cls, status: SystemStatus) -> SystemOut:
@@ -102,6 +103,7 @@ class SystemOut(ApiModel):
             edition_checks=[EditionCheckOut.of(check) for check in status.edition_checks],
             next_corpus_watch=status.next_corpus_watch,
             outbox_pending=status.outbox_pending,
+            model_requests_left=status.model_requests_left,
         )
 
 

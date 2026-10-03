@@ -16,6 +16,11 @@ class ModelNotConfiguredError(AiProviderError):
     """No model API is configured for this installation: nothing to retry."""
 
 
+class ModelBudgetExhaustedError(AiProviderError):
+    """The requests the model allows today are spent: checks wait for the
+    budget to renew (or for an administrator to connect a paid model)."""
+
+
 class ModelOutputError(AiProviderError):
     """The provider answered, but not in the form the request demanded
     (e.g. no JSON object for a structured request). Asking again can help."""
@@ -62,3 +67,26 @@ class LanguageModel(Protocol):
     model: str
 
     async def complete(self, request: CompletionRequest) -> Completion: ...
+
+
+class RequestBudget(Protocol):
+    """How many model requests may still be made: a per-minute pace and a
+    daily allowance, shared by every process of the installation."""
+
+    async def spend(self) -> None:
+        """Take one request; wait for the minute to pass if the pace is
+        reached, raise ModelBudgetExhaustedError if the day's allowance is."""
+        ...
+
+    async def remaining_today(self) -> int | None:
+        """Requests left today; None when there is no daily allowance."""
+        ...
+
+
+class CompletionCache(Protocol):
+    """Answers of the model kept by the request that produced them: the same
+    request (same text, checks, prompt and models) is never paid twice."""
+
+    async def get(self, key: str) -> Completion | None: ...
+
+    async def put(self, key: str, completion: Completion) -> None: ...

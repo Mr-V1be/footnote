@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable, Mapping, Sequence
+from collections.abc import AsyncIterator, Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 import structlog
 
 from snoska.domain.checks.catalog import CheckDefinition, CheckMethod
 from snoska.domain.checks.outcome import CheckOutcome
 from snoska.domain.documents.structure import DocumentStructure
-from snoska.ports.ai import AiProviderError, ModelNotConfiguredError
+from snoska.ports.ai import AiProviderError, ModelBudgetExhaustedError, ModelNotConfiguredError
 from snoska.ports.checks.embeddings import EmbeddingCache
 
 log = structlog.get_logger(__name__)
@@ -24,6 +24,8 @@ class CheckErrorCode:
 
     MODEL_NOT_CONFIGURED = "model_not_configured"
     MODEL_UNAVAILABLE = "model_unavailable"
+    # The model's requests for the day are spent; the check runs again later.
+    MODEL_DAILY_LIMIT = "model_daily_limit"
     INVALID_MODEL_ANSWER = "invalid_model_answer"
     NORM_UNAVAILABLE = "norm_unavailable"
     INTERNAL_ERROR = "internal_error"
@@ -51,12 +53,22 @@ class ExecutorSession(Protocol):
     async def execute(self, check: CheckDefinition) -> CheckOutcome: ...
 
 
+@runtime_checkable
+class BatchSession(Protocol):
+    """Checks of one method answered together (one model request for many
+    checks): outcomes arrive as they are settled, in any order."""
+
+    def execute_many(
+        self, checks: Sequence[CheckDefinition]
+    ) -> AsyncIterator[tuple[CheckDefinition, CheckOutcome]]: ...
+
+
 class CheckExecutor(Protocol):
     method: CheckMethod
 
     async def open(
         self, document: DocumentUnderCheck, checks: Sequence[CheckDefinition]
-    ) -> ExecutorSession:
+    ) -> ExecutorSession | BatchSession:
         """Prepare the shared context (e.g. a passage index); may raise AiProviderError."""
         ...
 
@@ -74,6 +86,8 @@ Record = Callable[[Executed], Awaitable[None]]
 def _provider_error_code(error: AiProviderError) -> str:
     if isinstance(error, ModelNotConfiguredError):
         return CheckErrorCode.MODEL_NOT_CONFIGURED
+    if isinstance(error, ModelBudgetExhaustedError):
+        return CheckErrorCode.MODEL_DAILY_LIMIT
     return CheckErrorCode.MODEL_UNAVAILABLE
 
 
@@ -110,6 +124,9 @@ class CheckEngine:
             if not group:
                 continue
             session = await self._open(executor, document, group)
+            if isinstance(session, BatchSession):
+                tasks.append(self._execute_batch(session, group, lock, record))
+                continue
             limit = asyncio.Semaphore(max(1, session.concurrency))
             tasks.extend(self._execute(session, check, limit, lock, record) for check in group)
         await asyncio.gather(*tasks)
@@ -117,7 +134,7 @@ class CheckEngine:
     @staticmethod
     async def _open(
         executor: CheckExecutor, document: DocumentUnderCheck, group: Sequence[CheckDefinition]
-    ) -> ExecutorSession:
+    ) -> ExecutorSession | BatchSession:
         try:
             return await executor.open(document, group)
         except AiProviderError as exc:
@@ -145,3 +162,34 @@ class CheckEngine:
             duration = round((time.perf_counter() - started) * MILLISECONDS)
         async with lock:
             await record(Executed(check, outcome, duration))
+
+    @staticmethod
+    async def _execute_batch(
+        session: BatchSession,
+        group: Sequence[CheckDefinition],
+        lock: asyncio.Lock,
+        record: Record,
+    ) -> None:
+        started = time.perf_counter()
+        pending = {check.code: check for check in group}
+
+        def elapsed() -> int:
+            return round((time.perf_counter() - started) * MILLISECONDS)
+
+        try:
+            async for check, outcome in session.execute_many(group):
+                pending.pop(check.code, None)
+                async with lock:
+                    await record(Executed(check, outcome, elapsed()))
+            code = None
+        except AiProviderError as exc:
+            log.warning("checks.model_unavailable", checks=len(pending), error=str(exc))
+            code = _provider_error_code(exc)
+        except Exception:
+            log.exception("checks.batch_failed", checks=len(pending))
+            code = CheckErrorCode.INTERNAL_ERROR
+        # Whatever the batch did not settle is recorded as not performed.
+        for check in pending.values():
+            async with lock:
+                outcome = CheckOutcome.failed(code or CheckErrorCode.INTERNAL_ERROR)
+                await record(Executed(check, outcome, elapsed()))

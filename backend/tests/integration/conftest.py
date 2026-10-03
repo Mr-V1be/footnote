@@ -23,7 +23,13 @@ os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
 
 from snoska.api.app import create_app
 from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import BACKEND_ROOT, Settings, StorageBackend
+from snoska.bootstrap.settings import (
+    BACKEND_ROOT,
+    AiProvider,
+    AiSettings,
+    Settings,
+    StorageBackend,
+)
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
 from snoska.infrastructure.persistence.vector_index import ensure_space
@@ -37,7 +43,7 @@ from tests.support.scenario import MEMBERS, ORG_A, ORG_B, member_of
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
-    "edition_checks, task_states, conversation_turns, conversations, "
+    "model_completions, edition_checks, task_states, conversation_turns, conversations, "
     "version_changes, payment_events, invoices, usage_ledger, subscriptions, "
     "webhook_deliveries, webhook_endpoints, api_keys, audit_events, workspace_members, "
     "findings, check_results, check_runs, text_embeddings, edition_indexes, "
@@ -73,6 +79,8 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     )
     billing = base.billing.model_copy(update={"plans": TEST_PLANS})
     payments = base.payments.model_copy(update={"test_secret": SecretStr("test-payments")})
+    # Tests never reach a real model, whatever the stand's .env configures.
+    ai = AiSettings(_env_file=None, ai_provider=AiProvider.NONE)
     return base.model_copy(
         update={
             "keycloak": keycloak,
@@ -80,6 +88,7 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
             "integrations": integrations,
             "billing": billing,
             "payments": payments,
+            "ai": ai,
         }
     )
 

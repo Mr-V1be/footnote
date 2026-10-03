@@ -82,6 +82,10 @@ class DocumentVersionRepository(Protocol):
 
     async def list_for_document(self, document_id: UUID) -> Sequence[DocumentVersion]: ...
 
+    async def latest_waiting_for_model(self) -> Sequence[DocumentVersion]:
+        """Latest versions whose latest check waited for the model's allowance."""
+        ...
+
     async def latest_parsed(self) -> Sequence[DocumentVersion]:
         """The latest version of every document of the tenant, where it is parsed."""
         ...

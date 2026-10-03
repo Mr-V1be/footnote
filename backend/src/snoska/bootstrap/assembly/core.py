@@ -1,19 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import timedelta
 
 import httpx
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from snoska.application.audit.trail import AuditTrail
 from snoska.application.billing.meter import UsageMeter
 from snoska.application.integrations.events import EventFollowUps, OrganizationEvents
 from snoska.application.tenancy.gate import WorkspaceGate
-from snoska.bootstrap.providers import AiAdapters, build_ai_adapters
+from snoska.bootstrap.providers import AiAdapters, AiServices, build_ai_adapters
 from snoska.bootstrap.settings import Settings
 from snoska.bootstrap.storage import build_blob_storage
 from snoska.domain.billing.plans import PlanCatalog
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES
+from snoska.infrastructure.ai.budget import RedisRequestBudget, UnlimitedBudget
 from snoska.infrastructure.billing.plans import load_plans
 from snoska.infrastructure.identity.claims import KeycloakClaimsMapper
 from snoska.infrastructure.identity.jwks import JwksKeySource
@@ -25,10 +28,12 @@ from snoska.infrastructure.parsing.ocr.tesseract import TesseractConfig, Tessera
 from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
 from snoska.infrastructure.parsing.registry import ParserRegistry
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
+from snoska.infrastructure.persistence.repositories.completions import PostgresCompletionCache
 from snoska.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
 from snoska.infrastructure.system.clock import SystemClock
-from snoska.ports.ai import Embedder, LanguageModel
+from snoska.ports.ai import Embedder, LanguageModel, RequestBudget
 from snoska.ports.blob_storage import BlobStorage
+from snoska.ports.clock import Clock
 from snoska.ports.identity import MemberAdministration, OrganizationDirectory, TokenVerifier
 from snoska.ports.integrations.transport import WebhookTransport
 
@@ -70,6 +75,7 @@ class Core:
     engine: AsyncEngine
     http: httpx.AsyncClient
     ai: AiAdapters
+    redis: Redis
     clock: SystemClock
     uow: SqlUnitOfWorkFactory
     blobs: BlobStorage
@@ -109,19 +115,43 @@ class Core:
     async def close(self) -> None:
         await self.ai.close()
         await self.http.aclose()
+        await self.redis.aclose()
         await self.engine.dispose()
+
+
+def _ai_services(settings: Settings, engine: AsyncEngine, clock: Clock, redis: Redis) -> AiServices:
+    ai = settings.ai
+    limited = ai.llm_requests_per_minute > 0 or ai.llm_requests_per_day > 0
+    budget: RequestBudget = (
+        RedisRequestBudget(
+            redis,
+            per_minute=ai.llm_requests_per_minute,
+            per_day=ai.llm_requests_per_day,
+            clock=clock,
+        )
+        if limited
+        else UnlimitedBudget()
+    )
+    cache = (
+        PostgresCompletionCache(engine, clock, timedelta(days=ai.llm_cache_days))
+        if ai.llm_cache_days > 0
+        else None
+    )
+    return AiServices(budget=budget, cache=cache)
 
 
 async def build_core(settings: Settings, overrides: Overrides) -> Core:
     engine = create_engine(app_database(settings))
     http = httpx.AsyncClient(timeout=HTTP_TIMEOUT_SECONDS)
+    redis: Redis = Redis.from_url(settings.redis.url())
+    clock = SystemClock()
     try:
-        ai = build_ai_adapters(settings.ai)
+        ai = build_ai_adapters(settings.ai, _ai_services(settings, engine, clock, redis))
     except BaseException:
         await http.aclose()
+        await redis.aclose()
         await engine.dispose()
         raise
-    clock = SystemClock()
     box = FernetSecretBox(settings.integrations.secrets_key.get_secret_value())
     return Core(
         settings=settings,
@@ -129,6 +159,7 @@ async def build_core(settings: Settings, overrides: Overrides) -> Core:
         engine=engine,
         http=http,
         ai=ai,
+        redis=redis,
         clock=clock,
         uow=SqlUnitOfWorkFactory(engine, box),
         blobs=build_blob_storage(settings.storage),

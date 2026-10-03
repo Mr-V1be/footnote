@@ -15,6 +15,7 @@ from snoska.domain.operations.schedule import EditionCheck
 from snoska.domain.tenancy.access import PlatformAccess
 from snoska.domain.tenancy.organization import Organization
 from snoska.domain.tenancy.permissions import Permission
+from snoska.ports.ai import RequestBudget
 from snoska.ports.health import HealthCheck
 from snoska.ports.identity import OrganizationDirectory
 from snoska.ports.unit_of_work import UnitOfWorkFactory
@@ -51,6 +52,7 @@ class SystemStatus:
     edition_checks: Sequence[EditionCheck]
     next_corpus_watch: datetime | None
     outbox_pending: int
+    model_requests_left: int | None = None
 
 
 class PlatformConsole:
@@ -69,6 +71,7 @@ class PlatformConsole:
         language_model: str | None,
         embedding_model: str | None,
         embedding_space: EmbeddingSpace,
+        budget: RequestBudget | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._billing = billing
@@ -76,6 +79,7 @@ class PlatformConsole:
         self._health = health
         self._scheduler = scheduler
         self._model = (model_configured, language_model, embedding_model)
+        self._budget = budget
         self._space = embedding_space
 
     async def organizations(self, access: PlatformAccess) -> Sequence[OrganizationSummary]:
@@ -141,4 +145,5 @@ class PlatformConsole:
             edition_checks=checks,
             next_corpus_watch=watch.next_run_at if watch else None,
             outbox_pending=pending,
+            model_requests_left=await self._budget.remaining_today() if self._budget else None,
         )

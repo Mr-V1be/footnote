@@ -42,7 +42,7 @@ def check_engine(
                 model,
                 norms,
                 LegalCheckSettings(
-                    concurrency=settings.model_concurrency,
+                    checks_per_request=settings.checks_per_request,
                     fragments=settings.fragments,
                     related_norms=settings.related_norms,
                     max_attempts=settings.max_attempts,

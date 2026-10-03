@@ -13,7 +13,7 @@ from snoska.application.billing.service import BillingService
 from snoska.application.checks.progress import RunProgress
 from snoska.application.checks.quality.benchmark import CheckBenchmark
 from snoska.application.checks.quality.queries import QualityQueries
-from snoska.application.checks.recheck import RecheckDocuments
+from snoska.application.checks.recheck import RecheckDocuments, ResumeWaitingChecks
 from snoska.application.checks.service import CheckService
 from snoska.application.corpus.indexing import IndexCorpusEdition
 from snoska.application.corpus.queries import CorpusQueries
@@ -35,6 +35,7 @@ from snoska.application.shared.jobs import (
     INDEX_CORPUS_EDITION,
     NOTIFY_TEST_PAYMENT,
     PARSE_DOCUMENT_VERSION,
+    RESUME_CHECKS,
     RUN_CHECKS,
     WATCH_CORPUS,
 )
@@ -90,6 +91,9 @@ __all__ = [
     "check_engine",
     "load_check_catalog",
 ]
+
+
+HOUR = timedelta(hours=1)
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,6 +212,7 @@ async def build_container(
                 job_name=WATCH_CORPUS.name,
                 interval=timedelta(hours=operations.corpus_watch_interval_hours),
             ),
+            PeriodicTask(name=RESUME_CHECKS.name, job_name=RESUME_CHECKS.name, interval=HOUR),
         ),
         clock,
     )
@@ -265,6 +270,7 @@ async def build_container(
             core.meter,
             clock,
             configured=core.ai.configured or core.overrides.language_model is not None,
+            budget=core.ai.budget,
         ),
         autofix=Autofix(
             uow,
@@ -298,6 +304,7 @@ async def build_container(
             language_model=core.language_model.model or None,
             embedding_model=core.embedder.model or None,
             embedding_space=core.embedder.space,
+            budget=core.ai.budget,
         ),
         scheduler=scheduler,
         corpus_watch=corpus_watch,
@@ -320,6 +327,7 @@ async def build_container(
             RUN_CHECKS.name: checks.run_job,
             DELIVER_WEBHOOK.name: DeliverWebhook(uow, transport, clock),
             WATCH_CORPUS.name: corpus_watch,
+            RESUME_CHECKS.name: ResumeWaitingChecks(checks.recheck, core.ai.budget),
             NOTIFY_TEST_PAYMENT.name: TestPaymentNotifier(
                 core.http, f"{settings.api_url}/api/v1/billing/webhooks/test"
             ),

@@ -65,8 +65,8 @@ async def test_a_new_edition_is_loaded_and_the_operator_told_once(container: Con
 
 async def test_periodic_tasks_are_queued_once_when_due(container: Container) -> None:
     await container.scheduler.register()
-    assert await container.scheduler.tick() == 1
-    assert await container.scheduler.tick() == 0, "the next run is a week away"
+    assert await container.scheduler.tick() == 2, "the weekly watch and the hourly resume"
+    assert await container.scheduler.tick() == 0, "neither is due again yet"
     async with container.engine.begin() as connection:
         jobs = (
             (
@@ -77,7 +77,7 @@ async def test_periodic_tasks_are_queued_once_when_due(container: Container) -> 
             .scalars()
             .all()
         )
-    assert jobs == ["corpus.watch"]
+    assert sorted(jobs) == ["checks.resume", "corpus.watch"]
 
 
 async def test_the_operator_sees_organizations_and_moves_them_between_plans(

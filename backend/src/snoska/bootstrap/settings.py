@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from enum import StrEnum
 from pathlib import Path
@@ -110,6 +111,28 @@ class AiSettings(BaseSettings):
     # Vector size the embedding model returns; it names the vector space.
     embedding_dimensions: int = 0
     request_timeout_seconds: float = 120.0
+    # Models that answer when the first one is rate-limited, comma-separated.
+    # Free models only, unless the owner decides otherwise.
+    llm_fallback_models: str = ""
+    # Extra fields of every chat request, as JSON (provider-specific options,
+    # e.g. {"reasoning": {"effort": "low"}} for reasoning models).
+    llm_extra_body: str = ""
+    # The provider's pace and daily allowance (0: none), shared by all processes.
+    llm_requests_per_minute: int = Field(default=0, ge=0)
+    llm_requests_per_day: int = Field(default=0, ge=0)
+    # A cached answer is reused for this many days.
+    llm_cache_days: int = Field(default=30, ge=0)
+
+    def extra_body(self) -> dict[str, object]:
+        if not self.llm_extra_body.strip():
+            return {}
+        value = json.loads(self.llm_extra_body)
+        if not isinstance(value, dict):
+            raise ValueError("SNOSKA_LLM_EXTRA_BODY must be a JSON object")
+        return value
+
+    def fallback_models(self) -> tuple[str, ...]:
+        return tuple(item.strip() for item in self.llm_fallback_models.split(",") if item.strip())
 
     def embedding_space(self) -> EmbeddingSpace:
         """The vector space of the configured model: vectors of different
@@ -148,14 +171,15 @@ class ChecksSettings(BaseSettings):
     # Labelled documents the checks are measured on, and the latest result.
     reference_dir: Path = BACKEND_ROOT / "demo" / "reference"
     quality_report: Path = BACKEND_ROOT / "data" / "quality" / "benchmark.json"
-    # Model checks running at once; match the model server's parallel slots.
-    model_concurrency: int = 2
-    # Passages of the document shown to the model for one requirement.
-    fragments: int = 8
+    # Requirements of a document asked in one model request: free tiers allow
+    # few requests a day, so a document's legal checks share one or two.
+    checks_per_request: int = 12
+    # Passages of the document retrieved for one requirement.
+    fragments: int = 4
     # Provisions found by meaning, besides those the check names.
     related_norms: int = 1
-    # Answers asked for one check before it is reported as failed.
-    max_attempts: int = 3
+    # Requests for a batch: the first, then the rejected verdicts once more.
+    max_attempts: int = 2
 
 
 class ApiSettings(BaseSettings):

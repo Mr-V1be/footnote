@@ -1,13 +1,24 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import asyncio
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import httpx
+import structlog
 
 from snoska.domain.corpus.embedding import EmbeddingSpace
+from snoska.infrastructure.ai.budget import UnlimitedBudget
 from snoska.infrastructure.ai.http import HttpPolicy, ensure_json_object, post_json
-from snoska.ports.ai import AiProviderError, Completion, CompletionRequest
+from snoska.ports.ai import (
+    AiProviderError,
+    Completion,
+    CompletionRequest,
+    ModelBudgetExhaustedError,
+    RequestBudget,
+)
+
+log = structlog.get_logger(__name__)
 
 SCHEMA_NAME = "answer"
 
@@ -36,20 +47,50 @@ class OpenAiCompatibleEmbedder:
         return [[float(value) for value in item["embedding"]] for item in ordered]
 
 
-class OpenAiCompatibleLanguageModel:
-    """Chat completions from any server implementing ``POST /chat/completions``."""
+# A model of the chain cannot serve the request (unknown model, no structured
+# output): the next one may.
+_UNSERVED_STATUS = frozenset({400, 404, 422})
+_TRANSIENT_STATUS = frozenset({408, 409, 425, 429, 500, 502, 503, 504})
+_MAX_RETRY_AFTER_SECONDS = 30.0
+# How free tiers say the account's daily allowance is spent (a 429 like the
+# transient ones, but no other model of the tier will answer either).
+_DAILY_LIMIT_MARKERS = ("per-day", "per day", "free-models-per-day")
 
-    def __init__(self, client: httpx.AsyncClient, model: str, policy: HttpPolicy) -> None:
+
+class OpenAiCompatibleLanguageModel:
+    """Chat completions from any server implementing ``POST /chat/completions``.
+
+    Requests go to the first model of a chain; a model that is rate-limited
+    or overloaded is retried with a growing pause, then the next model of
+    the chain answers. Every request is first taken from the budget, so the
+    installation keeps to the provider's pace and daily allowance.
+    """
+
+    def __init__(
+        self,
+        client: httpx.AsyncClient,
+        model: str,
+        policy: HttpPolicy,
+        *,
+        fallbacks: Sequence[str] = (),
+        budget: RequestBudget | None = None,
+        extra_body: Mapping[str, Any] | None = None,
+    ) -> None:
         self._client = client
         self.model = model
+        self.chain = (model, *(item for item in fallbacks if item and item != model))
         self._policy = policy
+        self._budget = budget or UnlimitedBudget()
+        # Provider-specific request fields (e.g. how much a reasoning model thinks).
+        self._extra = dict(extra_body or {})
 
-    async def complete(self, request: CompletionRequest) -> Completion:
+    def _payload(self, model: str, request: CompletionRequest) -> dict[str, Any]:
         payload: dict[str, Any] = {
-            "model": self.model,
+            "model": model,
             "messages": [{"role": m.role.value, "content": m.content} for m in request.messages],
             "temperature": request.temperature,
             "max_tokens": request.max_tokens,
+            **self._extra,
             **request.options,
         }
         if request.response_schema is not None:
@@ -61,19 +102,83 @@ class OpenAiCompatibleLanguageModel:
                     "strict": True,
                 },
             }
-        body = await post_json(self._client, "chat/completions", payload, self._policy)
-        choices = body.get("choices")
-        if not isinstance(choices, list) or not choices:
-            raise AiProviderError("unexpected chat response")
-        content = choices[0].get("message", {}).get("content")
-        if not isinstance(content, str):
-            raise AiProviderError("chat response has no content")
-        if request.response_schema is not None:
-            ensure_json_object(content)
-        usage = body.get("usage") or {}
-        return Completion(
-            text=content,
-            model=str(body.get("model", self.model)),
-            prompt_tokens=usage.get("prompt_tokens"),
-            completion_tokens=usage.get("completion_tokens"),
-        )
+        return payload
+
+    async def complete(self, request: CompletionRequest) -> Completion:
+        last: str = "no attempt"
+        for model in self.chain:
+            for attempt in range(1, self._policy.attempts + 1):
+                await self._budget.spend()
+                try:
+                    response = await self._client.post(
+                        "chat/completions", json=self._payload(model, request)
+                    )
+                except httpx.TransportError as exc:
+                    last = f"{model}: {exc!r}"
+                    await self._pause(attempt, None)
+                    continue
+                if response.status_code in _TRANSIENT_STATUS:
+                    if response.status_code == 429 and _daily_limit(response):
+                        raise ModelBudgetExhaustedError("the provider's daily allowance is spent")
+                    last = f"{model}: {response.status_code}"
+                    log.warning("ai.model_busy", model=model, status=response.status_code)
+                    await self._pause(attempt, response)
+                    continue
+                if response.status_code in _UNSERVED_STATUS:
+                    last = f"{model}: {response.status_code}"
+                    log.warning("ai.model_unserved", model=model, status=response.status_code)
+                    break
+                if response.is_error:
+                    raise AiProviderError(f"provider rejected the request: {response.status_code}")
+                completion = _completion(response, model, request)
+                if completion is None:
+                    last = f"{model}: no answer"
+                    await self._pause(attempt, None)
+                    continue
+                return completion
+            log.warning("ai.model_fallback", model=model, reason=last)
+        raise AiProviderError(f"no model of the chain answered ({last})")
+
+    async def _pause(self, attempt: int, response: httpx.Response | None) -> None:
+        if attempt >= self._policy.attempts:
+            return
+        after = response.headers.get("retry-after") if response is not None else None
+        try:
+            wait = min(float(after), _MAX_RETRY_AFTER_SECONDS) if after else None
+        except ValueError:
+            wait = None
+        await asyncio.sleep(wait or self._policy.backoff_seconds * 2 ** (attempt - 1))
+
+
+def _daily_limit(response: httpx.Response) -> bool:
+    text = response.text.lower()
+    return any(marker in text for marker in _DAILY_LIMIT_MARKERS)
+
+
+def _completion(
+    response: httpx.Response, model: str, request: CompletionRequest
+) -> Completion | None:
+    """The answer of a successful response; None for an empty one (some
+    providers answer 200 with an error inside), which is worth repeating."""
+    body = response.json()
+    if not isinstance(body, dict) or body.get("error"):
+        error = body.get("error") if isinstance(body, dict) else None
+        log.warning("ai.empty_answer", model=model, error=str(error)[:300])
+        return None
+    choices = body.get("choices")
+    if not isinstance(choices, list) or not choices:
+        log.warning("ai.empty_answer", model=model, error="no choices")
+        return None
+    content = choices[0].get("message", {}).get("content")
+    if not isinstance(content, str) or not content.strip():
+        log.warning("ai.empty_answer", model=model, finish=choices[0].get("finish_reason"))
+        return None
+    if request.response_schema is not None:
+        ensure_json_object(content)
+    usage = body.get("usage") or {}
+    return Completion(
+        text=content,
+        model=str(body.get("model", model)),
+        prompt_tokens=usage.get("prompt_tokens"),
+        completion_tokens=usage.get("completion_tokens"),
+    )

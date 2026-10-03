@@ -1,26 +1,27 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass, field
 
 import structlog
 
 from snoska.application.checks.engine import (
+    BatchSession,
     CheckErrorCode,
     DocumentUnderCheck,
-    ExecutorSession,
 )
-from snoska.application.checks.legal.answer import Answer, InvalidAnswer, parse_answer
+from snoska.application.checks.legal.answer import Answer, parse_batch
 from snoska.application.checks.legal.index import DocumentIndex, embed_cached
 from snoska.application.checks.legal.prompt import (
-    ANSWER_SCHEMA,
+    BATCH_SCHEMA,
     Context,
-    build_context,
+    PreparedCheck,
+    answer_tokens,
+    build_batch_context,
     build_messages,
-    correction,
 )
 from snoska.application.checks.norms import NormLibrary, ProvisionNotFoundError
-from snoska.domain.checks.catalog import CheckDefinition, CheckMethod, LawNorm, ModelBrief
+from snoska.domain.checks.catalog import CheckDefinition, CheckMethod, LawNorm
 from snoska.domain.checks.outcome import (
     CheckOutcome,
     CitedProvision,
@@ -30,28 +31,21 @@ from snoska.domain.checks.outcome import (
     ResultStatus,
 )
 from snoska.domain.documents.structure import Block, BlockKind
-from snoska.ports.ai import (
-    ChatMessage,
-    CompletionRequest,
-    Embedder,
-    LanguageModel,
-    MessageRole,
-    ModelOutputError,
-)
+from snoska.ports.ai import CompletionRequest, Embedder, LanguageModel, ModelOutputError
 
 log = structlog.get_logger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
 class LegalCheckSettings:
-    """How model checks run. Concurrency should match what the model server
-    serves in parallel; more only queues requests on its side."""
+    """How model checks run. Requirements of a document go to the model
+    together, ``checks_per_request`` at a time; a rejected verdict is asked
+    again, alone with the other rejected ones, up to ``max_attempts``."""
 
-    concurrency: int = 2
-    fragments: int = 8
+    checks_per_request: int = 12
+    fragments: int = 4
     related_norms: int = 1
-    max_attempts: int = 3
-    max_tokens: int = 450
+    max_attempts: int = 2
     model_options: Mapping[str, object] = field(default_factory=dict)
 
 
@@ -100,6 +94,8 @@ def outcome_of(answer: Answer, context: Context, attempts: int) -> CheckOutcome:
 
 
 class _LegalSession:
+    """The model checks of one document, asked in batches."""
+
     def __init__(
         self,
         executor: LegalExecutor,
@@ -107,7 +103,6 @@ class _LegalSession:
         index: DocumentIndex,
         queries: Mapping[str, Sequence[float]],
     ) -> None:
-        self.concurrency = executor.settings.concurrency
         self._executor = executor
         self._document = document
         self._index = index
@@ -115,7 +110,22 @@ class _LegalSession:
         self._blocks = {block.ordinal: block for block in document.structure.blocks}
         self._outline = _outline(document.structure.blocks)
 
-    async def execute(self, check: CheckDefinition) -> CheckOutcome:
+    async def execute_many(
+        self, checks: Sequence[CheckDefinition]
+    ) -> AsyncIterator[tuple[CheckDefinition, CheckOutcome]]:
+        prepared: list[PreparedCheck] = []
+        for check in checks:
+            ready = await self._prepare(check)
+            if isinstance(ready, CheckOutcome):
+                yield check, ready
+            else:
+                prepared.append(ready)
+        size = max(1, self._executor.settings.checks_per_request)
+        for start in range(0, len(prepared), size):
+            async for settled in self._ask(prepared[start : start + size]):
+                yield settled
+
+    async def _prepare(self, check: CheckDefinition) -> PreparedCheck | CheckOutcome:
         brief, norm = check.brief, check.norm
         if brief is None or not isinstance(norm, LawNorm):
             raise ValueError(f"{check.code} is not a model check")
@@ -136,37 +146,50 @@ class _LegalSession:
         fragments = self._index.search(query, brief.keywords, settings.fragments)
         if not fragments:
             return CheckOutcome.not_applicable()
-        context = build_context([*named, *related], fragments)
-        return await self._ask(brief, context)
+        return PreparedCheck(check, brief, (*named, *related), tuple(fragments))
 
-    async def _ask(self, brief: ModelBrief, context: Context) -> CheckOutcome:
+    async def _ask(
+        self, batch: Sequence[PreparedCheck]
+    ) -> AsyncIterator[tuple[CheckDefinition, CheckOutcome]]:
         settings = self._executor.settings
-        messages = build_messages(brief, context, self._document.title, self._outline)
+        remaining = list(batch)
+        problems: dict[str, str] = {}
         for attempt in range(1, settings.max_attempts + 1):
-            completion_text = ""
+            if not remaining:
+                return
+            context = build_batch_context(remaining)
+            earlier = {
+                key: problems[item.check.code]
+                for key, item in context.checks.items()
+                if item.check.code in problems
+            }
+            request = CompletionRequest(
+                messages=build_messages(context, self._document.title, self._outline, earlier),
+                response_schema=BATCH_SCHEMA,
+                temperature=0.0,
+                max_tokens=answer_tokens(len(remaining)),
+                options=settings.model_options,
+            )
             try:
-                completion = await self._executor.model.complete(
-                    CompletionRequest(
-                        messages=messages,
-                        response_schema=ANSWER_SCHEMA,
-                        temperature=0.0,
-                        max_tokens=settings.max_tokens,
-                        options=settings.model_options,
-                    )
-                )
-                completion_text = completion.text
-                answer = parse_answer(completion_text, context, self._blocks)
-            except (InvalidAnswer, ModelOutputError) as exc:
-                problem = exc.problem if isinstance(exc, InvalidAnswer) else "ответ не JSON."
-                log.info("checks.answer_rejected", attempt=attempt, problem=problem)
-                messages = (
-                    *messages,
-                    ChatMessage(MessageRole.ASSISTANT, completion_text or "{}"),
-                    correction(problem),
-                )
-                continue
-            return outcome_of(answer, context, attempt)
-        return CheckOutcome.failed(CheckErrorCode.INVALID_MODEL_ANSWER, settings.max_attempts)
+                text = (await self._executor.model.complete(request)).text
+            except ModelOutputError:
+                text = ""
+            parsed = parse_batch(text, context, self._blocks)
+            problems = {}
+            for key, item in context.checks.items():
+                answer = parsed.answers.get(key)
+                if answer is not None:
+                    yield item.check, outcome_of(answer, context.context_of(key), attempt)
+                else:
+                    problems[item.check.code] = parsed.problems[key]
+            if problems:
+                log.info("checks.verdicts_rejected", attempt=attempt, problems=problems)
+            remaining = [item for item in remaining if item.check.code in problems]
+        for item in remaining:
+            yield (
+                item.check,
+                CheckOutcome.failed(CheckErrorCode.INVALID_MODEL_ANSWER, settings.max_attempts),
+            )
 
 
 class LegalExecutor:
@@ -189,7 +212,7 @@ class LegalExecutor:
 
     async def open(
         self, document: DocumentUnderCheck, checks: Sequence[CheckDefinition]
-    ) -> ExecutorSession:
+    ) -> BatchSession:
         index = await DocumentIndex.build(document.structure, self.embedder, document.embeddings)
         searches = sorted({check.brief.search for check in checks if check.brief is not None})
         queries = await embed_cached(searches, self.embedder, document.embeddings)

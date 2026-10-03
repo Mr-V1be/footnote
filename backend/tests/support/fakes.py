@@ -80,16 +80,20 @@ class HashEmbedder:
 
 
 _FRAGMENT = re.compile(r"^\[(D\d+)\] (?:\([^)]*\) )?(.+)$", re.MULTILINE)
+_REQUIREMENT = re.compile(
+    r"^\[(C\d+)\] (.+)\nВыполнено, если: .*\nНормы требования: (.+)$", re.MULTILINE
+)
 _QUOTE_WORDS = 8
 
 
 class RecordedLanguageModel:
     """A language model with recorded verdicts, keyed by words of the question.
 
-    It answers like a well-behaved model: it quotes the first passage it was
-    shown word for word and cites the first provision. ``verdicts`` maps a
-    phrase of a check's question to the verdict to give; anything else is
-    "present". Every request is kept for assertions.
+    It answers a batch of requirements like a well-behaved model: for each
+    it quotes the first passage it was shown word for word and cites the
+    requirement's first provision. ``verdicts`` maps a phrase of a check's
+    question to the verdict to give; anything else is "present". Every
+    request is kept for assertions.
     """
 
     model = "recorded"
@@ -103,12 +107,20 @@ class RecordedLanguageModel:
         if "citations" in str(request.response_schema):
             return self._completion(_question_answer(request))
         prompt = request.messages[-1].content
-        question = prompt.splitlines()[0]
+        fragments = _FRAGMENT.findall(prompt)
+        verdicts = [
+            self._verdict(key, question, norms, fragments)
+            for key, question, norms in _REQUIREMENT.findall(prompt)
+        ]
+        return self._completion({"verdicts": verdicts})
+
+    def _verdict(
+        self, key: str, question: str, norms: str, fragments: list[tuple[str, str]]
+    ) -> Mapping[str, object]:
         verdict = next(
             (verdict for phrase, verdict in self._verdicts.items() if phrase in question),
             "present",
         )
-        fragments = _FRAGMENT.findall(prompt)
         quotes = (
             [
                 {
@@ -119,14 +131,14 @@ class RecordedLanguageModel:
             if fragments and verdict in ("present", "partial")
             else []
         )
-        answer = {
+        return {
+            "check": key,
             "verdict": verdict,
             "quotes": quotes,
-            "norm": "N1",
+            "norm": norms.split(",", maxsplit=1)[0].strip(),
             "explanation": f"Записанный ответ: {verdict}.",
             "recommendation": "Дополните документ." if verdict in ("partial", "absent") else "",
         }
-        return self._completion(answer)
 
     def _completion(self, answer: Mapping[str, object]) -> Completion:
         return Completion(

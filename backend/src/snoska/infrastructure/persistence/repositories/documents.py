@@ -20,6 +20,7 @@ from snoska.domain.documents.version import (
 )
 from snoska.domain.shared.errors import ConflictError
 from snoska.infrastructure.persistence.errors import violated_constraint
+from snoska.infrastructure.persistence.tables.checks import check_results, check_runs
 from snoska.infrastructure.persistence.tables.documents import document_versions, documents
 from snoska.infrastructure.persistence.tables.tenancy import user_profiles
 from snoska.ports.document_repositories import (
@@ -29,6 +30,9 @@ from snoska.ports.document_repositories import (
     UploadReference,
 )
 from snoska.ports.unit_of_work import ConcurrentModificationError
+
+# The error code of a check that waited for the model's daily allowance.
+MODEL_DAILY_LIMIT = "model_daily_limit"
 
 _LIKE_ESCAPE = "\\"
 _UPLOAD_KEY_CONSTRAINT = "uq_document_versions_organization_id_upload_key"
@@ -293,6 +297,39 @@ class SqlDocumentVersionRepository:
                 ),
             )
             .where(document_versions.c.status == ParseStatus.PARSED.value)
+            .order_by(document_versions.c.created_at)
+        )
+        return [_version(row) for row in result.mappings()]
+
+    async def latest_waiting_for_model(self) -> Sequence[DocumentVersion]:
+        """Latest versions whose latest check has results that waited for the
+        model's daily allowance."""
+        last_run = (
+            select(check_runs.c.id)
+            .where(check_runs.c.version_id == document_versions.c.id)
+            .order_by(check_runs.c.created_at.desc())
+            .limit(1)
+            .correlate(document_versions)
+            .scalar_subquery()
+        )
+        waiting = (
+            select(check_results.c.run_id)
+            .where(
+                check_results.c.run_id == last_run,
+                check_results.c.error_code == MODEL_DAILY_LIMIT,
+            )
+            .exists()
+        )
+        result = await self._connection.execute(
+            select(document_versions)
+            .join(
+                documents,
+                and_(
+                    documents.c.id == document_versions.c.document_id,
+                    documents.c.latest_version_number == document_versions.c.number,
+                ),
+            )
+            .where(waiting)
             .order_by(document_versions.c.created_at)
         )
         return [_version(row) for row in result.mappings()]

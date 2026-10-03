@@ -22,7 +22,7 @@ router = APIRouter(
 async def ask_status(container: ContainerDep, access: OrganizationAccessDep) -> AskStatusOut:
     """Whether a model is connected to answer questions."""
     del access
-    return AskStatusOut.of(container.questions.status())
+    return AskStatusOut.of(await container.questions.status())
 
 
 @router.get(

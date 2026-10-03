@@ -4,7 +4,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from snoska.application.checks.legal.prompt import MAX_QUOTES, VERDICTS, Context
+from snoska.application.checks.legal.prompt import MAX_QUOTES, VERDICTS, BatchContext, Context
 from snoska.domain.checks.grounding import locate_quote
 from snoska.domain.checks.outcome import TextLocation
 from snoska.domain.documents.structure import Block
@@ -79,25 +79,22 @@ def _locate(
     return None
 
 
-def parse_answer(text: str, context: Context, blocks: Mapping[int, Block]) -> Answer:
-    """Accept an answer only if it is well-formed and grounded.
+def parse_verdict(
+    data: Mapping[str, object], context: Context, blocks: Mapping[int, Block]
+) -> Answer:
+    """Accept a verdict only if it is well-formed and grounded.
 
-    Grounded means: every quote is found word for word in the passage it
-    names, and the norm is one of those the model was given. A verdict that
-    the requirement is met, fully or in part, must be backed by a quote.
+    Grounded means: every quote is found word for word in a passage the
+    model was shown, and the norm is one of those given for the requirement.
+    A verdict that the requirement is met, fully or in part, must be backed
+    by a quote.
     """
-    try:
-        data = json.loads(text)
-    except ValueError as exc:
-        raise InvalidAnswer("ответ не является корректным JSON.") from exc
-    if not isinstance(data, dict):
-        raise InvalidAnswer("ответ должен быть JSON-объектом.")
     verdict = data.get("verdict")
     if verdict not in VERDICTS:
         raise InvalidAnswer(f"verdict должен быть одним из: {', '.join(VERDICTS)}.")
     norm = data.get("norm")
     if not isinstance(norm, str) or norm not in context.norms:
-        raise InvalidAnswer(f"норма {norm!r} не из списка: {', '.join(context.norms)}.")
+        raise InvalidAnswer(f"норма {norm!r} не из списка требования: {', '.join(context.norms)}.")
     quotes = _quotes(data, context, blocks)
     if verdict in GROUNDED_VERDICTS and not quotes:
         raise InvalidAnswer("для present и partial нужна хотя бы одна дословная цитата.")
@@ -111,3 +108,39 @@ def parse_answer(text: str, context: Context, blocks: Mapping[int, Block]) -> An
         explanation=explanation,
         recommendation=_text(data, "recommendation"),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class BatchAnswers:
+    """The verdicts accepted, and for the rest what was wrong (by key)."""
+
+    answers: Mapping[str, Answer]
+    problems: Mapping[str, str]
+
+
+def parse_batch(text: str, context: BatchContext, blocks: Mapping[int, Block]) -> BatchAnswers:
+    """Each verdict of a batch is judged on its own: one bad verdict does not
+    reject the others, and only the rejected ones are asked again."""
+    keys = list(context.checks)
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return BatchAnswers({}, dict.fromkeys(keys, "ответ не является корректным JSON."))
+    items = data.get("verdicts") if isinstance(data, dict) else None
+    if not isinstance(items, list):
+        return BatchAnswers({}, dict.fromkeys(keys, "нужен объект с массивом verdicts."))
+    answers: dict[str, Answer] = {}
+    problems: dict[str, str] = {}
+    for item in items:
+        key = item.get("check") if isinstance(item, dict) else None
+        if not isinstance(key, str) or key not in context.checks or key in answers:
+            continue
+        try:
+            answers[key] = parse_verdict(item, context.context_of(key), blocks)
+            problems.pop(key, None)
+        except InvalidAnswer as exc:
+            problems[key] = exc.problem
+    for key in keys:
+        if key not in answers and key not in problems:
+            problems[key] = "нет вердикта по этому требованию."
+    return BatchAnswers(answers, problems)

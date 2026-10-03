@@ -51,6 +51,15 @@ WATCH_CORPUS = JobSpec(
     min_backoff_ms=60_000,
 )
 
+# Hourly: checks that waited for the model's daily allowance run again once
+# the allowance renews.
+RESUME_CHECKS = JobSpec(
+    name="checks.resume",
+    queue="checks",
+    max_retries=1,
+    time_limit_seconds=5 * 60,
+)
+
 JOB_SPECS: tuple[JobSpec, ...] = (
     PARSE_DOCUMENT_VERSION,
     INDEX_CORPUS_EDITION,
@@ -58,4 +67,5 @@ JOB_SPECS: tuple[JobSpec, ...] = (
     DELIVER_WEBHOOK,
     NOTIFY_TEST_PAYMENT,
     WATCH_CORPUS,
+    RESUME_CHECKS,
 )

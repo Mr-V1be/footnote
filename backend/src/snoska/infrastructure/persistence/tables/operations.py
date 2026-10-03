@@ -27,3 +27,15 @@ edition_checks = Table(
     CheckConstraint("outcome IN ('unchanged', 'new_edition', 'failed')", name="outcome_known"),
     Index("ix_edition_checks_time", "checked_at"),
 )
+
+# Answers of the model by the hash of the request that produced them. A key
+# is reached only by sending the very same text, so sharing it across
+# organizations reveals nothing a requester does not already hold.
+model_completions = Table(
+    "model_completions",
+    metadata,
+    Column("key", Text, primary_key=True),
+    Column("model", Text, nullable=False),
+    Column("text", Text, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
