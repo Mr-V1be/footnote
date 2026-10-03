@@ -4,8 +4,10 @@ import {
   IconAlertTriangle,
   IconCircleCheck,
   IconPlugConnectedX,
+  IconReceipt,
   IconRefresh,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { CheckReport, Severity } from "@/shared/api/types";
@@ -30,6 +32,7 @@ export function CheckSummary({
   canRecheck,
   rechecking,
   onRecheck,
+  billingHref,
 }: {
   report: CheckReport | null;
   counts: Record<Severity, number>;
@@ -38,6 +41,8 @@ export function CheckSummary({
   canRecheck: boolean;
   rechecking: boolean;
   onRecheck: () => void;
+  /** The plan and usage page, when the person may see it. */
+  billingHref: string | null;
 }) {
   const t = useTranslations("checks");
   const format = useFormatter();
@@ -51,6 +56,13 @@ export function CheckSummary({
       onClick={onRecheck}
     >
       {t("summary.recheck")}
+    </Button>
+  ) : null;
+
+  // A check refused by the plan's limit leads to the plan, for those who see it.
+  const billingLink = billingHref ? (
+    <Button asChild variant="secondary" size="sm" icon={<IconReceipt stroke={1.75} />}>
+      <Link href={billingHref}>{t("summary.toBilling")}</Link>
     </Button>
   ) : null;
 
@@ -82,16 +94,21 @@ export function CheckSummary({
     );
   }
   if (run.status === "failed") {
+    const quota = run.failureCode === "quota_exceeded";
     return (
       <section className={styles.summary} data-state="failed" role="alert">
         <div className={styles.summaryLine}>
           <IconAlertTriangle stroke={1.75} className={styles.summaryIcon} aria-hidden />
           <div>
-            <p className={styles.summaryTitle}>{t("summary.failed")}</p>
-            <p className={styles.summaryHint}>{t("summary.failedHint")}</p>
+            <p className={styles.summaryTitle}>
+              {quota ? t("summary.quotaExceeded") : t("summary.failed")}
+            </p>
+            <p className={styles.summaryHint}>
+              {quota ? t("summary.quotaHint") : t("summary.failedHint")}
+            </p>
           </div>
         </div>
-        {recheck}
+        {quota ? billingLink : recheck}
       </section>
     );
   }

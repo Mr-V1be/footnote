@@ -29,7 +29,10 @@ let cached: ServerConfig | undefined;
  */
 export function serverConfig(): ServerConfig {
   if (!cached) {
-    loadEnvConfig(path.resolve(process.cwd(), ".."), process.env.NODE_ENV !== "production");
+    const dev = process.env.NODE_ENV !== "production";
+    // In development the server's modules are reloaded and Next may restore
+    // its own environment meanwhile: read the repository's .env afresh.
+    loadEnvConfig(path.resolve(process.cwd(), ".."), dev, undefined, dev);
     cached = schema.parse(process.env);
   }
   return cached;

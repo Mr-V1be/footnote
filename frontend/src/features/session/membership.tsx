@@ -51,3 +51,8 @@ export function useCan(permission: Permission): boolean {
   const { membership } = useMembership();
   return (scope ?? membership.permissions).includes(permission);
 }
+
+/** Permissions on the organization as a whole, whatever scope the caller is in. */
+export function useOrganizationCan(permission: Permission): boolean {
+  return useMembership().membership.permissions.includes(permission);
+}

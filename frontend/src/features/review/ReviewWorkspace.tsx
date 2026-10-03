@@ -8,7 +8,7 @@ import { CheckSummary } from "@/features/checks/result/CheckSummary";
 import type { CardHandlers } from "@/features/checks/result/FindingList";
 import { useCheckReport, useFindingReview } from "@/features/checks/useCheckReport";
 import { isRunPending } from "@/features/checks/queries";
-import { useCan } from "@/features/session/membership";
+import { useCan, useOrganizationCan } from "@/features/session/membership";
 import { DocumentSheet } from "@/features/documents/viewer/sheet/DocumentSheet";
 import {
   FootnoteProvider,
@@ -21,6 +21,8 @@ import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { Button } from "@/shared/ui/button/Button";
 import { BottomBar } from "@/shared/ui/bottom-bar/BottomBar";
 import { Drawer, DrawerContent } from "@/shared/ui/drawer/Drawer";
+import { useToast } from "@/shared/ui/toast/Toast";
+import { useErrorText } from "@/shared/i18n/useErrorText";
 
 import { NotesPanel } from "./NotesPanel";
 import styles from "./review.module.css";
@@ -218,6 +220,10 @@ export function ReviewWorkspace({
   const data = report.data ?? null;
   const state = useReviewState(structure, data);
   const canRecheck = useCan("checks.run");
+  const canSeeBilling = useOrganizationCan("billing.read");
+  const toast = useToast();
+  const errorText = useErrorText();
+  const t = useTranslations("checks");
   const [panel, setPanel] = useState<Panel>(null);
   const settled = data ? !isRunPending(data.run.status) : false;
 
@@ -245,7 +251,17 @@ export function ReviewWorkspace({
           reviews={state.reviews}
           canRecheck={canRecheck && (settled || data === null) && !report.isPending}
           rechecking={recheck.isPending}
-          onRecheck={() => recheck.mutate()}
+          onRecheck={() =>
+            recheck.mutate(undefined, {
+              onError: (error) =>
+                toast({
+                  tone: "critical",
+                  title: t("summary.recheckFailed"),
+                  description: errorText(error),
+                }),
+            })
+          }
+          billingHref={canSeeBilling ? `/o/${organization}/settings/billing` : null}
         />
         <Workspace
           organization={organization}

@@ -40,7 +40,10 @@ export const SCREENS = [
         await page.getByRole("button", { name: /^Замечания/ }).click();
         await page.getByRole("dialog").waitFor();
       }
-      await page.getByRole("button", { name: /Кегль основного текста/ }).first().click();
+      await page
+        .getByRole("button", { name: /Кегль основного текста/ })
+        .first()
+        .click();
       await page.getByRole("button", { name: "К первому месту" }).click();
       await page.waitForTimeout(600);
     },

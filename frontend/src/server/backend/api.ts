@@ -31,3 +31,17 @@ export async function serverApi(returnTo: string): Promise<ApiClient> {
   });
   return client;
 }
+
+/**
+ * API client for the few public endpoints (the test payment provider's own
+ * pages): no user, the signed token in the request is the access.
+ */
+export function publicApi(): ApiClient {
+  const client = createClient<paths>({ baseUrl: serverConfig().SNOSKA_API_URL });
+  client.use({
+    onRequest({ request }) {
+      return new Request(request, { signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS) });
+    },
+  });
+  return client;
+}

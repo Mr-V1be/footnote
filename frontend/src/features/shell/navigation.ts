@@ -4,6 +4,7 @@ import {
   IconFolders,
   IconHistory,
   IconKey,
+  IconReceipt,
   IconUsers,
   IconWebhook,
   type Icon,
@@ -81,4 +82,5 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   settings("api-keys", IconKey, "apiKeys", "integrations.manage"),
   settings("webhooks", IconWebhook, "webhooks", "integrations.manage"),
   settings("audit", IconHistory, "audit", "audit.read"),
+  settings("billing", IconReceipt, "billing", "billing.read"),
 ];

@@ -167,8 +167,8 @@ class BillingService:
                 organization_id=access.organization_id,
                 amount_kopecks=invoice.amount_kopecks,
                 currency=self._plans.currency,
-                description=f"{invoice.number}: {target.code}",
-                return_url=f"{self._web_url}/o/{access.organization.alias}/billing",
+                description=f"Счёт № {invoice.number}",
+                return_url=f"{self._web_url}/o/{access.organization.alias}/settings/billing",
             )
         )
         invoice.payment_id, invoice.payment_url = session.payment_id, session.confirmation_url

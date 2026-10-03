@@ -5,6 +5,7 @@
 import { BASE } from "../runner.mjs";
 
 const OWNER = "polyarnaya-zvezda";
+const ZARYA = "zarya";
 
 async function open(page, path) {
   await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
@@ -98,9 +99,61 @@ export const SCREENS = [
       await page.waitForLoadState("networkidle");
     },
   },
+  {
+    name: "10-billing",
+    user: "owner",
+    run: (page) => open(page, `/o/${OWNER}/settings/billing`),
+  },
+  {
+    name: "11-billing-plan-change",
+    user: "owner",
+    run: async (page) => {
+      await open(page, `/o/${OWNER}/settings/billing`);
+      await page.getByRole("button", { name: "Перейти", exact: true }).click();
+      await page.getByRole("dialog").waitFor();
+    },
+  },
+  {
+    // The test provider's checkout, reached from the plan change (the open
+    // invoice for a plan is reused, so repeated captures add nothing).
+    name: "12-checkout",
+    user: "zarya",
+    run: async (page) => {
+      await open(page, `/o/${ZARYA}/settings/billing`);
+      const pay = page.getByRole("link", { name: "Оплатить" });
+      if (await pay.count()) {
+        await pay.first().click();
+      } else {
+        await page.getByRole("button", { name: "Перейти", exact: true }).first().click();
+        await page.getByRole("dialog").getByRole("button", { name: "К оплате" }).click();
+      }
+      await page.waitForURL(/\/pay\/test\//);
+      await page.waitForLoadState("networkidle");
+    },
+  },
+  {
+    // Paying returns to the plan page; the plan changes on the provider's
+    // signed notification. Once paid, later captures show the result.
+    name: "13-billing-paid",
+    user: "zarya",
+    run: async (page) => {
+      await open(page, `/o/${ZARYA}/settings/billing`);
+      const pay = page.getByRole("link", { name: "Оплатить" });
+      if (await pay.count()) {
+        await pay.first().click();
+        await page.waitForURL(/\/pay\/test\//);
+        await page.getByRole("button", { name: /^Оплатить/ }).click();
+        await page.waitForURL(/payment=succeeded/);
+      } else {
+        await open(page, `/o/${ZARYA}/settings/billing?payment=succeeded`);
+      }
+      await page.getByText("Оплата подтверждена").waitFor({ timeout: 20_000 });
+    },
+  },
 ];
 
 export const USERS = {
   owner: "kovaleva@polyarnaya-zvezda.example",
+  zarya: "ershov@zarya.example",
   operator: "operator@snoska.example",
 };

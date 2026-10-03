@@ -1,0 +1,89 @@
+.screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: var(--space-6) var(--space-gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+  background: var(--color-canvas);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-5);
+  inline-size: min(100%, 26rem);
+  padding: var(--space-6) var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sheet);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.provider,
+.test {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.provider svg,
+.test svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+
+.test {
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-important-soft);
+  color: var(--color-important);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.amount {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-display);
+}
+
+.description {
+  color: var(--color-text-secondary);
+}
+
+.merchant {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-1-5);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.actions button {
+  block-size: var(--control-height-lg);
+}
+
+.note {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+  text-align: center;
+}
