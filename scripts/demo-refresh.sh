@@ -11,6 +11,8 @@
 #   6. landing media     clips and stills of the landing  -> frontend/public/landing
 #   7. product video     1920x1080 and 1080x1920          -> docs/case/video
 #
+# The runs leave no trace: the stand is returned to its seed at the end.
+#
 # Needs the infrastructure, the API, the worker and the web app running
 # (make up, make api, make worker, make web) and SNOSKA_DEMO_MODE=true.
 #
@@ -24,6 +26,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 API_URL="${API_URL:-http://127.0.0.1:46301}"
 WEB_URL="${WEB_URL:-http://localhost:46300}"
+
+# Each recorder restores the stand to its seed when it ends; here the stand
+# is restored once, after the last of them.
+export KEEP_STAND=1
 
 step() { printf '\n\033[1m▶ %s\033[0m\n' "$*"; }
 snoska() { (cd "$ROOT/backend" && uv run --frozen snoska "$@"); }
@@ -59,6 +65,10 @@ node e2e/landing/record.mjs
 
 step "7/7 product video"
 node e2e/video/record.mjs
+
+step "the demo stand back to its seed"
+snoska demo reset
+snoska checks wait
 
 step "done"
 echo "review the changes with git status before committing"

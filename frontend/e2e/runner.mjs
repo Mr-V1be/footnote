@@ -1,9 +1,11 @@
 // Shared by the screenshot sets: demo sign-in and the capture loop that
 // shoots every screen in three viewports and both themes with headless
 // Chromium (sound muted) and reports horizontal overflow and page errors.
+import { execFile } from "node:child_process";
 import { mkdir, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
 import { chromium } from "playwright";
 
@@ -32,6 +34,22 @@ export async function credentials() {
     pairs.set(match[1], match[2]);
   }
   return pairs;
+}
+
+/**
+ * Returns the demo stand to its seed after a run that changed it (uploads,
+ * questions, corrections, a spent plan, test webhooks) and waits until its
+ * documents are checked again; model answers come from the cache, so this
+ * costs no model requests. KEEP_STAND=1 leaves the stand as the run left it
+ * (make demo-refresh restores it once, at the end).
+ */
+export async function restoreStand() {
+  if (process.env.KEEP_STAND === "1") return;
+  const run = promisify(execFile);
+  const backend = { cwd: resolve(ROOT, "backend"), maxBuffer: 16 * 1024 * 1024 };
+  await run("uv", ["run", "--frozen", "snoska", "demo", "reset"], backend);
+  await run("uv", ["run", "--frozen", "snoska", "checks", "wait"], backend);
+  console.log("demo stand restored to its seed");
 }
 
 export async function signIn(browser, email, password) {
@@ -121,6 +139,7 @@ export async function capture({ screens, users, outDir }) {
     console.log(`captured ${screen.name}`);
   }
   await browser.close();
+  await restoreStand();
   for (const problem of problems) console.log(`PROBLEM ${problem}`);
   process.exitCode = problems.length ? 1 : 0;
 }

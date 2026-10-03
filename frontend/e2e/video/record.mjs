@@ -4,13 +4,13 @@
 //   node e2e/video/record.mjs               both cuts
 //   FORMATS=wide node e2e/video/record.mjs  one of them
 // Needs the stand with the seed and its checks (make demo-refresh); the
-// uploaded copy of the policy stays on the stand until the nightly reset.
+// stand returns to its seed afterwards (restoreStand).
 import { mkdir, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { chromium } from "playwright";
 
-import { ROOT, credentials, signIn } from "../runner.mjs";
+import { ROOT, credentials, restoreStand, signIn } from "../runner.mjs";
 import { launchRecorder, recording } from "../landing/media.mjs";
 import { compose, poster, renderCard } from "./compose.mjs";
 import { INTRO, OUTRO, SCENES, uploadTitle } from "./scenes.mjs";
@@ -104,3 +104,4 @@ for (const [name, format] of Object.entries(FORMATS)) {
   if (wanted(name)) await film(name, format, state);
 }
 await rm(WORK, { recursive: true, force: true });
+await restoreStand();

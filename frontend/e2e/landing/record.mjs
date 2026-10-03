@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 
 import { chromium } from "playwright";
 
-import { BASE, ROOT, credentials, signIn } from "../runner.mjs";
+import { BASE, ROOT, credentials, restoreStand, signIn } from "../runner.mjs";
 import { encodeLoop, encodeStill, glide, launchRecorder, pause, recording } from "./media.mjs";
 
 const OUT = resolve(ROOT, "frontend/public/landing");
@@ -261,3 +261,4 @@ for (const theme of THEMES) {
 }
 await browser.close();
 await rm(WORK, { recursive: true, force: true });
+await restoreStand();

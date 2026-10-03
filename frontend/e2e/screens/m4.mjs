@@ -40,11 +40,12 @@ async function bff(page, path, init) {
   );
 }
 
-/** The latest conversation of the lawyer, asked once if there is none. */
+/** The lawyer's seeded conversation about the question, asked if it is not there. */
 async function conversationId(page) {
   await open(page, `/o/${ZARYA}/ask`);
   const listed = await bff(page, `/organizations/${ZARYA}/ask/conversations`);
-  if (listed.body?.items?.length) return listed.body.items[0].id;
+  const seeded = (listed.body ?? []).find((item) => item.title === QUESTION);
+  if (seeded) return seeded.id;
   await page.getByRole("textbox", { name: "Вопрос" }).fill(QUESTION);
   await page.keyboard.press("Enter");
   await page.getByRole("list", { name: "Цитаты из закона" }).waitFor({ timeout: 120_000 });
@@ -72,8 +73,8 @@ async function uploadOnce(page, { title, file, kind }) {
 /**
  * Spends the Start plan's checks of «ИП Соколова»: one document checked
  * again until the plan refuses, then the next upload finds no check left.
- * Model answers are cached, so this costs no model requests; the nightly
- * reset gives the allowance back. Returns the document left unchecked.
+ * Model answers are cached, so this costs no model requests; the stand is
+ * restored after the run. Returns the document left unchecked.
  */
 async function spendChecks(page) {
   const kind = "Согласие на обработку ПДн";

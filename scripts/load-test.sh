@@ -5,8 +5,8 @@
 #   scripts/load-test.sh               60 seconds
 #   DURATION=30s scripts/load-test.sh
 #   LIST_RATE=150 REPORT_RATE=50 UPLOAD_RATE=2 CHECK_RATE=2 scripts/load-test.sh   a peak
-# The summary goes to .run/k6/summary.json. Uploaded copies stay in the demo
-# organization until the nightly reset (or `snoska demo reset`).
+# The summary goes to .run/k6/summary.json. The demo stand returns to its
+# seed afterwards (KEEP_STAND=1 leaves the uploaded copies in place).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -16,6 +16,14 @@ secret="$(grep -E '^SNOSKA_DEMO_CLIENT_SECRET=' "$ROOT/.env" | cut -d= -f2-)"
 [[ -n "$secret" ]] || { echo "SNOSKA_DEMO_CLIENT_SECRET is not set in .env" >&2; exit 1; }
 # The demo password of the seeded owner (public demo data).
 password="$(awk '/email: kovaleva@/{found=1} found && /password:/{print $2; exit}' "$ROOT/backend/demo/seed.yaml")"
+
+restore() {
+  if [[ "${KEEP_STAND:-0}" != 1 ]]; then
+    (cd "$ROOT/backend" && uv run --frozen snoska demo reset && uv run --frozen snoska checks wait)
+  fi
+}
+# Also when k6 fails a threshold.
+trap restore EXIT
 
 mkdir -p "$ROOT/.run/k6"
 # Secrets reach the container from the environment, not the command line.
