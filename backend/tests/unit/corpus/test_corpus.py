@@ -18,7 +18,7 @@ from snoska.domain.corpus.units import UnitKind
 from snoska.infrastructure.corpus_sources.law_html import ParsedLaw, parse_law_html
 from snoska.infrastructure.corpus_sources.pravo_ips import PORTAL_ENCODING
 
-SNAPSHOT = Path(__file__).parents[2] / "data" / "corpus" / "snapshots" / "152-fz.pravo-ips.html.gz"
+SNAPSHOT = Path(__file__).parents[3] / "data" / "corpus" / "snapshots" / "152-fz.pravo-ips.html.gz"
 ACT = LegalAct("152-fz", ActKind.FEDERAL_LAW, "152-ФЗ", "О персональных данных", date(2006, 7, 27))
 
 

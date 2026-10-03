@@ -12,7 +12,7 @@ from snoska.infrastructure.parsing.pdf.lines import parse_font_name
 from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
 from snoska.ports.document_parsing import DocumentParseError
 
-DEMO = Path(__file__).parents[2] / "demo" / "documents"
+DEMO = Path(__file__).parents[3] / "demo" / "documents"
 
 
 def parser() -> PdfParser:
