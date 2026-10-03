@@ -11,6 +11,7 @@ from snoska.infrastructure.ai.openai_compatible import (
     OpenAiCompatibleEmbedder,
     OpenAiCompatibleLanguageModel,
 )
+from snoska.infrastructure.ai.rehearsal import FeatureHashEmbedder, RehearsalLanguageModel
 from snoska.infrastructure.ai.unconfigured import UnconfiguredEmbedder, UnconfiguredLanguageModel
 from snoska.ports.ai import Embedder, LanguageModel
 
@@ -84,9 +85,19 @@ def _openai_compatible(settings: AiSettings) -> AiAdapters:
     )
 
 
+def _rehearsal(_: AiSettings) -> AiAdapters:
+    return AiAdapters(
+        provider=AiProvider.REHEARSAL,
+        embedder=FeatureHashEmbedder(),
+        language_model=RehearsalLanguageModel(),
+        close=_nothing_to_close,
+    )
+
+
 AI_PROVIDERS: Mapping[AiProvider, Callable[[AiSettings], AiAdapters]] = {
     AiProvider.NONE: _unconfigured,
     AiProvider.OPENAI_COMPATIBLE: _openai_compatible,
+    AiProvider.REHEARSAL: _rehearsal,
 }
 
 
