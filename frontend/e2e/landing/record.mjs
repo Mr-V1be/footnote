@@ -18,6 +18,22 @@ const LAPTOP = { width: 1280, height: 800 };
 const PHONE = { width: 390, height: 844 };
 const QUESTION = "В какой срок нужно прекратить обработку после отзыва согласия?";
 
+/**
+ * The autofix clip shows version 2 of the policy, the automatic fix of
+ * version 1: made here on a freshly seeded stand.
+ */
+async function ensureFixed(page, organization, id) {
+  await page.goto(`${BASE}/o/${organization}/documents/${id}`, { waitUntil: "networkidle" });
+  const compare = page.getByRole("button", { name: /Было и стало/ });
+  if ((await compare.count()) > 0) return;
+  await page.getByRole("button", { name: "Исправить оформление" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Создать исправленную версию" })
+    .click();
+  await compare.waitFor({ timeout: 300_000 });
+}
+
 async function documentId(page, organization, title) {
   await page.goto(`${BASE}/o/${organization}/w/main/documents`, { waitUntil: "networkidle" });
   const href = await page.getByRole("link", { name: title }).first().getAttribute("href");
@@ -198,11 +214,9 @@ for (const [role, email] of Object.entries(USERS)) {
 }
 await mkdir(OUT, { recursive: true });
 const probe = await browser.newContext({ storageState: states.lawyer });
-const policy = await documentId(
-  await probe.newPage(),
-  "zarya",
-  "Политика обработки персональных данных",
-);
+const probePage = await probe.newPage();
+const policy = await documentId(probePage, "zarya", "Политика обработки персональных данных");
+await ensureFixed(probePage, "zarya", policy);
 await probe.close();
 const facts = { policy };
 

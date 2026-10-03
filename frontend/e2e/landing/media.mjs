@@ -19,8 +19,9 @@ export function launchRecorder(chromium, scale = 2) {
 }
 
 /**
- * Opens a context that records its screen into `dir`. Returns the page and a
- * `mark()` that notes when the part worth keeping starts.
+ * Opens a context that records its screen into `dir`. Returns the page, a
+ * `mark()` that notes when the part worth keeping starts and `elapsed()`
+ * for scripts that keep several parts of one recording.
  */
 export async function recording(
   browser,
@@ -49,6 +50,8 @@ export async function recording(
     mark: () => {
       start = (Date.now() - opened) / 1000;
     },
+    /** Seconds since the recording started. */
+    elapsed: () => (Date.now() - opened) / 1000,
     finish: async () => {
       const end = (Date.now() - opened) / 1000;
       await context.close();
