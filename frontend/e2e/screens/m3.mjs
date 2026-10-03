@@ -3,6 +3,7 @@
 // formatting, questions to the corpus and the platform console.
 //   MILESTONE=m3 node e2e/screenshots.mjs
 import { BASE, documentIdByTitle } from "../runner.mjs";
+import { answerWithSample } from "./ask-sample.mjs";
 
 const OWNER = "polyarnaya-zvezda";
 const ZARYA = "zarya";
@@ -178,9 +179,28 @@ export const SCREENS = [
         await page.getByRole("button", { name: "Создать исправленную версию" }).click();
         await page.waitForURL(/v=2/);
       }
-      await page.getByText(/Проверено|замечани/).first().waitFor({ timeout: 60_000 });
+      await page
+        .getByText(/Проверено|замечани/)
+        .first()
+        .waitFor({ timeout: 60_000 });
       await page.getByRole("button", { name: /Было и стало/ }).click();
       await page.getByRole("dialog").waitFor();
+    },
+  },
+  {
+    // Without a model API key: the honest state, with steps for the administrator.
+    name: "16-ask-model-missing",
+    user: "owner",
+    run: (page) => open(page, `/o/${OWNER}/ask`),
+  },
+  {
+    name: "17-ask-answer",
+    user: "owner",
+    run: async (page) => {
+      const id = await answerWithSample(page);
+      await open(page, `/o/${OWNER}/ask/${id}`);
+      await page.getByText("В норме не найдено").waitFor();
+      await page.evaluate(() => window.scrollTo(0, 0));
     },
   },
 ];

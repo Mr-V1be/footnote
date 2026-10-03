@@ -4,6 +4,7 @@ import {
   IconFolders,
   IconHistory,
   IconKey,
+  IconMessageQuestion,
   IconReceipt,
   IconUsers,
   IconWebhook,
@@ -68,6 +69,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
     matches: (pathname, { organization }) =>
       pathname.startsWith(`/o/${organization}/w/`) ||
       pathname.startsWith(`/o/${organization}/documents/`),
+  },
+  {
+    id: "ask",
+    icon: IconMessageQuestion,
+    label: "ask",
+    group: "work",
+    permission: "norms.ask",
+    href: ({ organization }) => `/o/${organization}/ask`,
+    matches: (pathname, { organization }) => pathname.startsWith(`/o/${organization}/ask`),
   },
   {
     id: "methodology",

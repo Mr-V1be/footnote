@@ -802,5 +802,35 @@
       "spacing": "интервал {size}",
       "centimetres": "{size} см"
     }
+  },
+  "ask": {
+    "title": "Спросить норму",
+    "history": "История вопросов",
+    "newConversation": "Новый вопрос",
+    "newShort": "Новый",
+    "noHistory": "Вопросов пока не было",
+    "question": "Вопрос",
+    "placeholder": "Например: в какой срок отвечать на запрос субъекта?",
+    "send": "Отправить",
+    "searching": "Ищем ответ в норме…",
+    "emptyTitle": "Спросите о 152-ФЗ",
+    "emptyDescription": "Ответ — только с цитатами из закона и ссылками на его пункты.",
+    "notFoundTitle": "В норме не найдено",
+    "notFoundDescription": "В положениях 152-ФЗ нет ответа на этот вопрос. Уточните его или спросите иначе.",
+    "citations": "Цитаты из закона",
+    "toCitation": "Сноска {number}",
+    "unavailable": {
+      "modelTitle": "Модель не подключена",
+      "modelDescription": "Отвечать на вопросы можно, когда к стенду подключена языковая модель.",
+      "indexTitle": "Норма ещё не подготовлена к поиску",
+      "indexDescription": "Ответы появятся, когда текст закона будет проиндексирован.",
+      "forAdmin": "Для администратора стенда",
+      "steps": {
+        "llm": "SNOSKA_LLM_BASE_URL, SNOSKA_LLM_API_KEY, SNOSKA_LLM_MODEL",
+        "embedding": "SNOSKA_EMBEDDING_BASE_URL, SNOSKA_EMBEDDING_API_KEY, SNOSKA_EMBEDDING_MODEL",
+        "index": "make index",
+        "restart": "make api, make worker"
+      }
+    }
   }
 }
