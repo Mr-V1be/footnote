@@ -10,6 +10,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import type { CheckReport, Severity } from "@/shared/api/types";
 import { Button } from "@/shared/ui/button/Button";
+import { Notice } from "@/shared/ui/notice/Notice";
 import { ProgressBar } from "@/shared/ui/progress/ProgressBar";
 
 import { SEVERITIES, type RunTally } from "../findings";
@@ -132,16 +133,12 @@ export function CheckSummary({
           ) : null}
         </p>
         {tally.modelMissing > 0 ? (
-          <p className={styles.notice}>
-            <IconPlugConnectedX stroke={1.75} aria-hidden />
-            {t("summary.modelMissing")}
-          </p>
+          <Notice icon={<IconPlugConnectedX stroke={1.75} />}>{t("summary.modelMissing")}</Notice>
         ) : null}
         {unavailable > 0 ? (
-          <p className={styles.notice}>
-            <IconAlertTriangle stroke={1.75} aria-hidden />
+          <Notice icon={<IconAlertTriangle stroke={1.75} />}>
             {t("summary.modelUnavailable")}
-          </p>
+          </Notice>
         ) : null}
       </div>
       {recheck}

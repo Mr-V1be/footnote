@@ -9,6 +9,7 @@ import { fetchCatalog, queryKeys } from "@/features/documents/queries";
 import { useApi } from "@/shared/api/ApiProvider";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
+import { Page } from "@/shared/ui/page/Page";
 import { PageHeader } from "@/shared/ui/page-header/PageHeader";
 import { Skeleton } from "@/shared/ui/skeleton/Skeleton";
 import { StatePanel } from "@/shared/ui/state-panel/StatePanel";
@@ -37,7 +38,7 @@ export function MethodologyScreen() {
 
   if (catalog.isError || quality.isError) {
     return (
-      <div className={styles.screen}>
+      <Page spacing="lg">
         <PageHeader title={t("title")} />
         <StatePanel
           icon={<IconAlertTriangle stroke={1.75} />}
@@ -54,7 +55,7 @@ export function MethodologyScreen() {
             </Button>
           }
         />
-      </div>
+      </Page>
     );
   }
   if (!catalog.data || quality.isPending) return <MethodologySkeleton />;
@@ -62,7 +63,7 @@ export function MethodologyScreen() {
   const report = quality.data;
   const models = catalog.data.models;
   return (
-    <div className={styles.screen}>
+    <Page spacing="lg">
       <PageHeader
         title={t("title")}
         meta={
@@ -99,13 +100,13 @@ export function MethodologyScreen() {
         )}
       </section>
       <CheckRegistry catalog={catalog.data} quality={report} kinds={kinds.data?.kinds ?? []} />
-    </div>
+    </Page>
   );
 }
 
 function MethodologySkeleton() {
   return (
-    <div className={styles.screen} aria-busy>
+    <Page spacing="lg" busy>
       <Skeleton width="16rem" height="2rem" />
       <div className={styles.tiles}>
         {[0, 1, 2].map((index) => (
@@ -124,6 +125,6 @@ function MethodologySkeleton() {
           </div>
         ))}
       </div>
-    </div>
+    </Page>
   );
 }

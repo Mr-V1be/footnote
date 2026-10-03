@@ -1,0 +1,25 @@
+.action {
+  position: fixed;
+  inset-inline-end: max(var(--space-gutter), env(safe-area-inset-right));
+  inset-block-end: calc(var(--floating-offset) + env(safe-area-inset-bottom));
+  z-index: var(--layer-sticky);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-popover);
+}
+
+.action > button {
+  block-size: var(--control-height-lg);
+  padding-inline: var(--space-4);
+}
+
+@media (width >= 64rem) {
+  .action {
+    position: static;
+    box-shadow: none;
+  }
+
+  .action > button {
+    block-size: var(--control-height-md);
+    padding-inline: var(--space-3);
+  }
+}

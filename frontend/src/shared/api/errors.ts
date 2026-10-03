@@ -34,3 +34,9 @@ export function unwrap<T>(result: { data?: T; error?: unknown; response: Respons
   const problem = isProblem(result.error) ? result.error : null;
   throw new ApiError(result.response.status, problem?.code ?? "unexpected_error", problem?.detail);
 }
+
+/** For a call that answers without a body (204): only a failure carries information. */
+export function unwrapEmpty(result: { error?: unknown; response: Response }): void {
+  if (result.response.ok) return;
+  unwrap({ error: result.error, response: result.response });
+}

@@ -124,28 +124,3 @@
   inline-size: var(--icon-sm);
   block-size: var(--icon-sm);
 }
-
-/* File details */
-
-.details {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-}
-
-.detail {
-  display: grid;
-  gap: var(--space-0-5);
-}
-
-.detail dt {
-  color: var(--color-text-tertiary);
-  font-size: var(--text-xs);
-}
-
-.detail dd {
-  margin: 0;
-  font-size: var(--text-sm);
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
-}

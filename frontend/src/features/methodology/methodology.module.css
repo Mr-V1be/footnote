@@ -1,12 +1,3 @@
-.screen {
-  display: grid;
-  gap: var(--space-8);
-  inline-size: 100%;
-  max-inline-size: var(--content-max);
-  margin-inline: auto;
-  padding: var(--space-6) var(--space-gutter) calc(var(--space-12) + env(safe-area-inset-bottom));
-}
-
 .section {
   display: grid;
   gap: var(--space-4);
@@ -348,11 +339,5 @@
 
   .shareList > div {
     justify-content: space-between;
-  }
-}
-
-@media (width >= 64rem) {
-  .screen {
-    padding-block: var(--space-8) var(--space-12);
   }
 }

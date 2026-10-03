@@ -1,19 +1,18 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { useReplaceParams } from "@/shared/hooks/useReplaceParams";
 
 import type { DocumentFilters } from "../queries";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
 /**
- * Filters live in the address so that reload, back and shared links keep
- * them. The search box updates immediately; the address follows when typing
- * pauses. The address is replaced in the browser only: the list query runs
- * on the client and the page is not rendered again on the server.
+ * Filters live in the address. The search box updates immediately; the
+ * address follows when typing pauses.
  */
 export function useListFilters(): {
   search: string;
@@ -23,24 +22,12 @@ export function useListFilters(): {
   applied: DocumentFilters;
   reset: () => void;
 } {
-  const pathname = usePathname();
   const params = useSearchParams();
   const kind = params.get("kind");
   const [search, setSearch] = useState(params.get("q") ?? "");
   const debounced = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
 
-  const replace = useCallback(
-    (next: Record<string, string | null>) => {
-      const query = new URLSearchParams(params.toString());
-      for (const [key, value] of Object.entries(next)) {
-        if (value) query.set(key, value);
-        else query.delete(key);
-      }
-      const suffix = query.toString();
-      window.history.replaceState(null, "", suffix ? `${pathname}?${suffix}` : pathname);
-    },
-    [params, pathname],
-  );
+  const replace = useReplaceParams();
 
   useEffect(() => {
     if ((params.get("q") ?? "") !== debounced) replace({ q: debounced || null });

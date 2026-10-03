@@ -1,0 +1,78 @@
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  margin-block-start: var(--space-0-5);
+}
+
+.icon svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
+.text {
+  display: grid;
+  flex: 1 1 14rem;
+  gap: var(--space-0-5);
+  min-inline-size: 0;
+}
+
+.title {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.body {
+  overflow-wrap: anywhere;
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  align-self: center;
+  gap: var(--space-2);
+}
+
+.ink {
+  background: var(--color-ink-soft);
+}
+
+.ink .icon {
+  color: var(--color-ink);
+}
+
+.warning {
+  background: var(--color-important-soft);
+}
+
+.warning .icon {
+  color: var(--color-important);
+}
+
+.critical {
+  background: var(--color-critical-soft);
+}
+
+.critical .icon {
+  color: var(--color-critical);
+}
+
+.success {
+  background: var(--color-success-soft);
+}
+
+.success .icon {
+  color: var(--color-success);
+}

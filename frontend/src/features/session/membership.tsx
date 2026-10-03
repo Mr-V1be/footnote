@@ -2,15 +2,15 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 
-import type { Me, Membership, Permission, Workspace } from "@/shared/api/types";
+import type { Membership, Permission, Workspace } from "@/shared/api/types";
 
 export interface MembershipState {
-  me: Me;
   membership: Membership;
   workspaces: Workspace[];
 }
 
 const MembershipContext = createContext<MembershipState | null>(null);
+const ScopeContext = createContext<readonly Permission[] | null>(null);
 
 export function MembershipProvider({
   value,
@@ -28,7 +28,26 @@ export function useMembership(): MembershipState {
   return state;
 }
 
-/** Permissions are computed by the server; the interface only reflects them. */
+/**
+ * Permissions of a narrower scope than the organization — a workspace or a
+ * document — where a workspace role replaces the organization role.
+ */
+export function PermissionScope({
+  permissions,
+  children,
+}: {
+  permissions: readonly Permission[];
+  children: ReactNode;
+}) {
+  return <ScopeContext value={permissions}>{children}</ScopeContext>;
+}
+
+/**
+ * Permissions are computed by the server; the interface only reflects them.
+ * Inside a scope its permissions apply, elsewhere the organization's.
+ */
 export function useCan(permission: Permission): boolean {
-  return useMembership().membership.permissions.includes(permission);
+  const scope = useContext(ScopeContext);
+  const { membership } = useMembership();
+  return (scope ?? membership.permissions).includes(permission);
 }

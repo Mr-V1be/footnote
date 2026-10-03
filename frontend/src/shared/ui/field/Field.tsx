@@ -1,4 +1,9 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  useId,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+} from "react";
 
 import styles from "./field.module.css";
 
@@ -34,4 +39,13 @@ export function Field({
 
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${styles.input} ${props.className ?? ""}`} />;
+}
+
+export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={`${styles.input} ${styles.textarea} ${props.className ?? ""}`}
+    />
+  );
 }

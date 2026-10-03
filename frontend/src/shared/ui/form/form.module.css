@@ -1,0 +1,24 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.row {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.error {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-critical-soft);
+  color: var(--color-critical);
+  font-size: var(--text-sm);
+}
+
+@media (width >= 40rem) {
+  .row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

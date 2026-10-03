@@ -5,8 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { DocumentStructure } from "@/shared/api/types";
 import { useFormatBytes } from "@/shared/format/useFormatBytes";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
-
-import styles from "./panels.module.css";
+import { Facts } from "@/shared/ui/facts/Facts";
 
 const PERCENT = 100;
 
@@ -43,14 +42,5 @@ export function FileDetails({ structure }: { structure: DocumentStructure }) {
       page.source === "declared" ? t("viewer.layoutDeclared") : t("viewer.layoutMeasured");
     rows.push([t("viewer.layout"), `${margins} (${source})`]);
   }
-  return (
-    <dl className={styles.details}>
-      {rows.map(([term, value]) => (
-        <div key={term} className={styles.detail}>
-          <dt>{term}</dt>
-          <dd>{value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+  return <Facts items={rows.map(([term, value]) => ({ term, value }))} />;
 }

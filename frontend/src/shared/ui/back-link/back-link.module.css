@@ -1,0 +1,17 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: var(--control-height-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.back:hover {
+  color: var(--color-ink);
+}
+
+.back svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}

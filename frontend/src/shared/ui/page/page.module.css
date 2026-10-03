@@ -1,0 +1,30 @@
+.page {
+  display: grid;
+  align-content: start;
+  inline-size: 100%;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-gutter)
+    calc(var(--floating-clearance) + env(safe-area-inset-bottom));
+}
+
+.content {
+  max-inline-size: var(--content-max);
+}
+
+.narrow {
+  max-inline-size: var(--content-narrow);
+}
+
+.md {
+  gap: var(--space-5);
+}
+
+.lg {
+  gap: var(--space-8);
+}
+
+@media (width >= 64rem) {
+  .page {
+    padding-block: var(--space-8) var(--space-12);
+  }
+}

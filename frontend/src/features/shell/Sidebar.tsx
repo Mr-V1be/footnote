@@ -1,54 +1,82 @@
 "use client";
 
+import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-
-import { useMembership } from "@/features/session/membership";
+import type { ReactNode } from "react";
 
 import { Brand } from "./Brand";
 import { DemoMark } from "./DemoMark";
-import { NAV_SECTIONS } from "./navigation";
-import { OrganizationSwitcher } from "./OrganizationSwitcher";
 import styles from "./sidebar.module.css";
 import { UserMenu } from "./UserMenu";
 
-export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+export interface SidebarLink {
+  id: string;
+  icon: Icon;
+  label: string;
+  href: string;
+  active: boolean;
+}
+
+export interface SidebarGroup {
+  id: string;
+  label?: string;
+  links: readonly SidebarLink[];
+}
+
+/**
+ * The column of an area of the application: the wordmark, where the person
+ * is (an organization, the platform), the sections and the person's menu.
+ */
+export function Sidebar({
+  context,
+  groups,
+  subtitle,
+  onNavigate,
+}: {
+  context: ReactNode;
+  groups: readonly SidebarGroup[];
+  /** Under the person's name: their role here. */
+  subtitle: string;
+  onNavigate?: () => void;
+}) {
   const t = useTranslations("nav");
-  const pathname = usePathname();
-  const { membership, workspaces } = useMembership();
-  const workspace = workspaces[0]?.slug ?? "main";
-  const context = { organization: membership.organization.alias, workspace };
   return (
     <div className={styles.sidebar}>
       <div className={styles.brand}>
         <Brand />
         <DemoMark />
       </div>
-      <OrganizationSwitcher />
+      {context}
       <nav aria-label={t("label")} className={styles.nav}>
-        <ul>
-          {NAV_SECTIONS.map((section) => {
-            const active = section.matches(pathname, context);
-            const Icon = section.icon;
-            return (
-              <li key={section.id}>
-                <Link
-                  href={section.href(context)}
-                  className={`${styles.link} ${active ? styles.active : ""}`}
-                  aria-current={active ? "page" : undefined}
-                  onClick={onNavigate}
-                >
-                  <Icon stroke={1.75} aria-hidden />
-                  <span>{t(section.label)}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {groups
+          .filter((group) => group.links.length > 0)
+          .map((group) => (
+            <div key={group.id} className={styles.group}>
+              {group.label ? <p className={styles.groupLabel}>{group.label}</p> : null}
+              <ul>
+                {group.links.map((link) => {
+                  const Glyph = link.icon;
+                  return (
+                    <li key={link.id}>
+                      <Link
+                        href={link.href}
+                        className={`${styles.link} ${link.active ? styles.active : ""}`}
+                        aria-current={link.active ? "page" : undefined}
+                        onClick={onNavigate}
+                      >
+                        <Glyph stroke={1.75} aria-hidden />
+                        <span>{link.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
       </nav>
       <div className={styles.footer}>
-        <UserMenu />
+        <UserMenu subtitle={subtitle} />
       </div>
     </div>
   );

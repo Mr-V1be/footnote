@@ -1,0 +1,188 @@
+.list {
+  display: grid;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.reserve {
+  --actions-min: var(--control-height-md);
+}
+
+.busy {
+  opacity: 0.6;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--actions-min, 0), auto);
+  grid-template-areas:
+    "main actions"
+    "aside actions";
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-block-end: var(--border-width) solid var(--color-divider);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row[data-leading] {
+  grid-template-columns: auto minmax(0, 1fr) minmax(var(--actions-min, 0), auto);
+  grid-template-areas:
+    "leading main actions"
+    "leading aside actions";
+}
+
+.row:last-child {
+  border-block-end: 0;
+}
+
+.row:not(:has(.aside)) {
+  grid-template-areas: "main actions";
+}
+
+.row[data-leading]:not(:has(.aside)) {
+  grid-template-areas: "leading main actions";
+}
+
+.leading {
+  grid-area: leading;
+  display: inline-flex;
+  align-self: start;
+  color: var(--color-text-tertiary);
+}
+
+.leading svg {
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
+}
+
+.main {
+  grid-area: main;
+  display: grid;
+  gap: var(--space-0-5);
+  min-inline-size: 0;
+}
+
+.title {
+  min-inline-size: 0;
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.description {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5) var(--space-3);
+  min-inline-size: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.aside {
+  grid-area: aside;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-inline-size: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  grid-area: actions;
+  position: relative;
+  z-index: var(--layer-raised);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.row:has(.link):hover,
+.row:has(.link):focus-within {
+  background: var(--color-surface-sunken);
+}
+
+.muted .main,
+.muted .aside,
+.muted .leading {
+  opacity: 0.6;
+}
+
+/* The whole row opens the record. */
+.link::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.link:focus-visible::after {
+  outline: var(--border-width-strong) solid var(--color-focus);
+  outline-offset: calc(-1 * var(--border-width-strong));
+}
+
+.skeletonRow {
+  pointer-events: none;
+}
+
+.skeletonCircle {
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-soft);
+}
+
+.skeletonLine {
+  display: block;
+  block-size: var(--space-3);
+  margin-block: var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--color-neutral-soft);
+  animation: breathe var(--duration-loop) var(--ease-standard) infinite;
+}
+
+.skeletonShort {
+  inline-size: 40%;
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (width >= 48rem) {
+  .row,
+  .row:not(:has(.aside)) {
+    grid-template-columns: minmax(0, 1fr) auto minmax(var(--actions-min, 0), auto);
+    grid-template-areas: "main aside actions";
+    column-gap: var(--space-4);
+  }
+
+  .row[data-leading],
+  .row[data-leading]:not(:has(.aside)) {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(var(--actions-min, 0), auto);
+    grid-template-areas: "leading main aside actions";
+  }
+
+  .aside {
+    justify-content: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonLine {
+    animation: none;
+  }
+}

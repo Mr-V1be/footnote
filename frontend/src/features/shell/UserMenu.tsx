@@ -4,8 +4,7 @@ import { IconLogout } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
-import { useMembership } from "@/features/session/membership";
-import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
+import { useSession } from "@/features/session/session";
 import { parseTheme, THEMES } from "@/shared/theme/theme";
 import { useThemePreference } from "@/shared/theme/ThemeContext";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
@@ -24,10 +23,16 @@ import styles from "./user-menu.module.css";
 
 const THEME_LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 
-export function UserMenu({ compact = false }: { compact?: boolean }) {
+export function UserMenu({
+  compact = false,
+  subtitle,
+}: {
+  compact?: boolean;
+  /** The person's role where they are, beside the name. */
+  subtitle?: string;
+}) {
   const t = useTranslations("user");
-  const roleLabel = useCodeLabel("roles");
-  const { me, membership } = useMembership();
+  const me = useSession();
   const { theme, setTheme } = useThemePreference();
   const logout = useRef<HTMLFormElement>(null);
   return (
@@ -42,7 +47,7 @@ export function UserMenu({ compact = false }: { compact?: boolean }) {
           {compact ? null : (
             <span className={styles.text}>
               <span className={styles.name}>{me.displayName}</span>
-              <span className={styles.role}>{roleLabel(membership.role)}</span>
+              {subtitle ? <span className={styles.role}>{subtitle}</span> : null}
             </span>
           )}
         </MenuTrigger>

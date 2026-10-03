@@ -1,14 +1,24 @@
 "use client";
 
-import { IconAlertTriangle, IconCategory, IconSearchOff, IconUpload } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconCategory,
+  IconFolder,
+  IconFolderOff,
+  IconSearchOff,
+  IconUpload,
+} from "@tabler/icons-react";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { useCan, useMembership } from "@/features/session/membership";
+import { PermissionScope, useCan, useMembership } from "@/features/session/membership";
 import { useApi } from "@/shared/api/ApiProvider";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 import { Button } from "@/shared/ui/button/Button";
+import { Page } from "@/shared/ui/page/Page";
+import { PageAction } from "@/shared/ui/page-action/PageAction";
 import { PageHeader } from "@/shared/ui/page-header/PageHeader";
 import { SearchField } from "@/shared/ui/search-field/SearchField";
 import { Select } from "@/shared/ui/select/Select";
@@ -29,7 +39,50 @@ import { useListFilters } from "./useListFilters";
 
 const ALL_KINDS = "__all";
 
+/** Documents of a workspace, under the role the person has in it. */
 export function DocumentsScreen({ workspace }: { workspace: string }) {
+  const t = useTranslations("documents");
+  const { workspaces } = useMembership();
+  const current = workspaces.find((item) => item.slug === workspace);
+  if (!current) {
+    return (
+      <Page>
+        <StatePanel
+          icon={<IconFolderOff stroke={1.75} />}
+          role="alert"
+          title={t("workspaceMissingTitle")}
+          description={t("workspaceMissingDescription")}
+        />
+      </Page>
+    );
+  }
+  return (
+    <PermissionScope permissions={current.permissions}>
+      <WorkspaceDocuments workspace={workspace} />
+    </PermissionScope>
+  );
+}
+
+/** Choosing the workspace, when the person sees more than one. */
+function WorkspaceSelect({ workspace }: { workspace: string }) {
+  const t = useTranslations("documents");
+  const router = useRouter();
+  const { membership, workspaces } = useMembership();
+  if (workspaces.length < 2) return null;
+  return (
+    <Select
+      label={t("workspace")}
+      icon={<IconFolder stroke={1.75} />}
+      value={workspace}
+      onValueChange={(slug) =>
+        router.push(`/o/${membership.organization.alias}/w/${slug}/documents`)
+      }
+      options={workspaces.map((item) => ({ value: item.slug, label: item.name }))}
+    />
+  );
+}
+
+function WorkspaceDocuments({ workspace }: { workspace: string }) {
   const t = useTranslations("documents");
   const tc = useTranslations("common");
   const api = useApi();
@@ -64,16 +117,6 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
     ...(catalog.data?.kinds.map((kind) => ({ value: kind.code, label: kindLabel(kind.code) })) ??
       []),
   ];
-  const uploadButton = canUpload ? (
-    <Button
-      variant="primary"
-      icon={<IconUpload stroke={1.75} />}
-      onClick={() => setUploadOpen(true)}
-    >
-      {t("upload")}
-    </Button>
-  ) : null;
-
   function content() {
     if (list.isPending) return <DocumentListSkeleton />;
     if (list.isError) {
@@ -148,11 +191,24 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
   }
 
   return (
-    <div className={styles.screen}>
+    <Page>
       <PageHeader
         title={t("title")}
-        meta={list.data && !pristine ? <span>{t("count", { count: items.length })}</span> : null}
-        actions={pristine ? undefined : <div className={styles.headerAction}>{uploadButton}</div>}
+        meta={
+          <>
+            <WorkspaceSelect workspace={workspace} />
+            {list.data && !pristine ? <span>{t("count", { count: items.length })}</span> : null}
+          </>
+        }
+        actions={
+          canUpload && !pristine ? (
+            <PageAction
+              icon={<IconUpload stroke={1.75} />}
+              label={t("upload")}
+              onClick={() => setUploadOpen(true)}
+            />
+          ) : undefined
+        }
       />
       <div className={styles.toolbar} role="search" hidden={pristine}>
         <div className={styles.search}>
@@ -173,22 +229,11 @@ export function DocumentsScreen({ workspace }: { workspace: string }) {
         />
       </div>
       {content()}
-      {canUpload && !pristine ? (
-        <div className={styles.fab}>
-          <Button
-            variant="primary"
-            icon={<IconUpload stroke={1.75} />}
-            onClick={() => setUploadOpen(true)}
-          >
-            {t("upload")}
-          </Button>
-        </div>
-      ) : null}
       <UploadDialog
         target={{ type: "document", workspace }}
         open={uploadOpen}
         onOpenChange={setUploadOpen}
       />
-    </div>
+    </Page>
   );
 }

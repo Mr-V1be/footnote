@@ -2,7 +2,6 @@
 
 import {
   IconAlertTriangle,
-  IconArrowLeft,
   IconDotsVertical,
   IconDownload,
   IconFileOff,
@@ -16,12 +15,13 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
 import { ReviewWorkspace } from "@/features/review/ReviewWorkspace";
-import { useCan, useMembership } from "@/features/session/membership";
+import { PermissionScope, useMembership } from "@/features/session/membership";
 import { useApi } from "@/shared/api/ApiProvider";
 import { ApiError } from "@/shared/api/errors";
 import type { DocumentDetails } from "@/shared/api/types";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
+import { BackLink } from "@/shared/ui/back-link/BackLink";
 import { Button } from "@/shared/ui/button/Button";
 import { IconButton } from "@/shared/ui/icon-button/IconButton";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/shared/ui/menu/Menu";
@@ -70,7 +70,6 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   const kindLabel = useCodeLabel("kinds");
   const { membership, workspaces } = useMembership();
   const organization = membership.organization.alias;
-  const canUpload = useCan("documents.upload");
   const wide = useMediaQuery("(width >= 48rem)");
   const [uploadOpen, setUploadOpen] = useState(false);
 
@@ -128,6 +127,8 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
   }
 
   const document = details.data;
+  // The document's own permissions: its workspace may give another role.
+  const canUpload = document.permissions.includes("documents.upload");
   const versionInfo = document.versions.find((item) => item.number === version);
   const parsed =
     structure.data && structure.data.version.status === "parsed" ? structure.data : null;
@@ -173,12 +174,14 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
       );
     }
     return (
-      <ReviewWorkspace
-        organization={organization}
-        documentId={document.id}
-        version={version}
-        structure={parsed}
-      />
+      <PermissionScope permissions={document.permissions}>
+        <ReviewWorkspace
+          organization={organization}
+          documentId={document.id}
+          version={version}
+          structure={parsed}
+        />
+      </PermissionScope>
     );
   }
 
@@ -235,10 +238,7 @@ export function DocumentScreen({ documentId }: { documentId: string }) {
       <PageHeader
         leading={
           <div className={styles.leading}>
-            <Link href={listHref} className={styles.back}>
-              <IconArrowLeft stroke={1.75} aria-hidden />
-              {t("viewer.backToList")}
-            </Link>
+            <BackLink href={listHref} label={t("viewer.backToList")} />
             {wide ? null : compactActions}
           </div>
         }

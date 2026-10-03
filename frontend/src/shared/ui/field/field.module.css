@@ -18,6 +18,14 @@
   font-size: var(--text-md);
 }
 
+.textarea {
+  block-size: auto;
+  min-block-size: calc(var(--control-height-md) * 2);
+  padding-block: var(--space-2);
+  line-height: var(--leading-normal);
+  resize: vertical;
+}
+
 .input::placeholder {
   color: var(--color-text-tertiary);
 }

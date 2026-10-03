@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AccessScreen } from "@/features/access/AccessScreen";
-import { AppShell } from "@/features/shell/AppShell";
+import { OrganizationShell } from "@/features/shell/OrganizationShell";
 import { serverApi } from "@/server/backend/api";
 import { ApiError, unwrap } from "@/shared/api/errors";
 
@@ -27,5 +27,9 @@ export default async function OrganizationLayout({
       throw error;
     });
   if (!workspaces) return <AccessScreen reason="notMember" />;
-  return <AppShell state={{ me, membership, workspaces }}>{children}</AppShell>;
+  return (
+    <OrganizationShell me={me} state={{ membership, workspaces }}>
+      {children}
+    </OrganizationShell>
+  );
 }

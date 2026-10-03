@@ -38,3 +38,56 @@ export type RunSummary = Schemas["RunSummaryOut"];
 export type Quality = Schemas["QualityOut"];
 export type QualityMetrics = Schemas["MetricsOut"];
 export type DocumentTiming = Schemas["DocumentTimingOut"];
+export type RunFailureCode = Schemas["RunFailureCode"];
+export type VersionOrigin = Schemas["VersionOrigin"];
+
+// Administration of an organization.
+export type AdministrationCatalog = Schemas["AdministrationCatalogOut"];
+export type Role = Schemas["RoleOut"];
+export type Member = Schemas["MemberOut"];
+export type Invite = Schemas["InviteIn"];
+export type WorkspaceMember = Schemas["WorkspaceMemberOut"];
+export type WorkspaceInput = Schemas["WorkspaceIn"];
+export type WorkspacePatch = Schemas["WorkspacePatchIn"];
+export type AuditPage = Schemas["AuditPageOut"];
+export type AuditEvent = Schemas["AuditEventOut"];
+export type AuditAction = Schemas["AuditAction"];
+export type ActorKind = Schemas["ActorKind"];
+
+// Integrations.
+export type ApiKey = Schemas["ApiKeyOut"];
+export type ApiScope = Schemas["ApiScope"];
+export type IssuedKey = Schemas["IssuedKeyOut"];
+export type Webhook = Schemas["WebhookOut"];
+export type WebhookInput = Schemas["WebhookIn"];
+export type WebhookWithSecret = Schemas["WebhookWithSecretOut"];
+export type WebhookEvent = Schemas["WebhookEvent"];
+export type Delivery = Schemas["DeliveryOut"];
+export type DeliveryStatus = Schemas["DeliveryStatus"];
+
+// Plans, usage and payments.
+export type Billing = Schemas["BillingOut"];
+export type Plan = Schemas["PlanOut"];
+export type Usage = Schemas["UsageOut"];
+export type UsageMetric = Schemas["UsageMetric"];
+export type Invoice = Schemas["InvoiceOut"];
+export type LedgerEntry = Schemas["LedgerEntryOut"];
+export type PlanChangeResult = Schemas["PlanChangeOut"];
+export type TestPayment = Schemas["TestPaymentOut"];
+
+// Automatic correction of formatting.
+export type AutofixPreview = Schemas["AutofixPreviewOut"];
+export type AutofixResult = Schemas["AutofixOut"];
+export type VersionChange = Schemas["ChangeOut"];
+export type SkipReason = Schemas["SkipReason"];
+
+// Questions to the corpus.
+export type AskStatus = Schemas["AskStatusOut"];
+export type ConversationSummary = Schemas["ConversationSummaryOut"];
+export type Conversation = Schemas["ConversationOut"];
+export type ConversationTurn = Schemas["TurnOut"];
+export type Citation = Schemas["CitationOut"];
+
+// The platform console.
+export type OrganizationRow = Schemas["OrganizationRowOut"];
+export type SystemStatus = Schemas["SystemOut"];

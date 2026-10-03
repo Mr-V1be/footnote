@@ -14,6 +14,7 @@ import { Button } from "@/shared/ui/button/Button";
 import { Dialog, DialogContent } from "@/shared/ui/dialog/Dialog";
 import { Dropzone } from "@/shared/ui/dropzone/Dropzone";
 import { Field, TextInput } from "@/shared/ui/field/Field";
+import { Form, FormError } from "@/shared/ui/form/Form";
 import { ProgressBar } from "@/shared/ui/progress/ProgressBar";
 import { Select } from "@/shared/ui/select/Select";
 import { useToast } from "@/shared/ui/toast/Toast";
@@ -199,7 +200,7 @@ function UploadForm({
         </>
       }
     >
-      <div className={styles.form}>
+      <Form>
         {file ? (
           <div className={styles.file}>
             <FileTypeIcon format={detected ?? ""} className={styles.fileIcon} />
@@ -220,13 +221,9 @@ function UploadForm({
           />
         )}
         {uploading ? <ProgressBar value={progress ?? undefined} label={t("uploading")} /> : null}
-        {error ? (
-          <p className={styles.error} role="alert">
-            {error}
-          </p>
-        ) : null}
+        {error ? <FormError>{error}</FormError> : null}
         {target.type === "document" && catalog.data ? (
-          <div className={styles.fields}>
+          <>
             <Field label={t("kind")}>
               {({ id }) => (
                 <Select
@@ -253,9 +250,9 @@ function UploadForm({
                 />
               )}
             </Field>
-          </div>
+          </>
         ) : null}
-      </div>
+      </Form>
     </DialogContent>
   );
 }
