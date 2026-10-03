@@ -203,11 +203,33 @@ export const SCREENS = [
       await page.evaluate(() => window.scrollTo(0, 0));
     },
   },
+  {
+    name: "18-platform-organizations",
+    user: "operator",
+    run: (page) => open(page, "/platform/organizations"),
+  },
+  {
+    name: "19-platform-plans",
+    user: "operator",
+    run: (page) => open(page, "/platform/plans"),
+  },
+  {
+    name: "20-platform-system",
+    user: "operator",
+    run: (page) => open(page, "/platform/system"),
+  },
+  {
+    // A workspace role: Igor observes the organization but is a lawyer in "Кадры".
+    name: "21-workspace-documents",
+    user: "workspaceLawyer",
+    run: (page) => open(page, `/o/${OWNER}/w/kadry/documents`),
+  },
 ];
 
 export const USERS = {
   owner: "kovaleva@polyarnaya-zvezda.example",
   zarya: "ershov@zarya.example",
   lawyer: "polyakova@zarya.example",
+  workspaceLawyer: "belov@polyarnaya-zvezda.example",
   operator: "operator@snoska.example",
 };

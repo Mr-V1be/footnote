@@ -201,7 +201,9 @@
     "notMemberTitle": "Нет доступа к организации",
     "notMemberDescription": "Вы не состоите в этой организации или ваша роль не даёт доступа.",
     "toMyOrganizations": "К моим организациям",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "notOperatorTitle": "Нет доступа к платформе",
+    "notOperatorDescription": "Консоль платформы открыта только её операторам."
   },
   "errors": {
     "notFoundTitle": "Страница не найдена",
@@ -620,7 +622,63 @@
     "ping": "Тестовое событие"
   },
   "platform": {
-    "title": "Платформа"
+    "title": "Платформа",
+    "operator": "Оператор платформы",
+    "nav": {
+      "organizations": "Организации",
+      "plans": "Тарифы",
+      "system": "Состояние системы"
+    },
+    "organizations": {
+      "title": "Организации",
+      "count": "{count, plural, one {# организация} few {# организации} many {# организаций} other {# организации}}",
+      "since": "С {date}",
+      "members": "{count, plural, one {# участник} few {# участника} many {# участников} other {# участника}}",
+      "usage": "{metric}: {used} из {limit}",
+      "planOf": "Тариф: {name}",
+      "assignTitle": "Перевести «{name}» на тариф «{plan}»?",
+      "assignConsequence": "Тариф начнёт действовать сразу, без счёта; лимиты этого месяца станут лимитами нового тарифа. Смена попадёт в журнал организации.",
+      "assignConfirm": "Перевести",
+      "assigned": "«{name}»: тариф «{plan}»"
+    },
+    "plans": {
+      "title": "Тарифы",
+      "limit": "{metric}: {limit}",
+      "free": "Бесплатно",
+      "price": "{price} в месяц",
+      "organizations": "{count, plural, =0 {Нет организаций} one {# организация} few {# организации} many {# организаций} other {# организации}}"
+    },
+    "system": {
+      "title": "Состояние системы",
+      "healthy": "Всё работает",
+      "degraded": "Есть сбои",
+      "services": "Службы",
+      "ok": "Работает",
+      "down": "Недоступна",
+      "runtime": "Модели и задачи",
+      "languageModel": "Языковая модель",
+      "embeddingModel": "Модель эмбеддингов",
+      "notConnected": "Не подключена",
+      "outbox": "Задачи в очереди",
+      "outboxCount": "{count, number}",
+      "nextWatch": "Следующая проверка редакции 152-ФЗ",
+      "notScheduled": "Не запланирована",
+      "corpus": "Корпус норм",
+      "revision": "Редакция {revision}",
+      "activated": "Действует с {date}",
+      "indexed": "Проиндексирован",
+      "notIndexed": "Не проиндексирован",
+      "watch": "Проверки новой редакции",
+      "watchNow": "Проверить сейчас",
+      "watchQueued": "Проверка редакции поставлена в очередь",
+      "watchFailed": "Не удалось запустить проверку",
+      "noChecks": "Проверок ещё не было",
+      "outcome": {
+        "unchanged": "Редакция не изменилась",
+        "new_edition": "Вышла новая редакция",
+        "failed": "Проверка не удалась"
+      }
+    }
   },
   "integrations": {
     "shownOnce": "Скопируйте сейчас: после закрытия окна его больше не показать.",
@@ -832,5 +890,11 @@
         "restart": "make api, make worker"
       }
     }
+  },
+  "healthChecks": {
+    "database": "База данных",
+    "storage": "Хранилище файлов",
+    "queue": "Очередь задач",
+    "identity": "Вход и учётные записи"
   }
 }

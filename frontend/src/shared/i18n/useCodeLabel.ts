@@ -18,7 +18,8 @@ type RegistryNamespace =
   | "auditCategories"
   | "actorKinds"
   | "apiScopes"
-  | "webhookEvents";
+  | "webhookEvents"
+  | "healthChecks";
 
 /**
  * Label for a registry code. Registries live on the server and may gain

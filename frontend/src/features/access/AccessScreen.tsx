@@ -9,7 +9,11 @@ import { StatePanel } from "@/shared/ui/state-panel/StatePanel";
 import styles from "./access-screen.module.css";
 
 /** Full-page refusal: the user is signed in but may not see this organization. */
-export async function AccessScreen({ reason }: { reason: "noOrganizations" | "notMember" }) {
+export async function AccessScreen({
+  reason,
+}: {
+  reason: "noOrganizations" | "notMember" | "notOperator";
+}) {
   const t = await getTranslations("access");
   return (
     <div className={styles.screen}>
@@ -23,7 +27,7 @@ export async function AccessScreen({ reason }: { reason: "noOrganizations" | "no
         role="alert"
         action={
           <div className={styles.actions}>
-            {reason === "notMember" ? (
+            {reason !== "noOrganizations" ? (
               <Button asChild variant="primary">
                 <Link href="/">{t("toMyOrganizations")}</Link>
               </Button>
