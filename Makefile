@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark wait demo-refresh watch demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark wait demo-refresh load watch demo-documents stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -56,6 +56,9 @@ wait: ## Wait until uploaded documents are read and checked
 
 demo-refresh: ## Refresh all that depends on the model: index, reset, recheck, benchmark, screenshots, landing media, video
 	scripts/demo-refresh.sh
+
+load: ## Load test the API with k6 in Docker (summary in .run/k6)
+	scripts/load-test.sh
 
 watch: ## Check now for a new edition of 152-FZ (weekly in the worker; mail goes to Mailpit)
 	$(BACKEND) snoska corpus watch
