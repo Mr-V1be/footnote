@@ -23,6 +23,8 @@ x-backend-env: &backend-env
   SNOSKA_DB_NAME: snoska
   SNOSKA_DB_OWNER_PASSWORD: ${SNOSKA_DB_OWNER_PASSWORD:?set SNOSKA_DB_OWNER_PASSWORD}
   SNOSKA_DB_APP_PASSWORD: ${SNOSKA_DB_APP_PASSWORD:?set SNOSKA_DB_APP_PASSWORD}
+  SNOSKA_DB_POOL_SIZE: ${SNOSKA_DB_POOL_SIZE:-5}
+  SNOSKA_DB_MAX_OVERFLOW: ${SNOSKA_DB_MAX_OVERFLOW:-5}
   SNOSKA_REDIS_HOST: redis
   SNOSKA_REDIS_PORT: "6379"
   SNOSKA_REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD:?set SNOSKA_REDIS_PASSWORD}
@@ -119,17 +121,27 @@ services:
     logging: *logging
     restart: unless-stopped
 
+  # Built ahead of time from infra/keycloak/Dockerfile: the realm and the login theme are
+  # inside the image, build options (database, health, features) are fixed there.
   keycloak:
-    image: keycloak/keycloak:26.8.0
-    command: ["start", "--import-realm"]
+    image: ${SNOSKA_IMAGE_PREFIX:-snoska}-keycloak:${SNOSKA_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: infra/keycloak/Dockerfile
+    pull_policy: missing
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_DB_POOL_MAX_SIZE: ${KEYCLOAK_DB_POOL_MAX_SIZE:-100}
+      # One node: the local cache, no cluster discovery.
+      KC_CACHE: local
+      # Heap of the JVM; empty keeps Keycloak's default, 70% of the container's limit.
+      JAVA_OPTS_KC_HEAP: ${KEYCLOAK_HEAP_OPTIONS:-}
+      JAVA_OPTS_APPEND: ${KEYCLOAK_JAVA_OPTIONS:-}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
       # Browsers and token issuers use the public URL; the servers reach
@@ -138,7 +150,6 @@ services:
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
       KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: xforwarded
-      KC_HEALTH_ENABLED: "true"
       KC_LOG_LEVEL: info
       # Placeholders of the realm file.
       SNOSKA_WEB_URL: ${SNOSKA_WEB_URL}
@@ -153,9 +164,6 @@ services:
       SNOSKA_SMTP_USERNAME: ${SNOSKA_SMTP_USERNAME:-}
       SNOSKA_SMTP_PASSWORD: ${SNOSKA_SMTP_PASSWORD:-}
       SNOSKA_SMTP_START_TLS: ${SNOSKA_SMTP_START_TLS:-true}
-    volumes:
-      - ./infra/keycloak/realm-snoska.json:/opt/keycloak/data/import/realm-snoska.json:ro
-      - ./infra/keycloak/themes/snoska:/opt/keycloak/themes/snoska:ro
     healthcheck:
       test:
         - CMD-SHELL

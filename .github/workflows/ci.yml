@@ -90,3 +90,20 @@ jobs:
       - name: Production build
         working-directory: frontend
         run: pnpm build
+
+  stack:
+    name: Production stack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compose file of the production stack is valid
+        run: |
+          sed -E 's/^([A-Z_]+)=$/\1=ci-placeholder/' infra/prod/env.example > "$RUNNER_TEMP/ci.env"
+          docker compose -f docker-compose.prod.yml --env-file "$RUNNER_TEMP/ci.env" --profile demo config --quiet
+      - name: Keycloak image is built with its options fixed
+        run: |
+          docker build -f infra/keycloak/Dockerfile -t snoska-keycloak:ci .
+          docker run --rm snoska-keycloak:ci show-config | tee "$RUNNER_TEMP/keycloak.txt"
+          grep -q 'kc.db =  postgres (Persisted)' "$RUNNER_TEMP/keycloak.txt"
+          grep -q 'kc.health-enabled =  true (Persisted)' "$RUNNER_TEMP/keycloak.txt"
