@@ -7,13 +7,14 @@ import { Pricing } from "./sections/Pricing";
 import { Showcase } from "./sections/Showcase";
 import { Steps } from "./sections/Steps";
 import { publicFacts } from "./data";
+import { mostChecksPerDocument } from "./facts";
 
 /** The product's page for guests: screens of the product, honest numbers, plans. */
 export async function Landing() {
   const facts = await publicFacts();
   return (
     <MarketingShell demo={facts.demo}>
-      <Hero demo={facts.demo} checks={facts.checks?.checks.length ?? null} />
+      <Hero demo={facts.demo} checks={facts.checks ? mostChecksPerDocument(facts.checks) : null} />
       <Steps />
       <Showcase />
       <Numbers checks={facts.checks} quality={facts.quality} />
