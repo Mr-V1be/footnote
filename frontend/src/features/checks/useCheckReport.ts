@@ -59,6 +59,13 @@ export function useCheckReport(organization: string, documentId: string, version
     };
     source.addEventListener("run", (event) => {
       const run = JSON.parse((event as MessageEvent<string>).data) as CheckRun;
+      if (!isRunPending(run.status)) {
+        // The finished run comes with all its findings: re-read the report
+        // rather than show it finished over the findings of a moment ago.
+        lastRefresh.current = Date.now();
+        void queryClient.invalidateQueries({ queryKey: reportKey, exact: true });
+        return;
+      }
       queryClient.setQueryData<CheckReport | null>(reportKey, (current) =>
         current && current.run.id === run.id ? { ...current, run } : current,
       );
