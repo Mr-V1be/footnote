@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Protocol
 from uuid import UUID
 
 from snoska.domain.tenancy.organization import Organization, UserProfile, Workspace
+from snoska.domain.tenancy.workspace_access import WorkspaceMember
 
 
 class OrganizationRepository(Protocol):
@@ -27,6 +28,36 @@ class WorkspaceRepository(Protocol):
 
     async def add_if_absent(self, workspace: Workspace) -> None: ...
 
+    async def add(self, workspace: Workspace) -> None:
+        """Raise SlugTakenError when the organization already has the slug."""
+        ...
+
+    async def save(self, workspace: Workspace) -> None: ...
+
+    async def delete(self, workspace_id: UUID) -> None: ...
+
+    async def document_counts(self) -> Mapping[UUID, int]: ...
+
+
+class WorkspaceMemberRepository(Protocol):
+    """Roles given inside workspaces; tenant-scoped."""
+
+    async def list_for_workspace(self, workspace_id: UUID) -> Sequence[WorkspaceMember]: ...
+
+    async def list_for_user(self, user_id: UUID) -> Sequence[WorkspaceMember]: ...
+
+    async def get(self, workspace_id: UUID, user_id: UUID) -> WorkspaceMember | None: ...
+
+    async def put(self, member: WorkspaceMember) -> None: ...
+
+    async def remove(self, workspace_id: UUID, user_id: UUID) -> None: ...
+
+    async def remove_user(self, user_id: UUID) -> None:
+        """When someone leaves the organization."""
+        ...
+
 
 class UserProfileRepository(Protocol):
     async def upsert(self, profile: UserProfile, now: datetime) -> None: ...
+
+    async def get_many(self, user_ids: Sequence[UUID]) -> Mapping[UUID, UserProfile]: ...

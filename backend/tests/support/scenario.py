@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from uuid import UUID, uuid4
 
 from sqlalchemy import text
 
 from snoska.bootstrap.container import Container
+from snoska.domain.tenancy.members import Member
 from snoska.ports.identity import OrganizationProfile
 from tests.support.tokens import MemberIdentity, TokenFactory
 
@@ -31,6 +33,20 @@ ALICE = _member("alice", ORG_A, "owner")
 OLGA = _member("olga", ORG_A, "observer")
 EVA = _member("eva", ORG_A, "executor")
 BOB = _member("bob", ORG_B, "owner")
+LEO = _member("leo", ORG_A, "lawyer")
+MEMBERS = (ALICE, OLGA, EVA, BOB, LEO)
+
+
+def member_of(identity: MemberIdentity, roles: Sequence[str]) -> Member:
+    """How the identity provider lists a scenario's member."""
+    first, _, last = identity.name.partition(" ")
+    return Member(
+        user_id=identity.user_id,
+        email=identity.email,
+        first_name=first,
+        last_name=last,
+        role_codes=frozenset(roles),
+    )
 
 
 def auth(tokens: TokenFactory, member: MemberIdentity) -> dict[str, str]:

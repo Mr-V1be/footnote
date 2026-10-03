@@ -1,17 +1,26 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import RowMapping, select
+from sqlalchemy import RowMapping, delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from snoska.domain.tenancy.organization import Organization, UserProfile, Workspace
+from snoska.domain.tenancy.organization import (
+    Organization,
+    SlugTakenError,
+    UserProfile,
+    Workspace,
+)
+from snoska.domain.tenancy.workspace_access import WorkspaceMember
+from snoska.infrastructure.persistence.tables.documents import documents
 from snoska.infrastructure.persistence.tables.tenancy import (
     organizations,
     user_profiles,
+    workspace_members,
     workspaces,
 )
 
@@ -29,6 +38,16 @@ def _workspace(row: RowMapping) -> Workspace:
         slug=row["slug"],
         name=row["name"],
         created_at=row["created_at"],
+        restricted=row["restricted"],
+    )
+
+
+def _member(row: RowMapping) -> WorkspaceMember:
+    return WorkspaceMember(
+        workspace_id=row["workspace_id"],
+        user_id=row["user_id"],
+        role_code=row["role_code"],
+        added_at=row["added_at"],
     )
 
 
@@ -99,6 +118,104 @@ class SqlWorkspaceRepository:
             )
         )
 
+    async def add(self, workspace: Workspace) -> None:
+        statement = (
+            insert(workspaces)
+            .values(
+                id=workspace.id,
+                organization_id=workspace.organization_id,
+                slug=workspace.slug,
+                name=workspace.name,
+                created_at=workspace.created_at,
+                restricted=workspace.restricted,
+            )
+            .on_conflict_do_nothing(
+                index_elements=[workspaces.c.organization_id, workspaces.c.slug]
+            )
+            .returning(workspaces.c.id)
+        )
+        if (await self._connection.execute(statement)).first() is None:
+            raise SlugTakenError(f"workspace {workspace.slug!r} already exists")
+
+    async def save(self, workspace: Workspace) -> None:
+        try:
+            await self._connection.execute(
+                update(workspaces)
+                .where(workspaces.c.id == workspace.id)
+                .values(slug=workspace.slug, name=workspace.name, restricted=workspace.restricted)
+            )
+        except IntegrityError as exc:
+            raise SlugTakenError(f"workspace {workspace.slug!r} already exists") from exc
+
+    async def delete(self, workspace_id: UUID) -> None:
+        await self._connection.execute(delete(workspaces).where(workspaces.c.id == workspace_id))
+
+    async def document_counts(self) -> Mapping[UUID, int]:
+        result = await self._connection.execute(
+            select(documents.c.workspace_id, func.count()).group_by(documents.c.workspace_id)
+        )
+        return {row[0]: int(row[1]) for row in result}
+
+
+class SqlWorkspaceMemberRepository:
+    def __init__(self, connection: AsyncConnection, organization_id: UUID | None) -> None:
+        self._connection = connection
+        self._organization_id = organization_id
+
+    async def list_for_workspace(self, workspace_id: UUID) -> Sequence[WorkspaceMember]:
+        result = await self._connection.execute(
+            select(workspace_members)
+            .where(workspace_members.c.workspace_id == workspace_id)
+            .order_by(workspace_members.c.added_at)
+        )
+        return [_member(row) for row in result.mappings()]
+
+    async def list_for_user(self, user_id: UUID) -> Sequence[WorkspaceMember]:
+        result = await self._connection.execute(
+            select(workspace_members).where(workspace_members.c.user_id == user_id)
+        )
+        return [_member(row) for row in result.mappings()]
+
+    async def get(self, workspace_id: UUID, user_id: UUID) -> WorkspaceMember | None:
+        result = await self._connection.execute(
+            select(workspace_members).where(
+                workspace_members.c.workspace_id == workspace_id,
+                workspace_members.c.user_id == user_id,
+            )
+        )
+        row = result.mappings().first()
+        return _member(row) if row else None
+
+    async def put(self, member: WorkspaceMember) -> None:
+        if self._organization_id is None:
+            raise RuntimeError("workspace members are written in a tenant unit of work")
+        statement = insert(workspace_members).values(
+            organization_id=self._organization_id,
+            workspace_id=member.workspace_id,
+            user_id=member.user_id,
+            role_code=member.role_code,
+            added_at=member.added_at,
+        )
+        await self._connection.execute(
+            statement.on_conflict_do_update(
+                index_elements=[workspace_members.c.workspace_id, workspace_members.c.user_id],
+                set_={"role_code": statement.excluded.role_code},
+            )
+        )
+
+    async def remove(self, workspace_id: UUID, user_id: UUID) -> None:
+        await self._connection.execute(
+            delete(workspace_members).where(
+                workspace_members.c.workspace_id == workspace_id,
+                workspace_members.c.user_id == user_id,
+            )
+        )
+
+    async def remove_user(self, user_id: UUID) -> None:
+        await self._connection.execute(
+            delete(workspace_members).where(workspace_members.c.user_id == user_id)
+        )
+
 
 class SqlUserProfileRepository:
     def __init__(self, connection: AsyncConnection) -> None:
@@ -127,3 +244,16 @@ class SqlUserProfileRepository:
                 ),
             )
         )
+
+    async def get_many(self, user_ids: Sequence[UUID]) -> Mapping[UUID, UserProfile]:
+        if not user_ids:
+            return {}
+        result = await self._connection.execute(
+            select(user_profiles).where(user_profiles.c.id.in_(list(user_ids)))
+        )
+        return {
+            row["id"]: UserProfile(
+                id=row["id"], email=row["email"], display_name=row["display_name"]
+            )
+            for row in result.mappings()
+        }

@@ -4,9 +4,13 @@ from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from uuid import UUID
 
+from snoska.application.audit.trail import AuditTrail
 from snoska.application.checks.norms import NormLibrary
 from snoska.application.checks.scheduling import CheckScheduler
 from snoska.application.documents.queries import VersionNotFoundError
+from snoska.application.tenancy.gate import WorkspaceGate
+from snoska.domain.audit.event import AuditAction
+from snoska.domain.audit.targets import document_target
 from snoska.domain.checks.catalog import CheckCatalog, LawNorm, StandardNorm
 from snoska.domain.checks.finding import REVIEW_PERMISSIONS, Finding, ReviewStatus
 from snoska.domain.checks.result import CheckResult
@@ -56,40 +60,55 @@ class CheckService:
         scheduler: CheckScheduler,
         norms: NormLibrary,
         clock: Clock,
+        gate: WorkspaceGate,
+        audit: AuditTrail,
     ) -> None:
         self._uow_factory = uow_factory
         self.catalog = catalog
         self._scheduler = scheduler
         self._norms = norms
         self._clock = clock
+        self._gate = gate
+        self._audit = audit
 
     async def request(
         self, access: OrganizationAccess, document_id: UUID, version_number: int
     ) -> CheckRun:
-        access.require(Permission.CHECKS_RUN)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            document = await self._gate.require_document(
+                uow, access, document_id, Permission.CHECKS_RUN
+            )
             version = await uow.versions.get_by_number(document_id, version_number)
             if version is None:
                 raise VersionNotFoundError("version not found")
             if version.status is not ParseStatus.PARSED:
                 raise VersionNotReadyError("the version is not parsed yet")
             run = await self._scheduler.schedule(uow, version, requested_by=access.user_id)
+            await self._audit.record(
+                uow,
+                access,
+                AuditAction.CHECK_REQUESTED,
+                document_target(document),
+                {"version": version_number},
+            )
             await uow.commit()
         return run
 
     async def run(self, access: OrganizationAccess, run_id: UUID) -> CheckRun:
-        access.require(Permission.DOCUMENTS_READ)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             run = await uow.check_runs.get(run_id)
-        if run is None:
-            raise RunNotFoundError("check run not found")
+            if run is None:
+                raise RunNotFoundError("check run not found")
+            await self._gate.require_document(
+                uow, access, run.document_id, Permission.DOCUMENTS_READ
+            )
         return run
 
     async def latest(
         self, access: OrganizationAccess, document_id: UUID, version_number: int
     ) -> CheckReport | None:
-        access.require(Permission.DOCUMENTS_READ)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            await self._gate.require_document(uow, access, document_id, Permission.DOCUMENTS_READ)
             version = await uow.versions.get_by_number(document_id, version_number)
             if version is None:
                 raise VersionNotFoundError("version not found")
@@ -142,14 +161,25 @@ class CheckService:
     async def review(
         self, access: OrganizationAccess, finding_id: UUID, status: ReviewStatus, revision: int
     ) -> Finding:
-        access.require(REVIEW_PERMISSIONS[status])
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             finding = await uow.findings.get(finding_id)
-            if finding is None:
+            run = await uow.check_runs.get(finding.run_id) if finding is not None else None
+            if finding is None or run is None:
                 raise FindingNotFoundError("finding not found")
+            document = await self._gate.require_document(
+                uow, access, run.document_id, REVIEW_PERMISSIONS[status]
+            )
             if finding.revision != revision:
                 raise ConcurrentModificationError("the finding was reviewed by someone else")
+            previous = finding.review
             finding.set_review(status, access.user_id, self._clock.now())
             await uow.findings.save(finding)
+            await self._audit.record(
+                uow,
+                access,
+                AuditAction.FINDING_REVIEWED,
+                document_target(document),
+                {"finding": finding.title, "from": previous.value, "to": status.value},
+            )
             await uow.commit()
         return finding

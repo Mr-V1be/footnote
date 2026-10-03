@@ -27,10 +27,11 @@ from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
 from snoska.infrastructure.persistence.vector_index import ensure_space
 from tests.support.fakes import FakeDirectory, HashEmbedder, RecordedLanguageModel
-from tests.support.scenario import ORG_A, ORG_B
+from tests.support.scenario import MEMBERS, ORG_A, ORG_B, member_of
 from tests.support.tokens import ISSUER, StaticKeys, TokenFactory
 
 TABLES = (
+    "audit_events, workspace_members, "
     "findings, check_results, check_runs, text_embeddings, edition_indexes, "
     "document_blocks, document_structures, document_versions, documents, workspaces, "
     "organizations, user_profiles, outbox_messages, norm_embeddings, norm_units, "
@@ -101,12 +102,25 @@ def tokens() -> TokenFactory:
 
 
 @pytest.fixture
-async def container(settings: Settings, tokens: TokenFactory) -> AsyncIterator[Container]:
+def directory() -> FakeDirectory:
+    """The organizations and their members, with the scenario's members in place."""
+    fake = FakeDirectory([ORG_A, ORG_B])
+    for identity in MEMBERS:
+        for organization_id, roles in identity.organizations.values():
+            fake.add(organization_id, member_of(identity, roles))
+    return fake
+
+
+@pytest.fixture
+async def container(
+    settings: Settings, tokens: TokenFactory, directory: FakeDirectory
+) -> AsyncIterator[Container]:
     built = await build_container(
         settings,
         overrides=Overrides(
             key_source=StaticKeys(tokens),
-            directory=FakeDirectory([ORG_A, ORG_B]),
+            directory=directory,
+            administration=directory,
             embedder=HashEmbedder(TEST_SPACE),
             language_model=RecordedLanguageModel(RECORDED_VERDICTS),
         ),

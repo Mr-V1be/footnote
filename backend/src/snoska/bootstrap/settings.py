@@ -64,6 +64,8 @@ class KeycloakSettings(BaseSettings):
     url: str = "http://localhost:46320"
     realm: str = "snoska"
     api_client_id: str = "snoska-api"
+    # The web app's client: invitation links lead back to it.
+    web_client_id: str = "snoska-web"
 
     @property
     def issuer(self) -> str:
@@ -230,6 +232,8 @@ class Settings(BaseSettings):
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
     tenancy: TenancySettings = Field(default_factory=TenancySettings)
+    # Where people open the product (links in emails and invitations).
+    web_url: str = "http://localhost:46300"
     corpus_catalog: Path = BACKEND_ROOT / "data" / "corpus" / "acts.yaml"
     demo_root: Path = BACKEND_ROOT / "demo"
 

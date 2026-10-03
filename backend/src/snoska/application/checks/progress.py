@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator
 from uuid import UUID
 
 from snoska.application.checks.service import RunNotFoundError
+from snoska.application.tenancy.gate import WorkspaceGate
 from snoska.domain.checks.run import CheckRun
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
@@ -24,9 +25,12 @@ class RunProgress:
     under the caller's tenant: notifications only say *which* run changed.
     """
 
-    def __init__(self, uow_factory: UnitOfWorkFactory, feed: RunChangeFeed) -> None:
+    def __init__(
+        self, uow_factory: UnitOfWorkFactory, feed: RunChangeFeed, gate: WorkspaceGate
+    ) -> None:
         self._uow_factory = uow_factory
         self._feed = feed
+        self._gate = gate
 
     async def _load(self, organization_id: UUID, run_id: UUID) -> CheckRun:
         async with self._uow_factory.for_tenant(organization_id) as uow:
@@ -36,8 +40,14 @@ class RunProgress:
         return run
 
     async def stream(self, access: OrganizationAccess, run_id: UUID) -> AsyncIterator[CheckRun]:
-        access.require(Permission.DOCUMENTS_READ)
         organization_id = access.organization_id
+        async with self._uow_factory.for_tenant(organization_id) as uow:
+            first = await uow.check_runs.get(run_id)
+            if first is None:
+                raise RunNotFoundError("check run not found")
+            await self._gate.require_document(
+                uow, access, first.document_id, Permission.DOCUMENTS_READ
+            )
         async with self._feed.subscribe() as changes:
             run = await self._load(organization_id, run_id)
             yield run

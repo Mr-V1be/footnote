@@ -5,7 +5,6 @@ from uuid import UUID
 
 from snoska.api.schemas.checks import RunSummaryOut
 from snoska.api.schemas.common import ApiModel
-from snoska.api.schemas.tenancy import WorkspaceOut
 from snoska.application.documents.queries import DocumentDetails
 from snoska.domain.documents.structure import (
     Alignment,
@@ -22,6 +21,7 @@ from snoska.domain.documents.version import (
     ParseFailureCode,
     ParseStatus,
 )
+from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.checks.repositories import RunSummary
 from snoska.ports.document_repositories import DocumentListItem
 
@@ -100,11 +100,19 @@ class VersionOut(ApiModel):
         )
 
 
+class WorkspaceRefOut(ApiModel):
+    id: UUID
+    slug: str
+    name: str
+
+
 class DocumentOut(ApiModel):
     id: UUID
     title: str
     kind: str
-    workspace: WorkspaceOut
+    workspace: WorkspaceRefOut
+    # What the member may do with this document (its workspace's role).
+    permissions: list[Permission]
     created_at: datetime
     updated_at: datetime
     latest_version: int
@@ -117,9 +125,10 @@ class DocumentOut(ApiModel):
             id=document.id,
             title=document.title,
             kind=document.kind_code,
-            workspace=WorkspaceOut(
+            workspace=WorkspaceRefOut(
                 id=details.workspace.id, slug=details.workspace.slug, name=details.workspace.name
             ),
+            permissions=sorted(details.access.permissions),
             created_at=document.created_at,
             updated_at=document.updated_at,
             latest_version=document.latest_version_number,

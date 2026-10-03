@@ -17,4 +17,16 @@ class Permission(StrEnum):
     # Mark a finding fixed or reopen it: work on the document.
     FINDINGS_RESOLVE = "findings.resolve"
     CORPUS_READ = "corpus.read"
+    # Ask the corpus a question; answers use the organization's quota.
+    NORMS_ASK = "norms.ask"
+    # Administration of the organization.
+    MEMBERS_MANAGE = "members.manage"
+    WORKSPACES_MANAGE = "workspaces.manage"
+    AUDIT_READ = "audit.read"
+    INTEGRATIONS_MANAGE = "integrations.manage"
+    BILLING_READ = "billing.read"
+    BILLING_MANAGE = "billing.manage"
+    # The platform's operator.
     PLATFORM_TENANTS_READ = "platform.tenants.read"
+    PLATFORM_PLANS_MANAGE = "platform.plans.manage"
+    PLATFORM_SYSTEM_READ = "platform.system.read"

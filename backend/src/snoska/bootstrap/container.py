@@ -6,6 +6,8 @@ from dataclasses import dataclass
 import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from snoska.application.audit.queries import AuditQueries
+from snoska.application.audit.trail import AuditTrail
 from snoska.application.checks.deterministic import DeterministicExecutor
 from snoska.application.checks.engine import CheckEngine
 from snoska.application.checks.job import RunChecks
@@ -28,8 +30,10 @@ from snoska.application.documents.upload import DocumentUploads, UploadLimits
 from snoska.application.shared.jobs import INDEX_CORPUS_EDITION, PARSE_DOCUMENT_VERSION, RUN_CHECKS
 from snoska.application.shared.outbox_relay import OutboxRelay
 from snoska.application.tenancy.access import DefaultWorkspace, TenantAccessService
+from snoska.application.tenancy.gate import WorkspaceGate
+from snoska.application.tenancy.members import OrganizationMembers
 from snoska.application.tenancy.platform import PlatformTenantQueries
-from snoska.application.tenancy.workspaces import WorkspaceQueries
+from snoska.application.tenancy.workspaces import Workspaces
 from snoska.bootstrap.providers import AiAdapters, build_ai_adapters
 from snoska.bootstrap.settings import ChecksSettings, Settings
 from snoska.bootstrap.storage import build_blob_storage
@@ -67,7 +71,12 @@ from snoska.infrastructure.system.clock import SystemClock
 from snoska.ports.ai import Embedder, LanguageModel
 from snoska.ports.corpus_source import CorpusSource
 from snoska.ports.health import HealthCheck
-from snoska.ports.identity import IdentityProvisioning, OrganizationDirectory, TokenVerifier
+from snoska.ports.identity import (
+    IdentityProvisioning,
+    MemberAdministration,
+    OrganizationDirectory,
+    TokenVerifier,
+)
 from snoska.ports.jobs import JobHandler, JobPublisher
 
 HTTP_TIMEOUT_SECONDS = 30.0
@@ -118,6 +127,7 @@ class Overrides:
 
     key_source: KeySource | None = None
     directory: OrganizationDirectory | None = None
+    administration: MemberAdministration | None = None
     embedder: Embedder | None = None
     language_model: LanguageModel | None = None
 
@@ -129,7 +139,9 @@ class Container:
     settings: Settings
     engine: AsyncEngine
     tenant_access: TenantAccessService
-    workspaces: WorkspaceQueries
+    workspaces: Workspaces
+    members: OrganizationMembers
+    audit: AuditQueries
     uploads: DocumentUploads
     documents: DocumentQueries
     catalog: CatalogQuery
@@ -178,6 +190,8 @@ async def build_container(
             client_id=settings.directory.client_id,
             client_secret=settings.directory.client_secret.get_secret_value(),
             api_client_id=settings.keycloak.api_client_id,
+            web_client_id=settings.keycloak.web_client_id,
+            web_url=settings.web_url,
         ),
     )
     verifier = JwtTokenVerifier(
@@ -198,6 +212,8 @@ async def build_container(
     language_model = overrides.language_model or ai.language_model
     check_catalog = load_check_catalog(settings.checks)
     norms = NormLibrary(uow)
+    gate = WorkspaceGate(ORGANIZATION_ROLES)
+    audit = AuditTrail(clock)
     engine_of_checks = check_engine(settings.checks, embedder, language_model, norms)
     quality_store = JsonQualityReportStore(settings.checks.quality_report)
     scheduler = CheckScheduler(check_catalog, clock)
@@ -223,16 +239,26 @@ async def build_container(
                 name=settings.tenancy.default_workspace_name,
             ),
         ),
-        workspaces=WorkspaceQueries(uow),
-        uploads=DocumentUploads(uow, blobs, SUPPORTED_FORMATS, DOCUMENT_KINDS, clock, limits),
-        documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS, RequisiteDetector()),
+        workspaces=Workspaces(uow, gate, ORGANIZATION_ROLES, audit, clock),
+        members=OrganizationMembers(
+            uow,
+            overrides.directory or directory,
+            overrides.administration or directory,
+            ORGANIZATION_ROLES,
+            audit,
+        ),
+        audit=AuditQueries(uow),
+        uploads=DocumentUploads(
+            uow, blobs, SUPPORTED_FORMATS, DOCUMENT_KINDS, clock, limits, gate, audit
+        ),
+        documents=DocumentQueries(uow, blobs, DOCUMENT_KINDS, RequisiteDetector(), gate),
         catalog=CatalogQuery(DOCUMENT_KINDS, SUPPORTED_FORMATS, limits),
         corpus_sync=CorpusSync(uow, catalog, sources, clock),
         corpus_indexing=corpus_indexing,
         corpus=CorpusQueries(uow),
         norm_search=NormSearch(uow, embedder),
-        checks=CheckService(uow, check_catalog, scheduler, norms, clock),
-        check_progress=RunProgress(uow, run_feed),
+        checks=CheckService(uow, check_catalog, scheduler, norms, clock, gate, audit),
+        check_progress=RunProgress(uow, run_feed, gate),
         recheck=RecheckDocuments(uow, scheduler),
         quality=QualityQueries(quality_store, check_catalog),
         benchmark=CheckBenchmark(

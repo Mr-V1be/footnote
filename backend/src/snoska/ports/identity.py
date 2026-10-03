@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
 
 from snoska.domain.shared.errors import DomainError
 from snoska.domain.tenancy.access import Principal
+from snoska.domain.tenancy.members import Member
 
 
 class AuthenticationError(DomainError):
@@ -33,6 +35,32 @@ class OrganizationDirectory(Protocol):
     """Read side of the identity provider's organization registry."""
 
     async def get_organization(self, organization_id: UUID) -> OrganizationProfile | None: ...
+
+    async def list_members(self, organization_id: UUID) -> Sequence[Member]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class Invitation:
+    email: str
+    first_name: str
+    last_name: str
+    role_code: str
+
+
+class MemberAdministration(Protocol):
+    """Changes to an organization's members, made in the identity provider.
+
+    Roles reach a member's token on their next sign-in or token refresh.
+    """
+
+    async def invite(self, organization_id: UUID, invitation: Invitation) -> UUID:
+        """Create (or reuse) the user, add them with the role, and email them
+        a link to set a password. Returns the user's id."""
+        ...
+
+    async def set_role(self, organization_id: UUID, user_id: UUID, role_code: str) -> None: ...
+
+    async def remove(self, organization_id: UUID, user_id: UUID) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)

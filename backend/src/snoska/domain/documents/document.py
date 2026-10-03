@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import PurePath
 from uuid import UUID
 
-from snoska.domain.shared.errors import ValidationError
+from snoska.domain.shared.errors import NotFoundError, ValidationError
 from snoska.domain.shared.text import normalize_whitespace
 
 TITLE_MAX_LENGTH = 300
@@ -13,6 +13,10 @@ TITLE_MAX_LENGTH = 300
 
 class InvalidTitleError(ValidationError):
     code = "invalid_title"
+
+
+class DocumentNotFoundError(NotFoundError):
+    code = "document_not_found"
 
 
 def title_from_filename(filename: str) -> str:

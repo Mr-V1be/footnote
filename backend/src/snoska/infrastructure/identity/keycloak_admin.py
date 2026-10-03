@@ -8,10 +8,19 @@ from uuid import UUID
 
 import httpx
 
-from snoska.ports.identity import IdentityProviderError, MemberSpec, OrganizationProfile
+from snoska.domain.tenancy.members import Member, MemberNotFoundError
+from snoska.ports.identity import (
+    IdentityProviderError,
+    Invitation,
+    MemberSpec,
+    OrganizationProfile,
+)
 
 TOKEN_SAFETY_MARGIN_SECONDS = 30
 PAGE_SIZE = 100
+# Actions an invited user completes from the email: verify it, set a password.
+INVITE_ACTIONS = ["VERIFY_EMAIL", "UPDATE_PASSWORD"]
+INVITE_LIFESPAN_SECONDS = 7 * 24 * 3600
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +30,9 @@ class KeycloakAdminConfig:
     client_id: str
     client_secret: str
     api_client_id: str
+    # Invitation emails link back to the web app through its client.
+    web_client_id: str = "snoska-web"
+    web_url: str = "http://localhost:46300"
 
 
 class KeycloakAdminClient:
@@ -90,6 +102,120 @@ class KeycloakAdminClient:
             return None
         body = response.json()
         return OrganizationProfile(id=UUID(body["id"]), alias=body["alias"], name=body["name"])
+
+    async def list_members(self, organization_id: UUID) -> list[Member]:
+        roles: dict[str, set[str]] = {}
+        users: dict[str, dict[str, Any]] = {}
+        for role_code, group_id in (await self._groups(organization_id)).items():
+            path = f"/organizations/{organization_id}/groups/{group_id}/members"
+            for user in await self._all(path):
+                users[user["id"]] = user
+                roles.setdefault(user["id"], set()).add(role_code)
+        for user in await self._all(f"/organizations/{organization_id}/members"):
+            users.setdefault(user["id"], user)
+        return [
+            Member(
+                user_id=UUID(user_id),
+                email=user.get("email"),
+                first_name=user.get("firstName") or "",
+                last_name=user.get("lastName") or "",
+                role_codes=frozenset(roles.get(user_id, set())),
+                pending="UPDATE_PASSWORD" in (user.get("requiredActions") or []),
+            )
+            for user_id, user in users.items()
+        ]
+
+    async def _all(self, path: str) -> list[dict[str, Any]]:
+        found: list[dict[str, Any]] = []
+        first = 0
+        while True:
+            page = (await self._call("GET", path, params={"first": first, "max": PAGE_SIZE})).json()
+            found.extend(page)
+            if len(page) < PAGE_SIZE:
+                return found
+            first += PAGE_SIZE
+
+    # ── Member administration ────────────────────────────────────────────────
+
+    async def invite(self, organization_id: UUID, invitation: Invitation) -> UUID:
+        email = invitation.email.strip().lower()
+        found = (
+            await self._call("GET", "/users", params={"username": email, "exact": "true"})
+        ).json()
+        if found:
+            user_id = str(found[0]["id"])
+            fresh = False
+        else:
+            await self._call(
+                "POST",
+                "/users",
+                json={
+                    "username": email,
+                    "email": email,
+                    "firstName": invitation.first_name,
+                    "lastName": invitation.last_name,
+                    "enabled": True,
+                    "emailVerified": False,
+                    "requiredActions": INVITE_ACTIONS,
+                },
+            )
+            created = (
+                await self._call("GET", "/users", params={"username": email, "exact": "true"})
+            ).json()
+            user_id = str(created[0]["id"])
+            fresh = True
+        await self._call(
+            "POST", f"/organizations/{organization_id}/members", json=user_id, ok=(201, 204, 409)
+        )
+        await self.set_role(organization_id, UUID(user_id), invitation.role_code)
+        if fresh:
+            await self._call(
+                "PUT",
+                f"/users/{user_id}/execute-actions-email",
+                params={
+                    "client_id": self._config.web_client_id,
+                    "redirect_uri": self._config.web_url,
+                    "lifespan": INVITE_LIFESPAN_SECONDS,
+                },
+                json=INVITE_ACTIONS,
+            )
+        return UUID(user_id)
+
+    async def set_role(self, organization_id: UUID, user_id: UUID, role_code: str) -> None:
+        groups = await self._groups(organization_id)
+        if role_code not in groups:
+            raise IdentityProviderError(f"organization has no group for role {role_code!r}")
+        member = await self._call(
+            "GET", f"/organizations/{organization_id}/members/{user_id}", ok=(200, 404)
+        )
+        if member.status_code == 404:
+            raise MemberNotFoundError("not a member of the organization")
+        current = {
+            group["name"]
+            for group in (
+                await self._call(
+                    "GET", f"/organizations/{organization_id}/members/{user_id}/groups"
+                )
+            ).json()
+        }
+        for name, group_id in groups.items():
+            path = f"/organizations/{organization_id}/groups/{group_id}/members/{user_id}"
+            if name == role_code and name not in current:
+                await self._call("PUT", path)
+            elif name != role_code and name in current:
+                await self._call("DELETE", path)
+
+    async def remove(self, organization_id: UUID, user_id: UUID) -> None:
+        groups = await self._groups(organization_id)
+        for group_id in groups.values():
+            await self._call(
+                "DELETE",
+                f"/organizations/{organization_id}/groups/{group_id}/members/{user_id}",
+                ok=(204, 404),
+            )
+        await self._call(
+            "DELETE", f"/organizations/{organization_id}/members/{user_id}", ok=(204, 404)
+        )
 
     # ── Provisioning ─────────────────────────────────────────────────────────
 

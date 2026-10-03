@@ -5,6 +5,7 @@ from typing import Protocol, Self
 from uuid import UUID
 
 from snoska.domain.shared.errors import ConflictError
+from snoska.ports.audit.log import AuditLog
 from snoska.ports.checks.embeddings import EmbeddingCache
 from snoska.ports.checks.repositories import (
     CheckResultRepository,
@@ -21,6 +22,7 @@ from snoska.ports.outbox import OutboxRepository
 from snoska.ports.tenancy_repositories import (
     OrganizationRepository,
     UserProfileRepository,
+    WorkspaceMemberRepository,
     WorkspaceRepository,
 )
 
@@ -69,6 +71,12 @@ class UnitOfWork(Protocol):
 
     @property
     def findings(self) -> FindingRepository: ...
+
+    @property
+    def workspace_members(self) -> WorkspaceMemberRepository: ...
+
+    @property
+    def audit(self) -> AuditLog: ...
 
     @property
     def embeddings(self) -> EmbeddingCache:

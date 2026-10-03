@@ -7,19 +7,52 @@ import json
 import math
 import re
 from collections.abc import Mapping, Sequence
-from uuid import UUID
+from dataclasses import replace
+from uuid import UUID, uuid4
 
 from snoska.domain.corpus.embedding import EmbeddingSpace
+from snoska.domain.tenancy.members import Member
 from snoska.ports.ai import Completion, CompletionRequest
-from snoska.ports.identity import OrganizationProfile
+from snoska.ports.identity import Invitation, OrganizationProfile
 
 
 class FakeDirectory:
+    """The identity provider's organizations and members, in memory."""
+
     def __init__(self, organizations: Sequence[OrganizationProfile]) -> None:
         self._organizations = {org.id: org for org in organizations}
+        self.members: dict[UUID, dict[UUID, Member]] = {org.id: {} for org in organizations}
+
+    def add(self, organization_id: UUID, member: Member) -> None:
+        self.members[organization_id][member.user_id] = member
 
     async def get_organization(self, organization_id: UUID) -> OrganizationProfile | None:
         return self._organizations.get(organization_id)
+
+    async def list_members(self, organization_id: UUID) -> list[Member]:
+        return list(self.members[organization_id].values())
+
+    async def invite(self, organization_id: UUID, invitation: Invitation) -> UUID:
+        user_id = uuid4()
+        self.add(
+            organization_id,
+            Member(
+                user_id=user_id,
+                email=invitation.email,
+                first_name=invitation.first_name,
+                last_name=invitation.last_name,
+                role_codes=frozenset({invitation.role_code}),
+                pending=True,
+            ),
+        )
+        return user_id
+
+    async def set_role(self, organization_id: UUID, user_id: UUID, role_code: str) -> None:
+        member = self.members[organization_id][user_id]
+        self.members[organization_id][user_id] = replace(member, role_codes=frozenset({role_code}))
+
+    async def remove(self, organization_id: UUID, user_id: UUID) -> None:
+        self.members[organization_id].pop(user_id, None)
 
 
 class HashEmbedder:

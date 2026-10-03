@@ -19,8 +19,8 @@ PLATFORM_PAGE_SIZE = 100
 async def list_workspaces(
     container: ContainerDep, access: OrganizationAccessDep
 ) -> list[WorkspaceOut]:
-    workspaces = await container.workspaces.list(access)
-    return [WorkspaceOut(id=ws.id, slug=ws.slug, name=ws.name) for ws in workspaces]
+    """Workspaces the member reaches, with their role and permissions there."""
+    return [WorkspaceOut.of(summary) for summary in await container.workspaces.list(access)]
 
 
 @router.get(

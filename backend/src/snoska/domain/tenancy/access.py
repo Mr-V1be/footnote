@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from uuid import UUID
 
 from snoska.domain.shared.errors import AccessDeniedError
@@ -15,6 +16,25 @@ class NotAMemberError(AccessDeniedError):
 
 class MissingPermissionError(AccessDeniedError):
     code = "missing_permission"
+
+
+class ActorKind(StrEnum):
+    USER = "user"
+    API_KEY = "api_key"
+    SYSTEM = "system"
+
+
+@dataclass(frozen=True, slots=True)
+class Actor:
+    """Who acts: a member, an integration's API key or the platform itself.
+    ``label`` is the name shown in the audit log as it was at the time."""
+
+    kind: ActorKind
+    id: UUID | None
+    label: str
+
+
+SYSTEM_ACTOR = Actor(kind=ActorKind.SYSTEM, id=None, label="system")
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,11 +79,16 @@ def _permissions_of(roles: tuple[RoleDefinition, ...]) -> frozenset[Permission]:
 
 @dataclass(frozen=True, slots=True)
 class OrganizationAccess:
-    """What a principal may do inside one organization."""
+    """What a principal may do inside one organization.
+
+    ``user_id`` is the member, or for an API key the key itself; ``actor``
+    names either for the audit log.
+    """
 
     organization: Organization
     user_id: UUID
     roles: tuple[RoleDefinition, ...]
+    actor: Actor
 
     @property
     def organization_id(self) -> UUID:
@@ -115,7 +140,12 @@ class AccessPolicy:
         roles = self._organization_roles.resolve(membership.role_codes)
         if not roles:
             raise NotAMemberError("principal holds no recognised role in the organization")
-        return OrganizationAccess(organization=organization, user_id=principal.user_id, roles=roles)
+        return OrganizationAccess(
+            organization=organization,
+            user_id=principal.user_id,
+            roles=roles,
+            actor=Actor(ActorKind.USER, principal.user_id, principal.display_name),
+        )
 
     def roles_of(self, membership: MembershipClaim) -> tuple[RoleDefinition, ...]:
         return self._organization_roles.resolve(membership.role_codes)

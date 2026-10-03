@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from snoska.domain.shared.errors import ValidationError
+from snoska.domain.shared.errors import ConflictError, ValidationError
 
 _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SLUG_MAX_LENGTH = 63
@@ -14,6 +14,10 @@ NAME_MAX_LENGTH = 200
 
 class InvalidSlugError(ValidationError):
     code = "invalid_slug"
+
+
+class SlugTakenError(ConflictError):
+    code = "slug_taken"
 
 
 def validate_slug(value: str) -> str:
@@ -35,11 +39,18 @@ class Organization:
 
 @dataclass(frozen=True, slots=True)
 class Workspace:
+    """A space of documents inside an organization.
+
+    An open workspace is reachable by every member with their organization
+    role; a restricted one only by the members it lists (and owners).
+    """
+
     id: UUID
     organization_id: UUID
     slug: str
     name: str
     created_at: datetime
+    restricted: bool = False
 
     def __post_init__(self) -> None:
         validate_slug(self.slug)

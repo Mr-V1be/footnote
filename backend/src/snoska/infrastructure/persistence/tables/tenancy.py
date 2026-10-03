@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
+    PrimaryKeyConstraint,
     Table,
     Text,
     UniqueConstraint,
     Uuid,
+    false,
 )
 
 from snoska.infrastructure.persistence.tables.metadata import metadata
@@ -35,6 +39,8 @@ workspaces = Table(
     Column("slug", Text, nullable=False),
     Column("name", Text, nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False),
+    # Only listed members (and owners) reach a restricted workspace.
+    Column("restricted", Boolean, nullable=False, server_default=false()),
     UniqueConstraint("organization_id", "slug"),
     # Lets child tables reference (workspace, organization) together so a row
     # can never point to a workspace of another tenant.
@@ -50,4 +56,20 @@ user_profiles = Table(
     Column("email", Text, nullable=True),
     Column("display_name", Text, nullable=False),
     Column("updated_at", DateTime(timezone=True), nullable=False),
+)
+
+workspace_members = Table(
+    "workspace_members",
+    metadata,
+    Column("organization_id", Uuid, nullable=False),
+    Column("workspace_id", Uuid, nullable=False),
+    Column("user_id", Uuid, nullable=False),
+    Column("role_code", Text, nullable=False),
+    Column("added_at", DateTime(timezone=True), nullable=False),
+    PrimaryKeyConstraint("workspace_id", "user_id"),
+    ForeignKeyConstraint(
+        ["workspace_id", "organization_id"],
+        ["workspaces.id", "workspaces.organization_id"],
+        ondelete="CASCADE",
+    ),
 )

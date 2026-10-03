@@ -6,13 +6,16 @@ from uuid import UUID
 
 import structlog
 
+from snoska.application.audit.trail import AuditTrail
 from snoska.application.shared.jobs import PARSE_DOCUMENT_VERSION
-from snoska.application.tenancy.workspaces import WorkspaceNotFoundError
-from snoska.domain.documents.document import Document, title_from_filename
+from snoska.application.tenancy.gate import WorkspaceGate
+from snoska.domain.audit.event import AuditAction
+from snoska.domain.audit.targets import document_target
+from snoska.domain.documents.document import Document, DocumentNotFoundError, title_from_filename
 from snoska.domain.documents.formats import FormatRegistry
 from snoska.domain.documents.kinds import DocumentKindRegistry
 from snoska.domain.documents.version import DocumentVersion, StoredFile
-from snoska.domain.shared.errors import ConflictError, NotFoundError
+from snoska.domain.shared.errors import ConflictError
 from snoska.domain.shared.ids import new_id
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.organization import UserProfile
@@ -23,10 +26,6 @@ from snoska.ports.outbox import OutboxMessage
 from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
 
 log = structlog.get_logger(__name__)
-
-
-class DocumentNotFoundError(NotFoundError):
-    code = "document_not_found"
 
 
 class UnchangedVersionError(ConflictError):
@@ -78,6 +77,8 @@ class DocumentUploads:
         kinds: DocumentKindRegistry,
         clock: Clock,
         limits: UploadLimits,
+        gate: WorkspaceGate,
+        audit: AuditTrail,
     ) -> None:
         self._uow_factory = uow_factory
         self._blobs = blobs
@@ -85,6 +86,8 @@ class DocumentUploads:
         self._kinds = kinds
         self._clock = clock
         self._limits = limits
+        self._gate = gate
+        self._audit = audit
 
     async def upload_document(
         self,
@@ -97,16 +100,15 @@ class DocumentUploads:
         title: str | None,
         upload_key: str | None,
     ) -> UploadResult:
-        access.require(Permission.DOCUMENTS_UPLOAD)
         kind = self._kinds.get(kind_code) if kind_code else self._kinds.default
+        async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            granted = await self._gate.require_slug(
+                uow, access, workspace_slug, Permission.DOCUMENTS_UPLOAD
+            )
+        workspace = granted.workspace
         replay = await self._replay(access, upload_key)
         if replay is not None:
             return replay
-
-        async with self._uow_factory.for_tenant(access.organization_id) as uow:
-            workspace = await uow.workspaces.get_by_slug(workspace_slug)
-        if workspace is None:
-            raise WorkspaceNotFoundError(f"workspace {workspace_slug!r} not found")
 
         document_id = new_id()
         version_id = new_id()
@@ -128,6 +130,13 @@ class DocumentUploads:
                 await uow.documents.add(document)
                 await uow.versions.add(version, upload_key=upload_key)
                 await self._schedule_parsing(uow, version)
+                await self._audit.record(
+                    uow,
+                    access,
+                    AuditAction.DOCUMENT_UPLOADED,
+                    document_target(document),
+                    {"workspace": workspace.slug, "kind": kind.code, "file": incoming.filename},
+                )
                 await uow.commit()
         except BaseException:
             await self._blobs.delete(stored.blob.key)
@@ -144,15 +153,11 @@ class DocumentUploads:
         incoming: IncomingFile,
         upload_key: str | None,
     ) -> UploadResult:
-        access.require(Permission.DOCUMENTS_UPLOAD)
+        async with self._uow_factory.for_tenant(access.organization_id) as uow:
+            await self._gate.require_document(uow, access, document_id, Permission.DOCUMENTS_UPLOAD)
         replay = await self._replay(access, upload_key)
         if replay is not None:
             return replay
-
-        async with self._uow_factory.for_tenant(access.organization_id) as uow:
-            existing = await uow.documents.get(document_id)
-        if existing is None:
-            raise DocumentNotFoundError("document not found")
 
         version_id = new_id()
         stored = await self._store(access.organization_id, document_id, version_id, incoming)
@@ -173,6 +178,13 @@ class DocumentUploads:
                 await uow.documents.save(document)
                 await uow.versions.add(version, upload_key=upload_key)
                 await self._schedule_parsing(uow, version)
+                await self._audit.record(
+                    uow,
+                    access,
+                    AuditAction.DOCUMENT_VERSION_ADDED,
+                    document_target(document),
+                    {"version": version.number, "file": incoming.filename},
+                )
                 await uow.commit()
         except BaseException:
             await self._blobs.delete(stored.blob.key)

@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncTransaction
 
+from snoska.infrastructure.persistence.repositories.audit import SqlAuditLog
 from snoska.infrastructure.persistence.repositories.checks import (
     SqlCheckResultRepository,
     SqlCheckRunRepository,
@@ -25,6 +26,7 @@ from snoska.infrastructure.persistence.repositories.structures import (
 from snoska.infrastructure.persistence.repositories.tenancy import (
     SqlOrganizationRepository,
     SqlUserProfileRepository,
+    SqlWorkspaceMemberRepository,
     SqlWorkspaceRepository,
 )
 from snoska.infrastructure.persistence.tables.metadata import TENANT_SETTING
@@ -51,6 +53,8 @@ class SqlUnitOfWork:
     check_results: SqlCheckResultRepository
     findings: SqlFindingRepository
     embeddings: SqlTextEmbeddingRepository
+    workspace_members: SqlWorkspaceMemberRepository
+    audit: SqlAuditLog
 
     def __init__(self, engine: AsyncEngine, tenant_id: UUID | None) -> None:
         self._engine = engine
@@ -77,6 +81,8 @@ class SqlUnitOfWork:
         self.check_results = SqlCheckResultRepository(connection)
         self.findings = SqlFindingRepository(connection)
         self.embeddings = SqlTextEmbeddingRepository(connection, self._tenant_id)
+        self.workspace_members = SqlWorkspaceMemberRepository(connection, self._tenant_id)
+        self.audit = SqlAuditLog(connection)
         return self
 
     async def commit(self) -> None:
