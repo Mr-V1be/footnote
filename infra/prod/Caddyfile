@@ -1,0 +1,48 @@
+# Reverse proxy with automatic TLS (Let's Encrypt for a public domain, the
+# local CA of Caddy for localhost). Two sites: the product and Keycloak.
+{
+	email {$SNOSKA_ACME_EMAIL}
+	http_port {$SNOSKA_HTTP_PORT:80}
+	https_port {$SNOSKA_HTTPS_PORT:443}
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+{$SNOSKA_DOMAIN} {
+	import security_headers
+	encode zstd gzip
+	# The public API for integrations; the web app reaches it inside the network.
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+	log {
+		output stdout
+		format json
+	}
+}
+
+{$SNOSKA_AUTH_DOMAIN} {
+	import security_headers
+	encode zstd gzip
+	# The admin console is reached over an SSH tunnel, not from the internet.
+	@admin path /admin /admin/*
+	respond @admin 404
+	reverse_proxy keycloak:8080
+	log {
+		output stdout
+		format json
+	}
+}

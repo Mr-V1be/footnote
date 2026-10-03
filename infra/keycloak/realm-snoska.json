@@ -19,10 +19,14 @@
   "ssoSessionIdleTimeout": 3600,
   "ssoSessionMaxLifespan": 36000,
   "smtpServer": {
-    "host": "mailpit",
-    "port": "${SNOSKA_SMTP_PORT}",
-    "from": "no-reply@snoska.example",
-    "fromDisplayName": "Сноска"
+    "host": "${SNOSKA_SMTP_HOST:mailpit}",
+    "port": "${SNOSKA_SMTP_PORT:1025}",
+    "from": "${SNOSKA_SMTP_FROM:no-reply@snoska.example}",
+    "fromDisplayName": "Сноска",
+    "auth": "${SNOSKA_SMTP_AUTH:false}",
+    "user": "${SNOSKA_SMTP_USERNAME:}",
+    "password": "${SNOSKA_SMTP_PASSWORD:}",
+    "starttls": "${SNOSKA_SMTP_START_TLS:false}"
   },
   "roles": {
     "realm": [

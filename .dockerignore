@@ -1,0 +1,21 @@
+# Build contexts get the sources only.
+.git
+.github
+.env
+.env.*
+!.env.example
+.run
+var
+docs
+load
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/.next
+**/.venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+backend/tests
+frontend/e2e
+frontend/tsconfig.tsbuildinfo

@@ -1,0 +1,317 @@
+name: snoska-prod
+
+# Production stack on one server: Caddy terminates TLS and is the only
+# service with published ports; everything else talks over the private
+# network. Configuration and secrets come from .env.prod (template:
+# infra/prod/env.example). Rollout: docs/deploy.md.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod --profile demo up -d
+
+x-logging: &logging
+  # Docker keeps at most 5 × 10 MB of each container's log.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-backend-env: &backend-env
+  SNOSKA_WEB_URL: ${SNOSKA_WEB_URL:?set SNOSKA_WEB_URL}
+  SNOSKA_API_URL: http://api:8000
+  SNOSKA_DB_HOST: postgres
+  SNOSKA_DB_PORT: "5432"
+  SNOSKA_DB_NAME: snoska
+  SNOSKA_DB_OWNER_PASSWORD: ${SNOSKA_DB_OWNER_PASSWORD:?set SNOSKA_DB_OWNER_PASSWORD}
+  SNOSKA_DB_APP_PASSWORD: ${SNOSKA_DB_APP_PASSWORD:?set SNOSKA_DB_APP_PASSWORD}
+  SNOSKA_REDIS_HOST: redis
+  SNOSKA_REDIS_PORT: "6379"
+  SNOSKA_REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD:?set SNOSKA_REDIS_PASSWORD}
+  SNOSKA_KEYCLOAK_URL: ${SNOSKA_KEYCLOAK_URL:?set SNOSKA_KEYCLOAK_URL}
+  SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+  SNOSKA_KEYCLOAK_REALM: snoska
+  SNOSKA_DIRECTORY_CLIENT_SECRET: ${SNOSKA_DIRECTORY_CLIENT_SECRET:?set SNOSKA_DIRECTORY_CLIENT_SECRET}
+  SNOSKA_SECRETS_KEY: ${SNOSKA_SECRETS_KEY:?set SNOSKA_SECRETS_KEY}
+  # Webhooks go to public https addresses only; a demo stand also sends
+  # them to its own receiver on the private network.
+  SNOSKA_WEBHOOKS_ALLOW_PRIVATE: ${SNOSKA_DEMO_MODE:-false}
+  SNOSKA_DEMO_MODE: ${SNOSKA_DEMO_MODE:-false}
+  SNOSKA_DEMO_RECEIVER: ${SNOSKA_DEMO_MODE:-false}
+  SNOSKA_DEMO_RESET_HOUR: ${SNOSKA_DEMO_RESET_HOUR:-3}
+  SNOSKA_PAYMENTS_PROVIDER: ${SNOSKA_PAYMENTS_PROVIDER:-test}
+  SNOSKA_PAYMENTS_TEST_SECRET: ${SNOSKA_PAYMENTS_TEST_SECRET:-}
+  SNOSKA_AI_PROVIDER: ${SNOSKA_AI_PROVIDER:-none}
+  SNOSKA_LLM_BASE_URL: ${SNOSKA_LLM_BASE_URL:-}
+  SNOSKA_LLM_API_KEY: ${SNOSKA_LLM_API_KEY:-}
+  SNOSKA_LLM_MODEL: ${SNOSKA_LLM_MODEL:-}
+  SNOSKA_LLM_FALLBACK_MODELS: ${SNOSKA_LLM_FALLBACK_MODELS:-}
+  SNOSKA_LLM_EXTRA_BODY: ${SNOSKA_LLM_EXTRA_BODY:-}
+  SNOSKA_LLM_REQUESTS_PER_MINUTE: ${SNOSKA_LLM_REQUESTS_PER_MINUTE:-0}
+  SNOSKA_LLM_REQUESTS_PER_DAY: ${SNOSKA_LLM_REQUESTS_PER_DAY:-0}
+  SNOSKA_EMBEDDING_BASE_URL: ${SNOSKA_EMBEDDING_BASE_URL:-}
+  SNOSKA_EMBEDDING_API_KEY: ${SNOSKA_EMBEDDING_API_KEY:-}
+  SNOSKA_EMBEDDING_MODEL: ${SNOSKA_EMBEDDING_MODEL:-}
+  SNOSKA_EMBEDDING_DIMENSIONS: ${SNOSKA_EMBEDDING_DIMENSIONS:-}
+  SNOSKA_STORAGE_BACKEND: local
+  SNOSKA_STORAGE_ROOT: /app/var/blobs
+  SNOSKA_SMTP_HOST: ${SNOSKA_SMTP_HOST:?set SNOSKA_SMTP_HOST}
+  SNOSKA_SMTP_PORT: ${SNOSKA_SMTP_PORT:-587}
+  SNOSKA_SMTP_SENDER: ${SNOSKA_SMTP_SENDER:?set SNOSKA_SMTP_SENDER}
+  SNOSKA_SMTP_USERNAME: ${SNOSKA_SMTP_USERNAME:-}
+  SNOSKA_SMTP_PASSWORD: ${SNOSKA_SMTP_PASSWORD:-}
+  SNOSKA_SMTP_START_TLS: ${SNOSKA_SMTP_START_TLS:-true}
+  SNOSKA_LOG_LEVEL: ${SNOSKA_LOG_LEVEL:-INFO}
+
+x-backend: &backend
+  # One image for the API, the worker and the one-off commands; the api
+  # service builds it.
+  image: ${SNOSKA_IMAGE_PREFIX:-snoska}-backend:${SNOSKA_VERSION:-latest}
+  pull_policy: never
+  environment: *backend-env
+  volumes:
+    - blobs:/app/var/blobs
+  logging: *logging
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.7-pg18-trixie
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD}
+      SNOSKA_DB_OWNER_PASSWORD: ${SNOSKA_DB_OWNER_PASSWORD}
+      SNOSKA_DB_APP_PASSWORD: ${SNOSKA_DB_APP_PASSWORD}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD}
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "max_connections=150"]
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./infra/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    mem_limit: 1g
+    logging: *logging
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.10.2-alpine
+    command:
+      - redis-server
+      - --requirepass
+      - ${SNOSKA_REDIS_PASSWORD}
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - noeviction
+    environment:
+      REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    mem_limit: 320m
+    logging: *logging
+    restart: unless-stopped
+
+  keycloak:
+    image: keycloak/keycloak:26.8.0
+    command: ["start", "--import-realm"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
+      # Browsers and token issuers use the public URL; the servers reach
+      # the back-channel endpoints at keycloak:8080 on the private network.
+      KC_HOSTNAME: ${SNOSKA_KEYCLOAK_URL}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_LOG_LEVEL: info
+      # Placeholders of the realm file.
+      SNOSKA_WEB_URL: ${SNOSKA_WEB_URL}
+      SNOSKA_WEB_CLIENT_SECRET: ${SNOSKA_WEB_CLIENT_SECRET:?set SNOSKA_WEB_CLIENT_SECRET}
+      SNOSKA_DIRECTORY_CLIENT_SECRET: ${SNOSKA_DIRECTORY_CLIENT_SECRET}
+      # Random even without the demo: the demo client is never left open.
+      SNOSKA_DEMO_CLIENT_SECRET: ${SNOSKA_DEMO_CLIENT_SECRET:?set SNOSKA_DEMO_CLIENT_SECRET}
+      SNOSKA_SMTP_HOST: ${SNOSKA_SMTP_HOST}
+      SNOSKA_SMTP_PORT: ${SNOSKA_SMTP_PORT:-587}
+      SNOSKA_SMTP_FROM: ${SNOSKA_SMTP_FROM:?set SNOSKA_SMTP_FROM}
+      SNOSKA_SMTP_AUTH: ${SNOSKA_SMTP_AUTH:-true}
+      SNOSKA_SMTP_USERNAME: ${SNOSKA_SMTP_USERNAME:-}
+      SNOSKA_SMTP_PASSWORD: ${SNOSKA_SMTP_PASSWORD:-}
+      SNOSKA_SMTP_START_TLS: ${SNOSKA_SMTP_START_TLS:-true}
+    volumes:
+      - ./infra/keycloak/realm-snoska.json:/opt/keycloak/data/import/realm-snoska.json:ro
+      - ./infra/keycloak/themes/snoska:/opt/keycloak/themes/snoska:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"UP"' <&3
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    mem_limit: 1g
+    logging: *logging
+    restart: unless-stopped
+
+  # Migrations run on every rollout, before the API and the worker start.
+  migrate:
+    <<: *backend
+    command: ["snoska", "db", "migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    healthcheck:
+      disable: true
+
+  api:
+    <<: *backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    pull_policy: missing
+    command: ["snoska", "api"]
+    environment:
+      <<: *backend-env
+      SNOSKA_API_WORKERS: ${SNOSKA_API_WORKERS:-2}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    mem_limit: 1g
+
+  worker:
+    <<: *backend
+    command: ["snoska", "worker"]
+    environment:
+      <<: *backend-env
+      SNOSKA_WORKER_THREADS: ${SNOSKA_WORKER_THREADS:-4}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:46302/metrics', timeout=4)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    mem_limit: 1536m
+
+  web:
+    image: ${SNOSKA_IMAGE_PREFIX:-snoska}-web:${SNOSKA_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      SNOSKA_WEB_URL: ${SNOSKA_WEB_URL}
+      SNOSKA_API_URL: http://api:8000
+      SNOSKA_KEYCLOAK_URL: ${SNOSKA_KEYCLOAK_URL}
+      SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      SNOSKA_KEYCLOAK_REALM: snoska
+      SNOSKA_WEB_CLIENT_SECRET: ${SNOSKA_WEB_CLIENT_SECRET}
+      SNOSKA_SESSION_SECRET: ${SNOSKA_SESSION_SECRET:?set SNOSKA_SESSION_SECRET}
+      SNOSKA_REDIS_HOST: redis
+      SNOSKA_REDIS_PORT: "6379"
+      SNOSKA_REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD}
+      SNOSKA_DEMO_MODE: ${SNOSKA_DEMO_MODE:-false}
+      SNOSKA_DEMO_CLIENT_SECRET: ${SNOSKA_DEMO_CLIENT_SECRET:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 512m
+    logging: *logging
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    environment:
+      SNOSKA_DOMAIN: ${SNOSKA_DOMAIN:?set SNOSKA_DOMAIN}
+      SNOSKA_AUTH_DOMAIN: ${SNOSKA_AUTH_DOMAIN:?set SNOSKA_AUTH_DOMAIN}
+      SNOSKA_ACME_EMAIL: ${SNOSKA_ACME_EMAIL:?set SNOSKA_ACME_EMAIL}
+      SNOSKA_HTTP_PORT: ${SNOSKA_HTTP_PORT:-80}
+      SNOSKA_HTTPS_PORT: ${SNOSKA_HTTPS_PORT:-443}
+    ports:
+      - "${SNOSKA_BIND:-0.0.0.0}:${SNOSKA_HTTP_PORT:-80}:${SNOSKA_HTTP_PORT:-80}"
+      - "${SNOSKA_BIND:-0.0.0.0}:${SNOSKA_HTTPS_PORT:-443}:${SNOSKA_HTTPS_PORT:-443}"
+      - "${SNOSKA_BIND:-0.0.0.0}:${SNOSKA_HTTPS_PORT:-443}:${SNOSKA_HTTPS_PORT:-443}/udp"
+    volumes:
+      - ./infra/prod/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - web
+      - keycloak
+    mem_limit: 256m
+    logging: *logging
+    restart: unless-stopped
+
+  backup:
+    image: pgvector/pgvector:0.8.7-pg18-trixie
+    entrypoint: ["/usr/local/bin/backup.sh"]
+    environment:
+      POSTGRES_SUPERUSER_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+      SNOSKA_BACKUP_HOUR: ${SNOSKA_BACKUP_HOUR:-2}
+      SNOSKA_BACKUP_KEEP_DAYS: ${SNOSKA_BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./infra/prod/backup.sh:/usr/local/bin/backup.sh:ro
+      - ${SNOSKA_BACKUP_DIR:-./backups}:/backups
+      - blobs:/blobs:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 256m
+    logging: *logging
+    restart: unless-stopped
+
+  # Demo stand only (profile "demo", with SNOSKA_DEMO_MODE=true): the
+  # nightly return of the seeded organizations to the seed.
+  demo-reset:
+    <<: *backend
+    command: ["snoska", "demo", "nightly"]
+    profiles: ["demo"]
+    mem_limit: 512m
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      disable: true
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${SNOSKA_SUBNET:-10.239.163.32/27}
+
+volumes:
+  pgdata:
+  redisdata:
+  blobs:
+  caddydata:
+  caddyconfig:
