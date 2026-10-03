@@ -3,7 +3,9 @@ import {
   IconFiles,
   IconFolders,
   IconHistory,
+  IconKey,
   IconUsers,
+  IconWebhook,
   type Icon,
 } from "@tabler/icons-react";
 
@@ -76,5 +78,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   },
   settings("members", IconUsers, "members", "members.manage"),
   settings("workspaces", IconFolders, "workspaces", "workspaces.manage"),
+  settings("api-keys", IconKey, "apiKeys", "integrations.manage"),
+  settings("webhooks", IconWebhook, "webhooks", "integrations.manage"),
   settings("audit", IconHistory, "audit", "audit.read"),
 ];

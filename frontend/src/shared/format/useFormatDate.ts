@@ -13,8 +13,10 @@ export function useFormatDate(): (iso: string) => string {
   return useCallback(
     (iso: string) => {
       const date = new Date(iso);
-      return now.getTime() - date.getTime() < RECENT_MS
-        ? format.relativeTime(date, now)
+      // Something that happened after the clock last ticked happened "now".
+      const reference = date > now ? date : now;
+      return reference.getTime() - date.getTime() < RECENT_MS
+        ? format.relativeTime(date, reference)
         : format.dateTime(date, { day: "numeric", month: "short", year: "numeric" });
     },
     [format, now],

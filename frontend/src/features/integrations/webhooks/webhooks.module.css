@@ -1,0 +1,34 @@
+.pending {
+  color: var(--color-ink);
+}
+
+.delivered {
+  color: var(--color-success);
+}
+
+.retrying {
+  color: var(--color-important);
+}
+
+.failed {
+  color: var(--color-critical);
+}
+
+.details {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.payload {
+  overflow: auto;
+  max-block-size: 50dvh;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
