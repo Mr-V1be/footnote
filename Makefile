@@ -5,7 +5,7 @@ COMPOSE := docker compose
 BACKEND := cd backend && uv run --frozen
 RUN_DIR := .run
 
-.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark wait demo-refresh load watch demo-documents stop
+.PHONY: help env up down migrate corpus index seed setup api worker web gate recheck benchmark wait demo-refresh load watch demo-documents stand status stop
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
@@ -66,5 +66,11 @@ watch: ## Check now for a new edition of 152-FZ (weekly in the worker; mail goes
 demo-documents: ## Rebuild the demo documents and the reference set (needs LibreOffice)
 	backend/.venv/bin/python scripts/demo/build_documents.py
 
-stop: ## Stop the containers
-	$(COMPOSE) stop
+stand: ## Run the whole stand in the background (containers, API, worker, web; logs in .run/logs)
+	scripts/stand.sh start
+
+status: ## Show what of the stand is running
+	scripts/stand.sh status
+
+stop: ## Stop the stand: API, worker and web started by `make stand`, then the containers
+	scripts/stand.sh stop
