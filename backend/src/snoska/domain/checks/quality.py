@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 
 from snoska.domain.checks.catalog import CheckMethod
@@ -133,6 +133,19 @@ class QualityReport:
     model: str | None
     documents: tuple[DocumentTiming, ...]
     observations: tuple[Observation, ...]
+
+    def restricted(self, files: frozenset[str]) -> QualityReport:
+        """The same measurement on a part of the set (to compare models on
+        the documents every one of them was measured on)."""
+        return replace(
+            self,
+            documents=tuple(item for item in self.documents if item.file_name in files),
+            observations=tuple(item for item in self.observations if item.document in files),
+        )
+
+    def model_measured(self) -> frozenset[str]:
+        """Files on which the model checks did run."""
+        return frozenset(item.file_name for item in self.documents if item.model_ms is not None)
 
     def by_check(self) -> Mapping[str, Metrics]:
         return group_metrics(self.observations, lambda item: item.check_code)

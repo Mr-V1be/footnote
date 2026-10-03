@@ -5,7 +5,8 @@ from datetime import datetime
 
 from snoska.api.schemas.common import ApiModel
 from snoska.application.checks.quality.queries import QualityView
-from snoska.domain.checks.quality import DocumentTiming, Metrics
+from snoska.domain.checks.catalog import CheckMethod
+from snoska.domain.checks.quality import DocumentTiming, Metrics, QualityReport
 
 
 class MetricsOut(ApiModel):
@@ -76,6 +77,34 @@ def _groups(grouped: Mapping[str, Metrics]) -> list[GroupMetricsOut]:
     return [GroupMetricsOut(code=code, metrics=MetricsOut.of(m)) for code, m in grouped.items()]
 
 
+class ModelTrialOut(ApiModel):
+    """A candidate model measured on the reference set (or a part of it)."""
+
+    model: str
+    measured_at: datetime
+    documents: int
+    precision: float | None
+    recall: float | None
+    errors: int
+    model_ms_per_document: int | None
+
+    @classmethod
+    def of(cls, trial: QualityReport, common: frozenset[str]) -> ModelTrialOut:
+        if common and trial.model_measured():
+            trial = trial.restricted(common)
+        metrics = trial.by_method().get(CheckMethod.MODEL)
+        timed = [item.model_ms for item in trial.documents if item.model_ms is not None]
+        return cls(
+            model=trial.model or "",
+            measured_at=trial.measured_at,
+            documents=len(trial.documents),
+            precision=metrics.precision if metrics else None,
+            recall=metrics.recall if metrics else None,
+            errors=metrics.errors if metrics else 0,
+            model_ms_per_document=round(sum(timed) / len(timed)) if timed else None,
+        )
+
+
 class QualityOut(ApiModel):
     """How the checks did on the labelled reference set, as last measured.
 
@@ -92,6 +121,7 @@ class QualityOut(ApiModel):
     methods: list[GroupMetricsOut]
     families: list[GroupMetricsOut]
     checks: list[GroupMetricsOut]
+    trials: list[ModelTrialOut]
 
     @classmethod
     def of(cls, view: QualityView) -> QualityOut | None:
@@ -107,4 +137,9 @@ class QualityOut(ApiModel):
             methods=_groups({method.value: m for method, m in report.by_method().items()}),
             families=_groups(report.by_family()),
             checks=_groups(report.by_check()),
+            trials=[
+                ModelTrialOut.of(trial, view.trial_documents)
+                for trial in view.trials
+                if trial.model
+            ],
         )

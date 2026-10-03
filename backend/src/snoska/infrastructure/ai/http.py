@@ -72,11 +72,20 @@ async def post_json(
     raise AiProviderError(f"provider unavailable: {last_error!r}") from last_error
 
 
-def ensure_json_object(text: str) -> None:
-    """Structured answers must be a JSON object; anything else is a provider fault."""
-    try:
-        value = json.loads(text)
-    except ValueError as exc:
-        raise ModelOutputError("model answer is not valid JSON") from exc
-    if not isinstance(value, dict):
-        raise ModelOutputError("model answer is not a JSON object")
+def json_object_text(text: str) -> str:
+    """The JSON object of a structured answer. Some models wrap it in a code
+    fence or a sentence despite the requested format; the object inside is
+    the answer. Anything without one is a provider fault."""
+    stripped = text.strip()
+    candidates = [stripped]
+    start, end = stripped.find("{"), stripped.rfind("}")
+    if 0 <= start < end:
+        candidates.append(stripped[start : end + 1])
+    for candidate in candidates:
+        try:
+            value = json.loads(candidate)
+        except ValueError:
+            continue
+        if isinstance(value, dict):
+            return candidate
+    raise ModelOutputError("model answer is not a JSON object")

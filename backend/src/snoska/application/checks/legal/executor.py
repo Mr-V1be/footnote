@@ -164,7 +164,7 @@ class _LegalSession:
                 if item.check.code in problems
             }
             request = CompletionRequest(
-                messages=build_messages(context, self._document.title, self._outline, earlier),
+                messages=build_messages(context, self._outline, earlier),
                 response_schema=BATCH_SCHEMA,
                 temperature=0.0,
                 max_tokens=answer_tokens(len(remaining)),

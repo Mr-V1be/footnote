@@ -14,11 +14,12 @@ VERDICTS = ("present", "partial", "absent", "uncertain")
 MAX_QUOTES = 2
 # The prompt's wording is part of every cached answer's key: change it and
 # the answers are asked again.
-PROMPT_VERSION = "batch-2"
-# An answer takes about this many tokens per requirement, plus the wrapper.
-TOKENS_PER_VERDICT = 260
-TOKENS_OVERHEAD = 200
-MAX_ANSWER_TOKENS = 8000
+PROMPT_VERSION = "batch-3"
+# An answer takes about this many tokens per requirement; the reserve covers
+# the wrapper and a model's reasoning, which counts against the same limit.
+TOKENS_PER_VERDICT = 300
+TOKENS_RESERVE = 1500
+MAX_ANSWER_TOKENS = 12000
 
 # The language of the instructions is the language of the documents: the
 # model reads Russian law and Russian documents and answers in Russian.
@@ -157,12 +158,15 @@ def _fragment_line(key: str, fragment: Fragment) -> str:
 
 def build_messages(
     context: BatchContext,
-    document_title: str,
     outline: Sequence[str],
     problems: Mapping[str, str] | None = None,
 ) -> tuple[ChatMessage, ...]:
     """The request for the requirements of ``context``. ``problems`` are what
-    was wrong with an earlier answer to the same requirements, by key."""
+    was wrong with an earlier answer to the same requirements, by key.
+
+    The request depends on the document's text only, not on the name it was
+    uploaded under: the same text checked anywhere asks the same question,
+    and its cached answer serves every copy."""
     requirements = "\n\n".join(
         f"[{key}] {item.brief.question}\n"
         f"Выполнено, если: {item.brief.criteria}\n"
@@ -178,7 +182,7 @@ def build_messages(
     parts = [
         f"Требования:\n{requirements}",
         f"Нормы:\n{norms}",
-        f"Документ «{document_title}». Разделы: {contents}\nФрагменты:\n{fragments}",
+        f"Разделы документа: {contents}\nФрагменты:\n{fragments}",
     ]
     if problems:
         notes = "\n".join(f"- {key}: {problem}" for key, problem in problems.items())
@@ -190,4 +194,4 @@ def build_messages(
 
 
 def answer_tokens(checks: int) -> int:
-    return min(TOKENS_OVERHEAD + TOKENS_PER_VERDICT * checks, MAX_ANSWER_TOKENS)
+    return min(TOKENS_RESERVE + TOKENS_PER_VERDICT * checks, MAX_ANSWER_TOKENS)

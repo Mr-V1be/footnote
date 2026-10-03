@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import replace
 
 import structlog
@@ -19,6 +19,7 @@ from snoska.domain.checks.quality import DocumentTiming, Observation, QualityRep
 from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.domain.documents.structure import DocumentStructure
 from snoska.ports.checks.quality import (
+    ModelTrialStore,
     QualityReportStore,
     ReferenceDocument,
     ReferenceSet,
@@ -70,10 +71,22 @@ class CheckBenchmark:
         self._clock = clock
         self._model_name = model_name
 
-    async def run(self, on_document: DocumentDone | None = None) -> QualityReport:
-        references = self._references.documents()
+    async def run(
+        self,
+        on_document: DocumentDone | None = None,
+        *,
+        only: Collection[str] = (),
+        store: QualityReportStore | ModelTrialStore | None = None,
+    ) -> QualityReport:
+        """Measure on the whole set, or on the files named in ``only``; the
+        result goes to ``store`` (a model's trial) or the main measurement."""
+        references = [
+            reference
+            for reference in self._references.documents()
+            if not only or reference.file_name in only
+        ]
         if not references:
-            raise ReferenceSetError("the reference set is empty")
+            raise ReferenceSetError("no reference document to measure")
         timings: list[DocumentTiming] = []
         observations: list[Observation] = []
         for reference in references:
@@ -101,7 +114,7 @@ class CheckBenchmark:
             documents=tuple(timings),
             observations=tuple(observations),
         )
-        self._store.save(report)
+        (store or self._store).save(report)
         return report
 
     def _checks_for(self, reference: ReferenceDocument) -> tuple[CheckDefinition, ...]:

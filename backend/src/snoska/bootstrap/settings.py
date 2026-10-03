@@ -171,6 +171,8 @@ class ChecksSettings(BaseSettings):
     # Labelled documents the checks are measured on, and the latest result.
     reference_dir: Path = BACKEND_ROOT / "demo" / "reference"
     quality_report: Path = BACKEND_ROOT / "data" / "quality" / "benchmark.json"
+    # Trials of candidate language models on the reference set.
+    model_trials: Path = BACKEND_ROOT / "data" / "quality" / "models"
     # Requirements of a document asked in one model request: free tiers allow
     # few requests a day, so a document's legal checks share one or two.
     checks_per_request: int = 12

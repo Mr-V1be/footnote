@@ -21,7 +21,10 @@ from snoska.domain.documents.formats import SUPPORTED_FORMATS
 from snoska.domain.documents.kinds import DOCUMENT_KINDS
 from snoska.domain.documents.requisites import RequisiteDetector
 from snoska.infrastructure.checks.catalog import YamlCheckCatalog
-from snoska.infrastructure.checks.quality_store import JsonQualityReportStore
+from snoska.infrastructure.checks.quality_store import (
+    JsonModelTrialStore,
+    JsonQualityReportStore,
+)
 from snoska.infrastructure.checks.reference import YamlReferenceSet
 from snoska.infrastructure.persistence.run_feed import PgRunChangeFeed
 from snoska.ports.ai import Embedder, LanguageModel
@@ -73,6 +76,7 @@ def build_checks(core: Core) -> ChecksAssembly:
     engine = check_engine(settings.checks, core.embedder, core.language_model, norms)
     scheduler = CheckScheduler(catalog, core.clock, core.meter)
     store = JsonQualityReportStore(settings.checks.quality_report)
+    trials = JsonModelTrialStore(settings.checks.model_trials)
     feed = PgRunChangeFeed(app_database(settings))
     return ChecksAssembly(
         catalog=catalog,
@@ -83,7 +87,7 @@ def build_checks(core: Core) -> ChecksAssembly:
         ),
         progress=RunProgress(core.uow, feed, core.gate),
         recheck=RecheckDocuments(core.uow, scheduler),
-        quality=QualityQueries(store, catalog),
+        quality=QualityQueries(store, catalog, trials),
         benchmark=CheckBenchmark(
             YamlReferenceSet(settings.checks.reference_dir, SUPPORTED_FORMATS),
             core.parsers,

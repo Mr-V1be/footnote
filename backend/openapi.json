@@ -8555,13 +8555,25 @@
               }
             ],
             "title": "Embeddingmodel"
+          },
+          "requestsLeftToday": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requestslefttoday"
           }
         },
         "type": "object",
         "required": [
           "configured",
           "languageModel",
-          "embeddingModel"
+          "embeddingModel",
+          "requestsLeftToday"
         ],
         "title": "AskStatusOut"
       },
@@ -10561,6 +10573,72 @@
         "title": "MetricsOut",
         "description": "Confusion counts of a group of observations, with the shares derived.\n\nA share is null when there is nothing to count it from: no violation was\nreported (precision) or none is labelled (recall), or the checks did not\nrun at all (see ``errors``)."
       },
+      "ModelTrialOut": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Measuredat"
+          },
+          "documents": {
+            "type": "integer",
+            "title": "Documents"
+          },
+          "precision": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision"
+          },
+          "recall": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recall"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          },
+          "modelMsPerDocument": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelmsperdocument"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "measuredAt",
+          "documents",
+          "precision",
+          "recall",
+          "errors",
+          "modelMsPerDocument"
+        ],
+        "title": "ModelTrialOut",
+        "description": "A candidate model measured on the reference set (or a part of it)."
+      },
       "ModelsOut": {
         "properties": {
           "configured": {
@@ -11310,6 +11388,13 @@
             },
             "type": "array",
             "title": "Checks"
+          },
+          "trials": {
+            "items": {
+              "$ref": "#/components/schemas/ModelTrialOut"
+            },
+            "type": "array",
+            "title": "Trials"
           }
         },
         "type": "object",
@@ -11321,7 +11406,8 @@
           "documents",
           "methods",
           "families",
-          "checks"
+          "checks",
+          "trials"
         ],
         "title": "QualityOut",
         "description": "How the checks did on the labelled reference set, as last measured.\n\n``current`` is false when the catalogue changed after the measurement.\n``model`` is null when no model was connected: the model checks were\nnot measured."
@@ -11908,6 +11994,17 @@
           "outboxPending": {
             "type": "integer",
             "title": "Outboxpending"
+          },
+          "modelRequestsLeft": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelrequestsleft"
           }
         },
         "type": "object",
@@ -11919,7 +12016,8 @@
           "acts",
           "editionChecks",
           "nextCorpusWatch",
-          "outboxPending"
+          "outboxPending",
+          "modelRequestsLeft"
         ],
         "title": "SystemOut"
       },

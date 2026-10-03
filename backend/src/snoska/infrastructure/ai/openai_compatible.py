@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -9,12 +10,13 @@ import structlog
 
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.infrastructure.ai.budget import UnlimitedBudget
-from snoska.infrastructure.ai.http import HttpPolicy, ensure_json_object, post_json
+from snoska.infrastructure.ai.http import HttpPolicy, json_object_text, post_json
 from snoska.ports.ai import (
     AiProviderError,
     Completion,
     CompletionRequest,
     ModelBudgetExhaustedError,
+    ModelOutputError,
     RequestBudget,
 )
 
@@ -55,6 +57,7 @@ _MAX_RETRY_AFTER_SECONDS = 30.0
 # How free tiers say the account's daily allowance is spent (a 429 like the
 # transient ones, but no other model of the tier will answer either).
 _DAILY_LIMIT_MARKERS = ("per-day", "per day", "free-models-per-day")
+_NOT_JSON = "not a JSON object"
 
 
 class OpenAiCompatibleLanguageModel:
@@ -130,13 +133,19 @@ class OpenAiCompatibleLanguageModel:
                     break
                 if response.is_error:
                     raise AiProviderError(f"provider rejected the request: {response.status_code}")
-                completion = _completion(response, model, request)
-                if completion is None:
-                    last = f"{model}: no answer"
-                    await self._pause(attempt, None)
-                    continue
-                return completion
+                reply = _reply(response, model, request)
+                if isinstance(reply, Completion):
+                    return reply
+                last = f"{model}: {reply.reason}"
+                if not reply.transient:
+                    # The same request gets the same failure from this model.
+                    break
+                await self._pause(attempt, None)
             log.warning("ai.model_fallback", model=model, reason=last)
+        if last.endswith(_NOT_JSON):
+            # The models answered, just not in the requested form: the caller
+            # may ask again with a correction.
+            raise ModelOutputError(f"no answer in the requested form ({last})")
         raise AiProviderError(f"no model of the chain answered ({last})")
 
     async def _pause(self, attempt: int, response: httpx.Response | None) -> None:
@@ -155,26 +164,40 @@ def _daily_limit(response: httpx.Response) -> bool:
     return any(marker in text for marker in _DAILY_LIMIT_MARKERS)
 
 
-def _completion(
+@dataclass(frozen=True, slots=True)
+class _NoAnswer:
+    reason: str
+    # An overloaded upstream may answer next time; a cut or malformed answer
+    # to the same request will not.
+    transient: bool
+
+
+def _reply(
     response: httpx.Response, model: str, request: CompletionRequest
-) -> Completion | None:
-    """The answer of a successful response; None for an empty one (some
-    providers answer 200 with an error inside), which is worth repeating."""
+) -> Completion | _NoAnswer:
+    """The answer of a successful response, or why there is none (some
+    providers answer 200 with an error inside)."""
     body = response.json()
     if not isinstance(body, dict) or body.get("error"):
         error = body.get("error") if isinstance(body, dict) else None
         log.warning("ai.empty_answer", model=model, error=str(error)[:300])
-        return None
+        return _NoAnswer("error in the answer", transient=True)
     choices = body.get("choices")
     if not isinstance(choices, list) or not choices:
         log.warning("ai.empty_answer", model=model, error="no choices")
-        return None
-    content = choices[0].get("message", {}).get("content")
+        return _NoAnswer("no choices", transient=True)
+    choice = choices[0]
+    content = choice.get("message", {}).get("content")
     if not isinstance(content, str) or not content.strip():
-        log.warning("ai.empty_answer", model=model, finish=choices[0].get("finish_reason"))
-        return None
+        finish = choice.get("finish_reason")
+        log.warning("ai.empty_answer", model=model, finish=finish)
+        return _NoAnswer(f"empty answer ({finish})", transient=finish != "length")
     if request.response_schema is not None:
-        ensure_json_object(content)
+        try:
+            content = json_object_text(content)
+        except ModelOutputError:
+            log.warning("ai.not_json", model=model, finish=choice.get("finish_reason"))
+            return _NoAnswer(_NOT_JSON, transient=False)
     usage = body.get("usage") or {}
     return Completion(
         text=content,

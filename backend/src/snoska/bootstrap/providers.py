@@ -109,7 +109,9 @@ def _openai_compatible(settings: AiSettings, services: AiServices) -> AiAdapters
 
 
 def _cached(model: OpenAiCompatibleLanguageModel, cache: CompletionCache | None) -> LanguageModel:
-    return model if cache is None else CachingLanguageModel(model, cache, model.chain)
+    # Keyed by the first model only: an answer a fallback gave in its place
+    # is as good as its own, and a trial of the model alone shares the cache.
+    return model if cache is None else CachingLanguageModel(model, cache, (model.model,))
 
 
 AI_PROVIDERS: Mapping[AiProvider, Callable[[AiSettings, AiServices], AiAdapters]] = {

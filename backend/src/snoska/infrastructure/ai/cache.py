@@ -9,8 +9,9 @@ from snoska.ports.ai import Completion, CompletionCache, CompletionRequest, Lang
 
 
 def request_key(chain: tuple[str, ...], request: CompletionRequest) -> str:
-    """Everything the answer depends on: the models, the messages (document
-    text, checks with their wording, the prompt) and the answer's form."""
+    """Everything the answer depends on: the model asked, the messages
+    (document text, checks with their wording, the prompt) and the answer's
+    form."""
     material = {
         "models": list(chain),
         "messages": [[m.role.value, m.content] for m in request.messages],

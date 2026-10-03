@@ -1116,6 +1116,8 @@ export type components = {
             languageModel: string | null;
             /** Embeddingmodel */
             embeddingModel: string | null;
+            /** Requestslefttoday */
+            requestsLeftToday: number | null;
         };
         /**
          * AuditAction
@@ -1814,6 +1816,29 @@ export type components = {
             recall: number | null;
         };
         /**
+         * ModelTrialOut
+         * @description A candidate model measured on the reference set (or a part of it).
+         */
+        ModelTrialOut: {
+            /** Model */
+            model: string;
+            /**
+             * Measuredat
+             * Format: date-time
+             */
+            measuredAt: string;
+            /** Documents */
+            documents: number;
+            /** Precision */
+            precision: number | null;
+            /** Recall */
+            recall: number | null;
+            /** Errors */
+            errors: number;
+            /** Modelmsperdocument */
+            modelMsPerDocument: number | null;
+        };
+        /**
          * ModelsOut
          * @description Whether model checks can run: a model API is configured and the corpus
          *     is searchable with its embedding model.
@@ -2067,6 +2092,8 @@ export type components = {
             families: components["schemas"]["GroupMetricsOut"][];
             /** Checks */
             checks: components["schemas"]["GroupMetricsOut"][];
+            /** Trials */
+            trials: components["schemas"]["ModelTrialOut"][];
         };
         /** QuestionIn */
         QuestionIn: {
@@ -2277,6 +2304,8 @@ export type components = {
             nextCorpusWatch: string | null;
             /** Outboxpending */
             outboxPending: number;
+            /** Modelrequestsleft */
+            modelRequestsLeft: number | null;
         };
         /** TableCellOut */
         TableCellOut: {

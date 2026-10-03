@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -92,3 +93,29 @@ class JsonQualityReportStore:
         self._path.write_text(
             json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
+
+
+def _slug(model: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-") or "model"
+
+
+class JsonModelTrialStore:
+    """One JSON file per candidate model, beside the main measurement."""
+
+    def __init__(self, directory: Path) -> None:
+        self._directory = directory
+
+    def all(self) -> list[QualityReport]:
+        if not self._directory.is_dir():
+            return []
+        reports = [
+            JsonQualityReportStore(path).load() for path in sorted(self._directory.glob("*.json"))
+        ]
+        return [report for report in reports if report is not None]
+
+    def save(self, report: QualityReport) -> None:
+        self._directory.mkdir(parents=True, exist_ok=True)
+        # One file per model and size of the measured set: a part of the set
+        # does not replace a trial on all of it.
+        name = f"{_slug(report.model or 'none')}--{len(report.documents)}"
+        JsonQualityReportStore(self._directory / f"{name}.json").save(report)

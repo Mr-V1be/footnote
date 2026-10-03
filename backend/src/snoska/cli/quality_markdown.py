@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 
 from snoska.domain.checks.catalog import CheckCatalog, CheckMethod
 from snoska.domain.checks.quality import DocumentTiming, Metrics, QualityReport
@@ -89,7 +89,43 @@ def _labelled(report: QualityReport, file_name: str) -> int:
     )
 
 
-def render(report: QualityReport, catalog: CheckCatalog) -> str:
+def _trial_row(trial: QualityReport, common: frozenset[str]) -> str:
+    if common and trial.model_measured():
+        trial = trial.restricted(common)
+    metrics = trial.by_method().get(CheckMethod.MODEL)
+    timed = [item.model_ms for item in trial.documents if item.model_ms is not None]
+    average = round(sum(timed) / len(timed)) if timed else None
+    if metrics is None:
+        return f"| `{trial.model}` | {len(trial.documents)} | — | — | — | {_seconds(average)} |"
+    return (
+        f"| `{trial.model}` | {len(trial.documents)} | {_share(metrics.precision)} "
+        f"| {_share(metrics.recall)} | {metrics.errors} | {_seconds(average)} |"
+    )
+
+
+def _trials(trials: Sequence[QualityReport]) -> list[str]:
+    if not trials:
+        return []
+    measured = [trial.model_measured() for trial in trials if trial.model_measured()]
+    common = frozenset.intersection(*measured) if measured else frozenset()
+    return [
+        "## Выбор модели",
+        "",
+        "Кандидаты — бесплатные модели внешнего API (`snoska checks benchmark --trial "
+        "--model … --only …`). Модели сравниваются на документах, где каждая из них дала "
+        f"ответы ({len(common)}); юридические проверки документа идут одним запросом. "
+        "«Не выполнено» — проверки без принятого ответа.",
+        "",
+        "| Модель | Документов | Точность | Полнота | Не выполнено | Модель, среднее на документ |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        *(_trial_row(trial, common) for trial in trials),
+        "",
+    ]
+
+
+def render(
+    report: QualityReport, catalog: CheckCatalog, trials: Sequence[QualityReport] = ()
+) -> str:
     titles = {check.code: check.title for check in catalog.all()}
     model = report.model or "не подключена — юридические проверки не измерены"
     by_method = report.by_method()
@@ -173,6 +209,7 @@ def render(report: QualityReport, catalog: CheckCatalog) -> str:
             "той же командой после того, как в `.env` заданы провайдер и ключ.",
             "",
         ]
+    lines += _trials(trials)
     lines += [
         "## Документы набора",
         "",

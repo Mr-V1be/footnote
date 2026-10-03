@@ -31,8 +31,9 @@ from snoska.ports.document_repositories import (
 )
 from snoska.ports.unit_of_work import ConcurrentModificationError
 
-# The error code of a check that waited for the model's daily allowance.
-MODEL_DAILY_LIMIT = "model_daily_limit"
+# Error codes of checks that wait for the model: its daily allowance was
+# spent, or it did not answer for a while.
+MODEL_WAITING = ("model_daily_limit", "model_unavailable")
 
 _LIKE_ESCAPE = "\\"
 _UPLOAD_KEY_CONSTRAINT = "uq_document_versions_organization_id_upload_key"
@@ -316,7 +317,7 @@ class SqlDocumentVersionRepository:
             select(check_results.c.run_id)
             .where(
                 check_results.c.run_id == last_run,
-                check_results.c.error_code == MODEL_DAILY_LIMIT,
+                check_results.c.error_code.in_(MODEL_WAITING),
             )
             .exists()
         )
