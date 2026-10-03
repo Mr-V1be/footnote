@@ -138,6 +138,7 @@
   --topbar-height: 3.5rem;
   --topbar-offset: calc(var(--topbar-height) + env(safe-area-inset-top));
   --content-max: 72rem;
+  --content-narrow: 52rem;
   --sheet-max: 47rem;
   --sheet-padding: 3.5rem;
   --bottom-bar-height: 4rem;

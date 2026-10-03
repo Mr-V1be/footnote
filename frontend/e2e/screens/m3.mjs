@@ -122,12 +122,12 @@ export const SCREENS = [
     },
   },
   {
-    // The test provider's checkout, reached from the plan change (the open
-    // invoice for a plan is reused, so repeated captures add nothing).
+    // The test provider's checkout, reached from a plan change; the open
+    // invoice for a plan is reused, so repeated captures add nothing.
     name: "12-checkout",
-    user: "zarya",
+    user: "owner",
     run: async (page) => {
-      await open(page, `/o/${ZARYA}/settings/billing`);
+      await open(page, `/o/${OWNER}/settings/billing`);
       const pay = page.getByRole("link", { name: "Оплатить" });
       if (await pay.count()) {
         await pay.first().click();
@@ -141,14 +141,20 @@ export const SCREENS = [
   },
   {
     // Paying returns to the plan page; the plan changes on the provider's
-    // signed notification. Once paid, later captures show the result.
+    // signed notification. The payment is made once ("Заря" moves from the
+    // free plan to "Команда"); later captures show its result.
     name: "13-billing-paid",
     user: "zarya",
     run: async (page) => {
       await open(page, `/o/${ZARYA}/settings/billing`);
-      const pay = page.getByRole("link", { name: "Оплатить" });
-      if (await pay.count()) {
-        await pay.first().click();
+      if (!(await page.getByText("Оплачен", { exact: true }).count())) {
+        const pay = page.getByRole("link", { name: "Оплатить" });
+        if (await pay.count()) {
+          await pay.first().click();
+        } else {
+          await page.getByRole("button", { name: "Перейти", exact: true }).first().click();
+          await page.getByRole("dialog").getByRole("button", { name: "К оплате" }).click();
+        }
         await page.waitForURL(/\/pay\/test\//);
         await page.getByRole("button", { name: /^Оплатить/ }).click();
         await page.waitForURL(/payment=succeeded/);
@@ -223,6 +229,15 @@ export const SCREENS = [
     name: "21-workspace-documents",
     user: "workspaceLawyer",
     run: (page) => open(page, `/o/${OWNER}/w/kadry/documents`),
+  },
+  {
+    // No access: an observer of the organization opens its members.
+    name: "22-no-access",
+    user: "workspaceLawyer",
+    run: async (page) => {
+      await open(page, `/o/${OWNER}/settings/members`);
+      await page.getByText("Раздел недоступен").waitFor();
+    },
   },
 ];
 
