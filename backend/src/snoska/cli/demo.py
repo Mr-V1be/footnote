@@ -11,9 +11,10 @@ import typer
 import yaml
 
 from snoska.application.documents.upload import IncomingFile
+from snoska.cli.demo_setup import ensure_integrations, ensure_plan, ensure_workspaces
 from snoska.cli.support import container_scope, settings_for_cli
 from snoska.domain.tenancy.access import MembershipClaim, Principal
-from snoska.domain.tenancy.roles import ORGANIZATION_ROLES
+from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, OWNER_ROLE
 from snoska.ports.identity import MemberSpec
 
 app = typer.Typer(help="Demo stand.", no_args_is_help=True)
@@ -87,6 +88,17 @@ def seed(file: Path | None = None) -> None:
                         platform_role_codes=frozenset(),
                     )
                     typer.echo(f"{alias}: {member['email']} ({member['role']})")
+                owner = next(
+                    members[member["email"]]
+                    for member in organization["members"]
+                    if member["role"] == OWNER_ROLE
+                )
+                owner_access = await container.tenant_access.organization_access(owner, alias)
+                await ensure_workspaces(
+                    container, owner_access, alias, organization.get("workspaces", []), members
+                )
+                if "plan" in organization:
+                    await ensure_plan(container, profile.id, alias, organization["plan"])
                 uploaded: dict[str, UUID] = {}
                 for document in organization.get("documents", []):
                     uploader = members[document["uploaded_by"]]
@@ -95,7 +107,9 @@ def seed(file: Path | None = None) -> None:
                     result = await container.uploads.upload_document(
                         access,
                         uploader.profile,
-                        workspace_slug=settings.tenancy.default_workspace_slug,
+                        workspace_slug=document.get(
+                            "workspace", settings.tenancy.default_workspace_slug
+                        ),
                         incoming=IncomingFile(filename=path.name, chunks=_file_chunks(path)),
                         kind_code=document["kind"],
                         title=document.get("title"),
@@ -116,5 +130,13 @@ def seed(file: Path | None = None) -> None:
                     )
                     state = _state(result.created)
                     typer.echo(f"{alias}: {path.name} v{result.version_number} {state}")
+                if "integrations" in organization:
+                    await ensure_integrations(
+                        container,
+                        owner_access,
+                        alias,
+                        organization["integrations"],
+                        settings.api_url,
+                    )
 
     asyncio.run(run())

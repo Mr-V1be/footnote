@@ -150,3 +150,16 @@ async def test_the_audit_log_records_who_did_what_and_exports_it(
     assert (await api.get(f"{BASE}/audit", headers=auth(tokens, EVA))).status_code == 403
     other = await api.get("/api/v1/organizations/beta/audit", headers=auth(tokens, BOB))
     assert other.json()["items"] == []
+
+
+async def test_the_administration_catalog_lists_what_screens_choose_from(
+    api: httpx.AsyncClient, tokens: TokenFactory
+) -> None:
+    response = await api.get("/api/v1/administration/catalog", headers=auth(tokens, EVA))
+    assert response.status_code == 200
+    body = response.json()
+    assert [role["code"] for role in body["roles"]] == ["owner", "lawyer", "executor", "observer"]
+    assert "members.manage" in body["roles"][0]["permissions"]
+    assert "ping" not in body["webhookEvents"]
+    assert body["auditCategories"][0] == "document"
+    assert "api_key" in body["actorKinds"]

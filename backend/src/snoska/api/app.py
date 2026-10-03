@@ -23,6 +23,7 @@ from snoska.api.routers import (
     workspaces,
 )
 from snoska.api.routers.admin import audit, integrations, members
+from snoska.api.routers.admin import catalog as admin_catalog
 from snoska.api.routers.admin import workspaces as workspace_admin
 from snoska.bootstrap.container import Container, build_container
 from snoska.bootstrap.settings import Settings
@@ -76,6 +77,7 @@ def create_app(
         workspaces,
         workspace_admin,
         members,
+        admin_catalog,
         audit,
         integrations,
         billing,

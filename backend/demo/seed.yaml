@@ -36,6 +36,19 @@ organizations:
         last_name: Белов
         password: Snoska-Demo-2026
         role: observer
+    # Four people do not fit the free plan: the stand starts on "team".
+    plan: team
+    # A personnel workspace only its members see; inside it Daria uploads and
+    # Igor, an observer in the organization, decides on findings as a lawyer.
+    workspaces:
+      - slug: kadry
+        name: Кадры
+        restricted: true
+        members:
+          - email: smirnova@polyarnaya-zvezda.example
+            role: executor
+          - email: belov@polyarnaya-zvezda.example
+            role: lawyer
     documents:
       - file: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx
         kind: regulation
@@ -57,11 +70,25 @@ organizations:
         kind: pd_policy
         title: Политика в отношении обработки персональных данных
         uploaded_by: orlov@polyarnaya-zvezda.example
+      - file: documents/rechnoy-port/soglasie-rabotnika.docx
+        kind: pd_consent
+        title: Согласие работника на обработку ПДн
+        uploaded_by: smirnova@polyarnaya-zvezda.example
+        workspace: kadry
     # New versions of documents uploaded above, in order.
     versions:
       - document: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov.docx
         file: documents/polyarnaya-zvezda/polozhenie-o-pd-rabotnikov-red2.docx
         uploaded_by: orlov@polyarnaya-zvezda.example
+    # An accounting system's key (its token is shown once and not kept) and
+    # a webhook to the stand's own receiver, which checks the signatures.
+    integrations:
+      api_keys:
+        - name: Учётная система
+          scopes: [documents:read, documents:write, checks:run]
+      webhooks:
+        - description: Демо-приёмник
+          events: [document.parsed, check.completed, check.failed, finding.reviewed]
 
   - alias: rechnoy-port
     name: АО «Речной порт»

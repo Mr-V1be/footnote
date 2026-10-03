@@ -1780,6 +1780,113 @@
         }
       }
     },
+    "/api/v1/administration/catalog": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Administration Catalog",
+        "description": "Roles, API scopes, webhook events and audit categories, in display order.",
+        "operationId": "administration_catalog",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationCatalogOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/organizations/{organization}/audit": {
       "get": {
         "tags": [
@@ -7981,6 +8088,55 @@
         ],
         "title": "ActorOut"
       },
+      "AdministrationCatalogOut": {
+        "properties": {
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/RoleOut"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "apiScopes": {
+            "items": {
+              "$ref": "#/components/schemas/ApiScope"
+            },
+            "type": "array",
+            "title": "Apiscopes"
+          },
+          "webhookEvents": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookEvent"
+            },
+            "type": "array",
+            "title": "Webhookevents"
+          },
+          "auditCategories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Auditcategories"
+          },
+          "actorKinds": {
+            "items": {
+              "$ref": "#/components/schemas/ActorKind"
+            },
+            "type": "array",
+            "title": "Actorkinds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roles",
+          "apiScopes",
+          "webhookEvents",
+          "auditCategories",
+          "actorKinds"
+        ],
+        "title": "AdministrationCatalogOut",
+        "description": "Registries the administration screens choose from."
+      },
       "Alignment": {
         "type": "string",
         "enum": [
@@ -11021,6 +11177,32 @@
           "role"
         ],
         "title": "RoleIn"
+      },
+      "RoleOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            },
+            "type": "array",
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "rank",
+          "permissions"
+        ],
+        "title": "RoleOut"
       },
       "RunFailureCode": {
         "type": "string",

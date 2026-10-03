@@ -171,6 +171,26 @@ export type paths = {
         patch: operations["change_member_role"];
         trace?: never;
     };
+    "/api/v1/administration/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Administration Catalog
+         * @description Roles, API scopes, webhook events and audit categories, in display order.
+         */
+        get: operations["administration_catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/organizations/{organization}/audit": {
         parameters: {
             query?: never;
@@ -979,6 +999,22 @@ export type components = {
             id: string | null;
             /** Label */
             label: string;
+        };
+        /**
+         * AdministrationCatalogOut
+         * @description Registries the administration screens choose from.
+         */
+        AdministrationCatalogOut: {
+            /** Roles */
+            roles: components["schemas"]["RoleOut"][];
+            /** Apiscopes */
+            apiScopes: components["schemas"]["ApiScope"][];
+            /** Webhookevents */
+            webhookEvents: components["schemas"]["WebhookEvent"][];
+            /** Auditcategories */
+            auditCategories: string[];
+            /** Actorkinds */
+            actorKinds: components["schemas"]["ActorKind"][];
         };
         /**
          * Alignment
@@ -2032,6 +2068,15 @@ export type components = {
         RoleIn: {
             /** Role */
             role: string;
+        };
+        /** RoleOut */
+        RoleOut: {
+            /** Code */
+            code: string;
+            /** Rank */
+            rank: number;
+            /** Permissions */
+            permissions: components["schemas"]["Permission"][];
         };
         /**
          * RunFailureCode
@@ -3683,6 +3728,98 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MemberOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    administration_catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationCatalogOut"];
                 };
             };
             /** @description Unauthorized */
