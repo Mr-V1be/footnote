@@ -6,7 +6,7 @@ from snoska.application.corpus.sync import CorpusSync, SyncOutcome
 from snoska.domain.operations.schedule import EditionCheck, WatchOutcome
 from snoska.domain.shared.ids import new_id
 from snoska.ports.clock import Clock
-from snoska.ports.corpus_source import ActCatalog, CorpusSourceError
+from snoska.ports.corpus.source import ActCatalog, CorpusSourceError
 from snoska.ports.jobs import JobPayload
 from snoska.ports.operations.notifications import Email, Mailer, PlatformAdmins
 from snoska.ports.unit_of_work import UnitOfWorkFactory

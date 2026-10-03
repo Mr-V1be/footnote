@@ -73,7 +73,7 @@ from snoska.infrastructure.persistence.health import DatabaseHealth
 from snoska.infrastructure.queue.health import RedisHealth
 from snoska.infrastructure.storage.health import StorageHealth
 from snoska.ports.blob_storage import BlobStorage
-from snoska.ports.corpus_source import CorpusSource
+from snoska.ports.corpus.source import CorpusSource
 from snoska.ports.health import HealthCheck
 from snoska.ports.identity import (
     IdentityProvisioning,

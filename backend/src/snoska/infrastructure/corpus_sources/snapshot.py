@@ -11,7 +11,7 @@ from snoska.infrastructure.corpus_sources.pravo_ips import (
     RawEdition,
     edition_from_html,
 )
-from snoska.ports.corpus_source import CorpusSourceError, FetchedEdition
+from snoska.ports.corpus.source import CorpusSourceError, FetchedEdition
 
 
 class SnapshotSource:

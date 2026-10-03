@@ -6,7 +6,7 @@ from uuid import UUID
 from snoska.api.schemas.common import ApiModel
 from snoska.domain.corpus.acts import ActKind
 from snoska.domain.corpus.units import NormUnit, UnitKind
-from snoska.ports.corpus_repositories import ActOverview, NormSearchHit
+from snoska.ports.corpus.repositories import ActOverview, NormSearchHit
 
 
 class EditionOut(ApiModel):

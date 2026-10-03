@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from snoska.domain.shared.errors import InvalidStateError, ValidationError
 from snoska.ports.ai import Embedder
-from snoska.ports.corpus_repositories import NormSearchHit
+from snoska.ports.corpus.repositories import NormSearchHit
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 QUERY_MAX_LENGTH = 2_000

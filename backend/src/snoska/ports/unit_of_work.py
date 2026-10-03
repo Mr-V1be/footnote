@@ -20,7 +20,7 @@ from snoska.ports.checks.repositories import (
     CheckRunRepository,
     FindingRepository,
 )
-from snoska.ports.corpus_repositories import CorpusRepository
+from snoska.ports.corpus.repositories import CorpusRepository
 from snoska.ports.document_repositories import (
     DocumentRepository,
     DocumentStructureRepository,

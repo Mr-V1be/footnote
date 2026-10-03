@@ -22,7 +22,7 @@ from snoska.infrastructure.persistence.tables.corpus import (
     norm_units,
 )
 from snoska.infrastructure.persistence.vector_index import comparable_type, space_predicate
-from snoska.ports.corpus_repositories import ActOverview, NormSearchHit
+from snoska.ports.corpus.repositories import ActOverview, NormSearchHit
 
 _INSERT_BATCH = 500
 

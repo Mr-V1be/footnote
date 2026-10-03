@@ -9,7 +9,7 @@ import yaml
 
 from snoska.domain.corpus.acts import ActKind, LegalAct
 from snoska.domain.shared.errors import NotFoundError
-from snoska.ports.corpus_source import TrackedAct
+from snoska.ports.corpus.source import TrackedAct
 
 
 class UnknownActError(NotFoundError):

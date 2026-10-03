@@ -9,7 +9,7 @@ from snoska.domain.corpus.citation import provision_text
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.corpus.units import NormUnit
 from snoska.domain.shared.errors import NotFoundError
-from snoska.ports.corpus_repositories import CorpusRepository
+from snoska.ports.corpus.repositories import CorpusRepository
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 

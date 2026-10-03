@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from snoska.domain.corpus.acts import Edition
 from snoska.domain.corpus.units import NormUnit
 from snoska.domain.shared.errors import NotFoundError
-from snoska.ports.corpus_repositories import ActOverview
+from snoska.ports.corpus.repositories import ActOverview
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 

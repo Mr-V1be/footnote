@@ -9,7 +9,7 @@ import httpx
 from snoska.domain.corpus.acts import LegalAct
 from snoska.infrastructure.corpus_sources.law_html import parse_law_html
 from snoska.ports.clock import Clock
-from snoska.ports.corpus_source import ActCatalog, CorpusSourceError, FetchedEdition
+from snoska.ports.corpus.source import ActCatalog, CorpusSourceError, FetchedEdition
 
 SOURCE_CODE = "pravo_ips"
 # The portal serves documents in Windows-1251.

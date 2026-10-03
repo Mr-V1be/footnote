@@ -13,7 +13,7 @@ from snoska.domain.corpus.assembly import assemble_edition, edition_content_hash
 from snoska.domain.shared.errors import NotFoundError
 from snoska.domain.shared.ids import new_id
 from snoska.ports.clock import Clock
-from snoska.ports.corpus_source import ActCatalog, CorpusSource
+from snoska.ports.corpus.source import ActCatalog, CorpusSource
 from snoska.ports.outbox import OutboxMessage
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
