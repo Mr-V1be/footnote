@@ -129,6 +129,14 @@ export function SystemScreen() {
               value: data.embeddingModel ?? t("notConnected"),
             },
             { term: t("outbox"), value: t("outboxCount", { count: data.outboxPending }) },
+            ...(data.modelRequestsLeft === null
+              ? []
+              : [
+                  {
+                    term: t("modelRequestsLeft"),
+                    value: t("modelRequestsLeftValue", { count: data.modelRequestsLeft }),
+                  },
+                ]),
             {
               term: t("nextWatch"),
               value: data.nextCorpusWatch ? moment(data.nextCorpusWatch) : t("notScheduled"),

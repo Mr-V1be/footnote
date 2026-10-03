@@ -22,7 +22,7 @@ import { Skeleton } from "@/shared/ui/skeleton/Skeleton";
 import { StatePanel } from "@/shared/ui/state-panel/StatePanel";
 
 import styles from "./ask.module.css";
-import { AskUnavailable } from "./AskUnavailable";
+import { AskUnavailable, type UnavailableReason } from "./AskUnavailable";
 import { Composer } from "./Composer";
 import { ConversationList } from "./ConversationList";
 import { ConversationView } from "./ConversationView";
@@ -35,9 +35,10 @@ import {
 } from "./queries";
 
 /** Where questions to the norm cannot be answered by the stand right now. */
-function unavailableReason(error: unknown): "model" | "index" | null {
+function unavailableReason(error: unknown): UnavailableReason | null {
   if (!(error instanceof ApiError)) return null;
   if (error.code === "model_not_configured") return "model";
+  if (error.code === "model_daily_limit") return "limit";
   if (error.code === "corpus_not_indexed") return "index";
   return null;
 }
@@ -81,8 +82,12 @@ export function AskScreen({ conversationId }: { conversationId: string | null })
   });
   const turns = conversation.data?.turns ?? [];
   const pending = ask.isPending ? ask.variables : null;
-  const unavailable =
-    status.data && !status.data.configured ? "model" : unavailableReason(ask.error);
+  const unavailable: UnavailableReason | null =
+    status.data && !status.data.configured
+      ? "model"
+      : status.data?.requestsLeftToday === 0
+        ? "limit"
+        : unavailableReason(ask.error);
 
   // A new question or answer comes into view at the bottom.
   useEffect(() => {
@@ -161,7 +166,7 @@ export function AskScreen({ conversationId }: { conversationId: string | null })
         ) : null}
         {unavailable && turns.length > 0 ? <AskUnavailable reason={unavailable} /> : null}
         <div ref={end} />
-        {status.data?.configured && unavailable !== "index" ? (
+        {status.data?.configured && unavailable !== "index" && unavailable !== "limit" ? (
           <Composer busy={ask.isPending} onAsk={(question) => ask.mutate(question)} />
         ) : null}
       </section>

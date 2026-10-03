@@ -3,6 +3,7 @@
 import {
   IconAlertTriangle,
   IconCircleCheck,
+  IconHourglass,
   IconPlugConnectedX,
   IconReceipt,
   IconRefresh,
@@ -118,7 +119,7 @@ export function CheckSummary({
   }
 
   const outstanding = SEVERITIES.reduce((sum, severity) => sum + counts[severity], 0);
-  const unavailable = tally.notPerformed - tally.modelMissing;
+  const unavailable = tally.notPerformed - tally.modelMissing - tally.modelLimit;
   // Nothing found is "clean" only when every check gave a verdict.
   const partial = tally.notPerformed > 0;
   return (
@@ -155,6 +156,9 @@ export function CheckSummary({
         </p>
         {tally.modelMissing > 0 ? (
           <Notice icon={<IconPlugConnectedX stroke={1.75} />}>{t("summary.modelMissing")}</Notice>
+        ) : null}
+        {tally.modelLimit > 0 ? (
+          <Notice icon={<IconHourglass stroke={1.75} />}>{t("summary.modelLimit")}</Notice>
         ) : null}
         {unavailable > 0 ? (
           <Notice icon={<IconAlertTriangle stroke={1.75} />}>

@@ -84,9 +84,12 @@ export interface RunTally {
   notPerformed: number;
   /** Model checks skipped because no model API is configured. */
   modelMissing: number;
+  /** Model checks waiting for the model's daily allowance to renew. */
+  modelLimit: number;
 }
 
 const MODEL_NOT_CONFIGURED = "model_not_configured";
+const MODEL_DAILY_LIMIT = "model_daily_limit";
 
 export function tally(results: readonly CheckResult[]): RunTally {
   const count = (status: CheckResult["status"]) =>
@@ -98,5 +101,6 @@ export function tally(results: readonly CheckResult[]): RunTally {
     notApplicable: count("not_applicable"),
     notPerformed: count("error"),
     modelMissing: results.filter((result) => result.errorCode === MODEL_NOT_CONFIGURED).length,
+    modelLimit: results.filter((result) => result.errorCode === MODEL_DAILY_LIMIT).length,
   };
 }

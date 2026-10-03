@@ -94,6 +94,7 @@ describe("tally", () => {
       notApplicable: 1,
       notPerformed: 2,
       modelMissing: 1,
+      modelLimit: 0,
     });
   });
 });
