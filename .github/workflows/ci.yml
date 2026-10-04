@@ -107,3 +107,9 @@ jobs:
           docker run --rm snoska-keycloak:ci show-config | tee "$RUNNER_TEMP/keycloak.txt"
           grep -q 'kc.db =  postgres (Persisted)' "$RUNNER_TEMP/keycloak.txt"
           grep -q 'kc.health-enabled =  true (Persisted)' "$RUNNER_TEMP/keycloak.txt"
+      - name: Keycloak image under a path keeps its health check at the root
+        run: |
+          docker build -f infra/keycloak/Dockerfile --build-arg KEYCLOAK_HTTP_RELATIVE_PATH=/auth -t snoska-keycloak:ci-path .
+          docker run --rm snoska-keycloak:ci-path show-config | tee "$RUNNER_TEMP/keycloak-path.txt"
+          grep -q 'kc.http-relative-path =  /auth (Persisted)' "$RUNNER_TEMP/keycloak-path.txt"
+          grep -q 'kc.http-management-relative-path =  / (Persisted)' "$RUNNER_TEMP/keycloak-path.txt"

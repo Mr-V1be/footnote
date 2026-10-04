@@ -29,7 +29,7 @@ x-backend-env: &backend-env
   SNOSKA_REDIS_PORT: "6379"
   SNOSKA_REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD:?set SNOSKA_REDIS_PASSWORD}
   SNOSKA_KEYCLOAK_URL: ${SNOSKA_KEYCLOAK_URL:?set SNOSKA_KEYCLOAK_URL}
-  SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+  SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080${KEYCLOAK_PATH:-}
   SNOSKA_KEYCLOAK_REALM: snoska
   SNOSKA_DIRECTORY_CLIENT_SECRET: ${SNOSKA_DIRECTORY_CLIENT_SECRET:?set SNOSKA_DIRECTORY_CLIENT_SECRET}
   SNOSKA_SECRETS_KEY: ${SNOSKA_SECRETS_KEY:?set SNOSKA_SECRETS_KEY}
@@ -128,6 +128,10 @@ services:
     build:
       context: .
       dockerfile: infra/keycloak/Dockerfile
+      args:
+        # Keycloak under a path of the product's name (KEYCLOAK_PATH, e.g. /auth); empty: on
+        # a name of its own, as SNOSKA_KEYCLOAK_URL says.
+        KEYCLOAK_HTTP_RELATIVE_PATH: ${KEYCLOAK_PATH:-/}
     pull_policy: missing
     depends_on:
       postgres:
@@ -241,7 +245,7 @@ services:
       SNOSKA_WEB_URL: ${SNOSKA_WEB_URL}
       SNOSKA_API_URL: http://api:8000
       SNOSKA_KEYCLOAK_URL: ${SNOSKA_KEYCLOAK_URL}
-      SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      SNOSKA_KEYCLOAK_INTERNAL_URL: http://keycloak:8080${KEYCLOAK_PATH:-}
       SNOSKA_KEYCLOAK_REALM: snoska
       SNOSKA_WEB_CLIENT_SECRET: ${SNOSKA_WEB_CLIENT_SECRET}
       SNOSKA_SESSION_SECRET: ${SNOSKA_SESSION_SECRET:?set SNOSKA_SESSION_SECRET}

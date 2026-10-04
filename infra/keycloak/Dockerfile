@@ -7,9 +7,14 @@
 ARG KEYCLOAK_IMAGE=keycloak/keycloak:26.8.0
 
 FROM ${KEYCLOAK_IMAGE} AS build
+# Keycloak's path on its public name: `/` on a name of its own, e.g. `/auth` under the
+# product's name. The management interface (health) stays at `/` either way.
+ARG KEYCLOAK_HTTP_RELATIVE_PATH=/
 # Features the realm does not use are left out: device and backchannel (CIBA) flows, pushed
 # authorization requests, Kerberos and impersonation.
 ENV KC_DB=postgres \
+    KC_HTTP_RELATIVE_PATH=${KEYCLOAK_HTTP_RELATIVE_PATH} \
+    KC_HTTP_MANAGEMENT_RELATIVE_PATH=/ \
     KC_HEALTH_ENABLED=true \
     KC_METRICS_ENABLED=false \
     KC_FEATURES_DISABLED=ciba,device-flow,par,kerberos,impersonation

@@ -59,6 +59,25 @@ flowchart LR
 
 Замер локально: Keycloak с этими настройками после импорта realm занимает около 370 МБ (с настройками по умолчанию — около 540 МБ). Keycloak всегда работает с локальным кэшем (`KC_CACHE=local`): один узел, без поиска соседей по кластеру.
 
+### Одно имя: Keycloak под путём
+
+Keycloak может жить не на своём имени, а под путём имени продукта, например
+`https://snoska.example.ru/auth`. В `.env.prod`:
+
+```bash
+SNOSKA_KEYCLOAK_URL=https://snoska.example.ru/auth
+KEYCLOAK_PATH=/auth
+```
+
+Образ Keycloak собирается с этим путём (`KEYCLOAK_HTTP_RELATIVE_PATH` — параметр сборки,
+проверка здоровья на порту управления остаётся на `/health/ready`), серверы обращаются к
+`http://keycloak:8080/auth`, а издатель токенов, адреса входа и выхода, redirect URI клиентов
+из импорта realm (`${SNOSKA_WEB_URL}/auth/callback`) следуют за `SNOSKA_KEYCLOAK_URL` и
+`SNOSKA_WEB_URL` сами. Прокси перед стеком отдаёт Keycloak только его публичные пути —
+`/auth/realms/*` и `/auth/resources/*`; `/auth/login`, `/auth/callback`, `/auth/logout` и
+`/auth/demo` — маршруты веб-приложения, консоль `/auth/admin` снаружи закрыта. Встроенный Caddy
+этого файла настроен на отдельное имя Keycloak.
+
 ## Что нужно от владельца
 
 - домен и две DNS-записи A (и AAAA, если есть IPv6) на сервер: `snoska.<домен>` и `auth.snoska.<домен>`;
