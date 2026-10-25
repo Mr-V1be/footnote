@@ -1,8 +1,8 @@
 {
   "format": 1,
-  "measured_at": "2026-10-03T09:02:53+00:00",
-  "catalog_revision": "212ce86c2ca2",
-  "model": "nvidia/nemotron-3-super-120b-a12b:free",
+  "measured_at": "2026-10-25T19:45:44+00:00",
+  "catalog_revision": "bbd2f9ab1264",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
   "documents": [
     {
       "file": "politika-severnyy-veter.docx",
@@ -10,9 +10,9 @@
       "kind": "pd_policy",
       "pages": 8,
       "typical": true,
-      "parse_ms": 29,
+      "parse_ms": 21,
       "deterministic_ms": 2,
-      "model_ms": 45428
+      "model_ms": 83931
     },
     {
       "file": "politika-zarya.docx",
@@ -20,9 +20,9 @@
       "kind": "pd_policy",
       "pages": 1,
       "typical": false,
-      "parse_ms": 10,
+      "parse_ms": 9,
       "deterministic_ms": 1,
-      "model_ms": 15250
+      "model_ms": 34863
     },
     {
       "file": "politika-kovalev-skan.pdf",
@@ -30,9 +30,9 @@
       "kind": "pd_policy",
       "pages": 1,
       "typical": false,
-      "parse_ms": 1391,
-      "deterministic_ms": 0,
-      "model_ms": 8808
+      "parse_ms": 1421,
+      "deterministic_ms": 1,
+      "model_ms": 57029
     },
     {
       "file": "polozhenie-zarya.docx",
@@ -40,9 +40,9 @@
       "kind": "regulation",
       "pages": 1,
       "typical": false,
-      "parse_ms": 10,
-      "deterministic_ms": 1,
-      "model_ms": 6042
+      "parse_ms": 8,
+      "deterministic_ms": 0,
+      "model_ms": 33546
     },
     {
       "file": "soglasie-severnyy-veter.docx",
@@ -50,9 +50,9 @@
       "kind": "pd_consent",
       "pages": 1,
       "typical": false,
-      "parse_ms": 8,
+      "parse_ms": 7,
       "deterministic_ms": 0,
-      "model_ms": 5904
+      "model_ms": 28941
     },
     {
       "file": "soglasie-zarya.docx",
@@ -62,7 +62,7 @@
       "typical": false,
       "parse_ms": 7,
       "deterministic_ms": 0,
-      "model_ms": 19797
+      "model_ms": 37079
     },
     {
       "file": "poruchenie-bystraya-dostavka.docx",
@@ -71,8 +71,8 @@
       "pages": 2,
       "typical": false,
       "parse_ms": 8,
-      "deterministic_ms": 1,
-      "model_ms": 9421
+      "deterministic_ms": 0,
+      "model_ms": 74839
     },
     {
       "file": "poruchenie-oblachnye-resheniya.docx",
@@ -80,9 +80,9 @@
       "kind": "pd_assignment",
       "pages": 2,
       "typical": false,
-      "parse_ms": 7,
-      "deterministic_ms": 0,
-      "model_ms": 5812
+      "parse_ms": 8,
+      "deterministic_ms": 1,
+      "model_ms": 21404
     },
     {
       "file": "prikaz-severnyy-veter.docx",
@@ -100,7 +100,7 @@
       "kind": "order",
       "pages": 1,
       "typical": false,
-      "parse_ms": 6,
+      "parse_ms": 10,
       "deterministic_ms": 0,
       "model_ms": 0
     },
@@ -110,9 +110,9 @@
       "kind": "pd_policy",
       "pages": 1,
       "typical": false,
-      "parse_ms": 7,
+      "parse_ms": 10,
       "deterministic_ms": 0,
-      "model_ms": 6318
+      "model_ms": 29295
     },
     {
       "file": "soglasie-rassylka.docx",
@@ -120,9 +120,9 @@
       "kind": "pd_consent",
       "pages": 1,
       "typical": false,
-      "parse_ms": 6,
+      "parse_ms": 8,
       "deterministic_ms": 0,
-      "model_ms": 13097
+      "model_ms": 31888
     },
     {
       "file": "poruchenie-v-dogovore.docx",
@@ -132,7 +132,7 @@
       "typical": false,
       "parse_ms": 7,
       "deterministic_ms": 0,
-      "model_ms": 6014
+      "model_ms": 38028
     },
     {
       "file": "prikaz-uyut.docx",
@@ -140,7 +140,7 @@
       "kind": "order",
       "pages": 1,
       "typical": false,
-      "parse_ms": 6,
+      "parse_ms": 10,
       "deterministic_ms": 0,
       "model_ms": 0
     }
@@ -888,7 +888,7 @@
       "family": "personal_data",
       "method": "model",
       "expected_violation": true,
-      "status": "needs_review"
+      "status": "violation"
     },
     {
       "document": "soglasie-severnyy-veter.docx",
@@ -992,7 +992,7 @@
       "family": "personal_data",
       "method": "model",
       "expected_violation": false,
-      "status": "needs_review"
+      "status": "passed"
     },
     {
       "document": "soglasie-severnyy-veter.docx",
@@ -1720,7 +1720,7 @@
       "family": "personal_data",
       "method": "model",
       "expected_violation": true,
-      "status": "needs_review"
+      "status": "violation"
     },
     {
       "document": "politika-sayt-uyut.docx",
@@ -1736,7 +1736,7 @@
       "family": "personal_data",
       "method": "model",
       "expected_violation": true,
-      "status": "passed"
+      "status": "violation"
     },
     {
       "document": "politika-sayt-uyut.docx",
@@ -2024,7 +2024,7 @@
       "family": "personal_data",
       "method": "model",
       "expected_violation": true,
-      "status": "needs_review"
+      "status": "violation"
     },
     {
       "document": "poruchenie-v-dogovore.docx",

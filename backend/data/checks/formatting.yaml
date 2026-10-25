@@ -1,4 +1,4 @@
-# Formatting checks: requirements of GOST R 7.0.97-2016 for organisational
+# Formatting checks: requirements of GOST R 7.0.97-2016 for organizational
 # documents, stated in our own words with the clause they come from. The text
 # of the standard is not reproduced.
 #
@@ -160,10 +160,10 @@ checks:
       en: Place of issue not stated
     requirement:
       ru: Указано место составления документа, если его нет в наименовании организации.
-      en: The document states where it was drawn up, unless the organisation's name already says so.
+      en: The document states where it was drawn up, unless the organization's name already says so.
     recommendation:
       ru: Укажите город, где составлен документ, например «г. Москва».
-      en: State the city where the document was drawn up, e.g. “г. Москва”.
+      en: State the city where the document was drawn up, e.g. “г. Москва” (Moscow).
 
   - code: formatting.approval_stamp
     method: deterministic
@@ -177,7 +177,7 @@ checks:
       en: No approval stamp
     requirement:
       ru: Локальный акт утверждён — в правом верхнем углу есть гриф «УТВЕРЖДЕН(А)» или «УТВЕРЖДАЮ» с реквизитами.
-      en: "The local act is approved: its top right corner carries the stamp “УТВЕРЖДЕН(А)” or “УТВЕРЖДАЮ” with the details of the approval."
+      en: "The local act is approved: its top right corner carries the stamp “УТВЕРЖДЕН(А)” (approved) or “УТВЕРЖДАЮ” (I approve) with the details of the approval."
     recommendation:
       ru: Добавьте гриф утверждения с названием распорядительного документа, его датой и номером.
       en: Add an approval stamp with the name of the approving order, its date and number.
@@ -194,10 +194,10 @@ checks:
       en: No title to the text
     requirement:
       ru: У приказа есть заголовок, который отвечает на вопрос «о чём?» и начинается с «О» («Об»).
-      en: The order has a title that says what it is about and starts with “О” (“Об”).
+      en: The order has a title that says what it is about and starts with “О” or “Об” (on).
     recommendation:
       ru: Добавьте заголовок, например «Об утверждении Политики обработки персональных данных».
-      en: Add a title, e.g. “Об утверждении Политики обработки персональных данных”.
+      en: Add a title, e.g. “Об утверждении Политики обработки персональных данных” (on approving the personal data policy).
 
   - code: formatting.signature
     method: deterministic
@@ -227,7 +227,7 @@ checks:
       en: Surname before initials in the signature block
     requirement:
       ru: В расшифровке подписи инициалы стоят перед фамилией — «А.С. Ковалёва».
-      en: "In the printed name under a signature the initials come before the surname: “А.С. Ковалёва”."
+      en: "In the printed name under a signature the initials come before the surname: “А.С. Ковалёва” (A.S. Kovaleva)."
     recommendation:
       ru: Поставьте инициалы перед фамилией.
       en: Put the initials before the surname.
@@ -243,10 +243,10 @@ checks:
       en: Date not written to the standard
     requirement:
       ru: Даты записываются цифрами через точку — 05.06.2026 — или словами и цифрами — 5 июня 2026 г.
-      en: Dates are written in digits separated by full stops, 05.06.2026, or in words and digits, “5 июня 2026 г.”.
+      en: Dates are written in digits separated by periods, 05.06.2026, or in words and digits, “5 июня 2026 г.” (5 June 2026).
     recommendation:
       ru: Запишите дату в виде ДД.ММ.ГГГГ или «5 июня 2026 г.».
-      en: Write the date as DD.MM.YYYY or as “5 июня 2026 г.”.
+      en: Write the date as DD.MM.YYYY or as “5 июня 2026 г.” (5 June 2026).
 
   - code: formatting.numbering
     method: deterministic

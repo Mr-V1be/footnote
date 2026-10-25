@@ -72,7 +72,7 @@ checks:
       en: For each purpose of processing, the categories and the list of personal data are defined.
     recommendation:
       ru: "Для каждой цели перечислите обрабатываемые данные — например, «для кадрового учёта: ФИО, паспортные данные, СНИЛС, ИНН»."
-      en: "For each purpose, list the data processed, e.g. “for HR records: full name, passport details, SNILS, INN”."
+      en: "For each purpose, list the data processed, e.g. “for HR records: full name, passport details, SNILS (insurance number), INN (tax number)”."
     brief:
       question: Определены ли в документе для каждой цели обработки категории и перечень обрабатываемых персональных данных?
       criteria: Для каждой цели или группы целей указано, какие именно данные обрабатываются; общий перечень допустим, если прямо сказано, что он относится ко всем названным целям.
@@ -169,7 +169,7 @@ checks:
       en: Data protection measures not described
     requirement:
       ru: Документ описывает правовые, организационные и технические меры защиты персональных данных.
-      en: The document describes the legal, organisational and technical measures that protect personal data.
+      en: The document describes the legal, organizational and technical measures that protect personal data.
     recommendation:
       ru: Перечислите меры защиты — назначение ответственного, локальные акты, разграничение доступа, учёт носителей, антивирусная защита, внутренний контроль.
       en: "List the protection measures: a person responsible, local acts, access control, accounting of data carriers, anti-virus protection, internal control."
@@ -232,7 +232,7 @@ checks:
       en: The policy describes how a data subject sends a request or withdraws consent, and how soon the operator replies.
     recommendation:
       ru: Укажите адрес и e-mail для запросов и срок ответа — 10 рабочих дней.
-      en: "Give the postal address and e-mail for requests and the reply period: 10 working days."
+      en: "Give the postal address and email for requests and the reply period: 10 working days."
     brief:
       question: Описано ли в документе, как субъект может обратиться к оператору (запрос, отзыв согласия) и в какой срок оператор отвечает?
       criteria: Указан способ обращения — адрес, e-mail, форма запроса — или срок ответа на запросы субъектов.
@@ -246,13 +246,13 @@ checks:
     severity: advice
     title:
       ru: Не назначен ответственный за организацию обработки
-      en: No person responsible for organising processing
+      en: No person responsible for organizing processing
     requirement:
       ru: Документ называет лицо, ответственное за организацию обработки персональных данных.
-      en: The document names the person responsible for organising the processing of personal data.
+      en: The document names the person responsible for organizing the processing of personal data.
     recommendation:
       ru: Укажите, что оператор назначает ответственного за организацию обработки персональных данных, и его обязанности.
-      en: State that the operator appoints a person responsible for organising the processing of personal data, and list their duties.
+      en: State that the operator appoints a person responsible for organizing the processing of personal data, and list their duties.
     brief:
       question: Сказано ли в документе о лице, ответственном за организацию обработки персональных данных?
       criteria: Упомянуто назначение ответственного за организацию обработки персональных данных (по должности или по имени).
@@ -333,7 +333,7 @@ checks:
       en: The consent lists the personal data it is given for.
     recommendation:
       ru: Перечислите данные — например, «ФИО, номер телефона, адрес электронной почты».
-      en: List the data, e.g. “full name, phone number, e-mail address”.
+      en: List the data, e.g. “full name, phone number, email address”.
     brief:
       question: Перечислены ли в согласии персональные данные, на обработку которых оно даётся?
       criteria: Есть конкретный перечень данных, а не «любые персональные данные».
@@ -373,7 +373,7 @@ checks:
       en: The consent lists the actions with the data and describes the methods of processing.
     recommendation:
       ru: Перечислите действия — сбор, запись, систематизация, хранение, уточнение, удаление — и укажите, ведётся ли обработка автоматизированно.
-      en: List the actions (collection, recording, systematisation, storage, updating, deletion) and state whether processing is automated.
+      en: List the actions (collection, recording, systematization, storage, updating, deletion) and state whether processing is automated.
     brief:
       question: Перечислены ли в согласии действия с персональными данными и описаны ли способы обработки?
       criteria: Перечислены действия (сбор, запись, хранение, уточнение, передача, удаление и т. п.) и сказано, автоматизированная обработка или нет.
