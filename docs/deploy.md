@@ -160,6 +160,24 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
 Миграции применяются сервисом `migrate` до старта новых API и воркера. Откат — `git checkout <тег>` и та же команда; миграции пишутся совместимыми с предыдущей версией кода.
 
+### Английский интерфейс (миграция 0013)
+
+Тексты, которые продукт пишет для читателя, хранятся на всех языках интерфейса. Миграция 0013 оставляет прежним строкам их русский текст; английский появляется после перепроверки и синхронизации корпуса. Realm, импортированный раньше, Keycloak не перечитывает — языки, тему писем и адрес возврата из приглашения добавляют один раз:
+
+```bash
+snoska corpus sync --source pravo_ips     # названия актов на всех языках (или дождаться еженедельной проверки)
+snoska checks recheck                     # последние версии документов — с текстами на всех языках
+C="docker compose -f docker-compose.prod.yml --env-file .env.prod"
+# пароль администратора Keycloak спросят; к адресу добавить KEYCLOAK_PATH, если он задан
+$C exec -it keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  --server http://localhost:8080 --realm master --user admin
+$C exec keycloak /opt/keycloak/bin/kcadm.sh update realms/snoska \
+  -s 'supportedLocales=["en","ru"]' -s defaultLocale=en -s emailTheme=snoska
+# В клиенте snoska-web к Valid redirect URIs добавить адрес веба без пути: https://домен
+```
+
+Перепроверка юридических проверок тратит запросы к модели (на документ — один запрос на 12 проверок); на бесплатном тарифе её лучше запускать в начале суток по UTC. Записи лендинга для каждого языка лежат в `frontend/public/landing/<язык>/` и снимаются `make demo-refresh`.
+
 ## Резервные копии
 
 Сервис `backup` каждую ночь (`SNOSKA_BACKUP_HOUR`, по UTC) кладёт в `SNOSKA_BACKUP_DIR` каталог с `snoska.dump`, `keycloak.dump` (pg_dump, формат custom) и `blobs.tar.gz` (загруженные файлы) и удаляет копии старше `SNOSKA_BACKUP_KEEP_DAYS`. Копию вне расписания: `docker compose -f docker-compose.prod.yml --env-file .env.prod exec backup /usr/local/bin/backup.sh now`. Каталог копий стоит синхронизировать за пределы сервера (rclone, rsync).
