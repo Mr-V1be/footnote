@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from snoska.domain.shared.locale import SOURCE_LOCALE, Locale
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, OWNER_ROLE
 from snoska.ports.identity import (
     IdentityProvisioning,
@@ -18,6 +19,8 @@ class Person:
     email: str
     first_name: str
     last_name: str
+    # The language their invitation is written in.
+    locale: Locale = SOURCE_LOCALE
 
 
 class Onboarding:
@@ -45,6 +48,7 @@ class Onboarding:
                 first_name=owner.first_name,
                 last_name=owner.last_name,
                 role_code=OWNER_ROLE,
+                locale=owner.locale,
             ),
         )
         return profile

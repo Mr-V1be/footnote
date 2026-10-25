@@ -9,6 +9,7 @@ from fastapi.responses import StreamingResponse
 
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.checks import (
     CheckCatalogOut,
     CheckReportOut,
@@ -46,14 +47,18 @@ async def request_check(
     response_model_by_alias=True,
 )
 async def latest_check(
-    container: ContainerDep, access: OrganizationAccessDep, document_id: UUID, number: int
+    container: ContainerDep,
+    access: OrganizationAccessDep,
+    locale: LocaleDep,
+    document_id: UUID,
+    number: int,
 ) -> CheckReportOut | None:
     """The latest run of the version with its results and findings; null if never checked."""
     report = await container.checks.latest(access, document_id, number)
     if report is None:
         return None
-    citations = await container.checks.citations()
-    return CheckReportOut.of(report, container.checks.catalog, citations)
+    citations = container.checks.citations()
+    return CheckReportOut.of(report, container.checks.catalog, citations, locale)
 
 
 @router.get(
@@ -114,15 +119,19 @@ async def run_events(
     response_model_by_alias=True,
 )
 async def review_finding(
-    container: ContainerDep, access: OrganizationAccessDep, finding_id: UUID, body: ReviewIn
+    container: ContainerDep,
+    access: OrganizationAccessDep,
+    locale: LocaleDep,
+    finding_id: UUID,
+    body: ReviewIn,
 ) -> FindingOut:
     """Accept, reject, mark fixed or reopen a finding (optimistic concurrency by revision)."""
     finding = await container.checks.review(access, finding_id, body.review, body.revision)
-    return FindingOut.of(finding)
+    return FindingOut.of(finding, locale)
 
 
 @router.get("/checks/catalog", response_model=CheckCatalogOut, response_model_by_alias=True)
-async def check_catalog(container: ContainerDep) -> CheckCatalogOut:
+async def check_catalog(container: ContainerDep, locale: LocaleDep) -> CheckCatalogOut:
     """Every check the product runs, what it requires and what it cites
     (public: the methodology is shown to guests too)."""
     ai = container.ai
@@ -131,7 +140,9 @@ async def check_catalog(container: ContainerDep) -> CheckCatalogOut:
         language_model=ai.language_model.model or None,
         embedding_model=ai.embedder.model or None,
     )
-    return CheckCatalogOut.of(container.checks.catalog, await container.checks.citations(), models)
+    return CheckCatalogOut.of(
+        container.checks.catalog, container.checks.citations(), models, locale
+    )
 
 
 @router.get("/checks/quality", response_model=QualityOut | None, response_model_by_alias=True)

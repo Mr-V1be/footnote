@@ -5,7 +5,9 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from snoska.domain.checks.spread import SpreadPolicy
+from snoska.domain.corpus.citation import cite_clause
 from snoska.domain.shared.errors import NotFoundError
+from snoska.domain.shared.locale import LocalizedText
 
 
 class CatalogError(ValueError):
@@ -61,12 +63,12 @@ class StandardNorm:
     """A clause of a standard. The standard's text is not redistributed: the
     check states the rule in its own words and refers to the clause."""
 
-    standard: str
+    standard: LocalizedText
     clause: str
 
     @property
-    def citation(self) -> str:
-        return f"п. {self.clause} {self.standard}"
+    def citation(self) -> LocalizedText:
+        return cite_clause(self.clause, self.standard)
 
 
 Norm = LawNorm | StandardNorm
@@ -95,6 +97,10 @@ class CheckDefinition:
     the norm, the default severity and how it is evaluated — a deterministic
     rule with parameters or a brief for the language model. Adding a check is
     adding an entry; the engine does not change.
+
+    What a reader sees — the title, the requirement and how to fix it — is
+    written in every interface language. The brief is not: the model reads
+    Russian documents against Russian law and is asked in their language.
     """
 
     code: str
@@ -103,9 +109,9 @@ class CheckDefinition:
     kinds: frozenset[str]
     norm: Norm
     severity: Severity
-    title: str
-    requirement: str
-    recommendation: str
+    title: LocalizedText
+    requirement: LocalizedText
+    recommendation: LocalizedText
     rule: str | None = None
     params: Mapping[str, object] = field(default_factory=dict)
     brief: ModelBrief | None = None
@@ -115,6 +121,11 @@ class CheckDefinition:
     def __post_init__(self) -> None:
         if not self.kinds:
             raise CatalogError(f"{self.code}: applies to no document kind")
+        for name in ("title", "requirement", "recommendation"):
+            missing = getattr(self, name).missing
+            if missing:
+                languages = ", ".join(locale.value for locale in missing)
+                raise CatalogError(f"{self.code}: {name} is not written in {languages}")
         if self.method is CheckMethod.DETERMINISTIC:
             if not self.rule:
                 raise CatalogError(f"{self.code}: a deterministic check names its rule")

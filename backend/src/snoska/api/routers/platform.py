@@ -6,6 +6,7 @@ from fastapi import APIRouter, status
 
 from snoska.api.dependencies import ContainerDep, PlatformAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.platform import OrganizationRowOut, PlanAssignIn, PlanOut, SystemOut
 from snoska.application.operations.platform import CORPUS_WATCH
 from snoska.domain.tenancy.permissions import Permission
@@ -39,9 +40,11 @@ async def assign_plan(
 
 
 @router.get("/system", response_model=SystemOut, response_model_by_alias=True)
-async def system_status(container: ContainerDep, access: PlatformAccessDep) -> SystemOut:
+async def system_status(
+    container: ContainerDep, access: PlatformAccessDep, locale: LocaleDep
+) -> SystemOut:
     """Health of dependencies, models, the corpus and its weekly check."""
-    return SystemOut.of(await container.console.system(access))
+    return SystemOut.of(await container.console.system(access), locale)
 
 
 @router.post("/corpus/watch", status_code=status.HTTP_202_ACCEPTED)

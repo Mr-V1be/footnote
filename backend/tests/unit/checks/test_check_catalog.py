@@ -10,18 +10,22 @@ from snoska.bootstrap.settings import ChecksSettings
 from snoska.domain.checks.catalog import CatalogError, CheckMethod, LawNorm, StandardNorm
 from snoska.domain.checks.rules.registry import DEFAULT_RULES
 from snoska.domain.documents.kinds import DOCUMENT_KINDS
+from snoska.domain.shared.locale import Locale
 from snoska.infrastructure.checks.catalog import YamlCheckCatalog
 
-HEADER = "family: formatting\nrank: 1\nstandard: ГОСТ Р 7.0.97-2016\nchecks:\n"
+HEADER = (
+    "family: formatting\nrank: 1\nstandard: {ru: ГОСТ Р 7.0.97-2016, en: GOST R 7.0.97-2016}\n"
+    "checks:\n"
+)
 ENTRY = """  - code: {code}
     method: deterministic
     rule: {rule}
     clause: "6.1"
     severity: advice
     kinds: [{kind}]
-    title: t
-    requirement: r
-    recommendation: f
+    title: {{ru: т, en: t}}
+    requirement: {{ru: т, en: r}}
+    recommendation: {{ru: т, en: f}}
 """
 
 
@@ -44,6 +48,28 @@ def test_the_shipped_catalogue_is_valid_and_grounded() -> None:
             assert isinstance(check.norm, StandardNorm)
     assert catalog.applicable("pd_policy"), "a policy is checked"
     assert len(catalog.revision) == 12
+
+
+def test_every_shipped_check_speaks_every_interface_language() -> None:
+    """One entry per check holds its wording in every language: none is
+    missing, and a translation is not a copy of the Russian original."""
+    catalog = YamlCheckCatalog(ChecksSettings().catalog_dir, DEFAULT_RULES, DOCUMENT_KINDS).load()
+    assert len(catalog.all()) >= 40
+    for check in catalog.all():
+        texts = [check.title, check.requirement, check.recommendation]
+        if isinstance(check.norm, StandardNorm):
+            texts += [check.norm.standard, check.norm.citation]
+        for text in texts:
+            assert set(text.values) == set(Locale), check.code
+            assert text.resolve(Locale.EN) != text.resolve(Locale.RU), check.code
+
+
+def test_a_check_without_a_wording_in_some_language_is_refused(tmp_path: Path) -> None:
+    entry = ENTRY.format(code="a", rule="date_format", kind="order").replace(
+        "title: {ru: т, en: t}", "title: {ru: т}"
+    )
+    with pytest.raises(CatalogError, match="'en'"):
+        load(write(tmp_path, entry))
 
 
 def test_revision_changes_with_any_entry(tmp_path: Path) -> None:

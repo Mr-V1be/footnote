@@ -7,7 +7,9 @@
 #
 # `brief.question` and `brief.criteria` are what the model is asked;
 # `brief.search` finds the relevant passages; `brief.keywords` are stems that
-# make a passage more likely to be relevant.
+# make a passage more likely to be relevant. The brief is in Russian, the
+# language of the documents and of the law; what a reader sees — `title`,
+# `requirement`, `recommendation` — is written in every interface language.
 family: personal_data
 rank: 0
 act: 152-fz
@@ -22,9 +24,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-2, st-5/ch-2]
     severity: critical
-    title: Не указаны конкретные цели обработки
-    requirement: Документ перечисляет конкретные цели обработки персональных данных.
-    recommendation: Перечислите цели обработки — например, исполнение трудовых договоров, оказание услуг клиентам, ведение бухгалтерского учёта.
+    title:
+      ru: Не указаны конкретные цели обработки
+      en: Specific purposes of processing not stated
+    requirement:
+      ru: Документ перечисляет конкретные цели обработки персональных данных.
+      en: The document lists the specific purposes of processing personal data.
+    recommendation:
+      ru: Перечислите цели обработки — например, исполнение трудовых договоров, оказание услуг клиентам, ведение бухгалтерского учёта.
+      en: "List the purposes of processing, for example: performing employment contracts, serving customers, keeping accounting records."
     brief:
       question: Перечислены ли в документе конкретные цели обработки персональных данных?
       criteria: Названы конкретные цели (исполнение договоров, кадровый учёт, оказание услуг и т. п.), а не общая формулировка вроде «в целях деятельности оператора».
@@ -36,9 +44,15 @@ checks:
     kinds: *local_acts
     anchors: [st-6/ch-1]
     severity: important
-    title: Не указаны правовые основания обработки
-    requirement: Документ называет правовые основания обработки персональных данных.
-    recommendation: Укажите основания обработки — согласие субъекта, исполнение договора, требования закона — и нормативные акты, во исполнение которых ведётся обработка.
+    title:
+      ru: Не указаны правовые основания обработки
+      en: Legal grounds for processing not stated
+    requirement:
+      ru: Документ называет правовые основания обработки персональных данных.
+      en: The document names the legal grounds for processing personal data.
+    recommendation:
+      ru: Укажите основания обработки — согласие субъекта, исполнение договора, требования закона — и нормативные акты, во исполнение которых ведётся обработка.
+      en: State the grounds for processing (the data subject's consent, performance of a contract, a requirement of law) and the regulations under which processing is carried out.
     brief:
       question: Названы ли в документе правовые основания обработки персональных данных?
       criteria: Указаны основания из части 1 статьи 6 (согласие, договор, обязанность по закону и т. п.) или перечислены нормативные акты, на основании которых ведётся обработка.
@@ -50,9 +64,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-2, st-5/ch-5]
     severity: important
-    title: Нет перечня данных для каждой цели
-    requirement: Для каждой цели обработки определены категории и перечень персональных данных.
-    recommendation: "Для каждой цели перечислите обрабатываемые данные — например, «для кадрового учёта: ФИО, паспортные данные, СНИЛС, ИНН»."
+    title:
+      ru: Нет перечня данных для каждой цели
+      en: No list of data for each purpose
+    requirement:
+      ru: Для каждой цели обработки определены категории и перечень персональных данных.
+      en: For each purpose of processing, the categories and the list of personal data are defined.
+    recommendation:
+      ru: "Для каждой цели перечислите обрабатываемые данные — например, «для кадрового учёта: ФИО, паспортные данные, СНИЛС, ИНН»."
+      en: "For each purpose, list the data processed, e.g. “for HR records: full name, passport details, SNILS, INN”."
     brief:
       question: Определены ли в документе для каждой цели обработки категории и перечень обрабатываемых персональных данных?
       criteria: Для каждой цели или группы целей указано, какие именно данные обрабатываются; общий перечень допустим, если прямо сказано, что он относится ко всем названным целям.
@@ -64,9 +84,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-2]
     severity: important
-    title: Не названы категории субъектов
-    requirement: Документ называет категории субъектов, чьи данные обрабатываются.
-    recommendation: Перечислите категории субъектов — работники, кандидаты на работу, клиенты, их представители, контрагенты.
+    title:
+      ru: Не названы категории субъектов
+      en: Categories of data subjects not named
+    requirement:
+      ru: Документ называет категории субъектов, чьи данные обрабатываются.
+      en: The document names the categories of data subjects whose data is processed.
+    recommendation:
+      ru: Перечислите категории субъектов — работники, кандидаты на работу, клиенты, их представители, контрагенты.
+      en: "List the categories of data subjects: employees, job candidates, customers, their representatives, counterparties."
     brief:
       question: Названы ли в документе категории субъектов, персональные данные которых обрабатываются?
       criteria: Перечислены группы людей — работники, кандидаты, клиенты, представители, контрагенты и т. п.
@@ -78,9 +104,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-2, st-5/ch-7]
     severity: important
-    title: Не определены сроки обработки и хранения
-    requirement: Документ определяет сроки обработки и хранения персональных данных.
-    recommendation: Укажите сроки обработки и хранения для каждой цели или порядок их определения — например, «в течение срока действия договора и 5 лет после его окончания».
+    title:
+      ru: Не определены сроки обработки и хранения
+      en: Processing and retention periods not defined
+    requirement:
+      ru: Документ определяет сроки обработки и хранения персональных данных.
+      en: The document defines the periods of processing and retention of personal data.
+    recommendation:
+      ru: Укажите сроки обработки и хранения для каждой цели или порядок их определения — например, «в течение срока действия договора и 5 лет после его окончания».
+      en: State the processing and retention periods for each purpose, or how they are determined, e.g. “for the term of the contract and 5 years after it ends”.
     brief:
       question: Определены ли в документе сроки обработки и хранения персональных данных?
       criteria: Указаны конкретные сроки или порядок их определения (до достижения цели, срок действия договора, сроки хранения документов по закону). Одна общая фраза «не дольше, чем требуют цели» без сроков — частичное выполнение.
@@ -92,9 +124,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-2, st-21/ch-4]
     severity: important
-    title: Не описан порядок уничтожения данных
-    requirement: Документ описывает, когда и как уничтожаются персональные данные при достижении целей обработки.
-    recommendation: Опишите порядок уничтожения — срок (например, 30 дней с достижения цели), способ и как оформляется уничтожение.
+    title:
+      ru: Не описан порядок уничтожения данных
+      en: Procedure for destroying data not described
+    requirement:
+      ru: Документ описывает, когда и как уничтожаются персональные данные при достижении целей обработки.
+      en: The document describes when and how personal data is destroyed once the purposes of processing are achieved.
+    recommendation:
+      ru: Опишите порядок уничтожения — срок (например, 30 дней с достижения цели), способ и как оформляется уничтожение.
+      en: "Describe the destruction procedure: the time limit (e.g. 30 days after the purpose is achieved), the method and how destruction is recorded."
     brief:
       question: Описан ли в документе порядок уничтожения персональных данных при достижении целей обработки или при наступлении иных законных оснований?
       criteria: Сказано, когда данные уничтожаются (срок после достижения цели или отзыва согласия) и как это делается или фиксируется.
@@ -106,9 +144,15 @@ checks:
     kinds: *local_acts
     anchors: [st-14/ch-1, st-14/ch-7]
     severity: important
-    title: Не описаны права субъекта
-    requirement: Документ описывает права субъекта персональных данных.
-    recommendation: Опишите права субъекта — получать сведения об обработке, требовать уточнения, блокирования или уничтожения данных, отозвать согласие, обжаловать действия оператора.
+    title:
+      ru: Не описаны права субъекта
+      en: Data subject rights not described
+    requirement:
+      ru: Документ описывает права субъекта персональных данных.
+      en: The document describes the rights of the data subject.
+    recommendation:
+      ru: Опишите права субъекта — получать сведения об обработке, требовать уточнения, блокирования или уничтожения данных, отозвать согласие, обжаловать действия оператора.
+      en: "Describe the data subject's rights: to receive information about the processing, to demand correction, blocking or destruction of the data, to withdraw consent, to appeal against the operator's actions."
     brief:
       question: Описаны ли в документе права субъекта персональных данных?
       criteria: Названо право получать сведения об обработке и хотя бы часть других прав — требовать уточнения, блокирования или уничтожения, отозвать согласие, обжаловать действия оператора.
@@ -120,9 +164,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1, st-19/ch-2]
     severity: important
-    title: Не описаны меры защиты данных
-    requirement: Документ описывает правовые, организационные и технические меры защиты персональных данных.
-    recommendation: Перечислите меры защиты — назначение ответственного, локальные акты, разграничение доступа, учёт носителей, антивирусная защита, внутренний контроль.
+    title:
+      ru: Не описаны меры защиты данных
+      en: Data protection measures not described
+    requirement:
+      ru: Документ описывает правовые, организационные и технические меры защиты персональных данных.
+      en: The document describes the legal, organisational and technical measures that protect personal data.
+    recommendation:
+      ru: Перечислите меры защиты — назначение ответственного, локальные акты, разграничение доступа, учёт носителей, антивирусная защита, внутренний контроль.
+      en: "List the protection measures: a person responsible, local acts, access control, accounting of data carriers, anti-virus protection, internal control."
     brief:
       question: Описаны ли в документе меры по обеспечению безопасности персональных данных?
       criteria: Перечислены конкретные меры — назначение ответственного, локальные акты, ограничение доступа, оценка вреда, ознакомление работников, технические средства защиты и т. п.
@@ -134,9 +184,15 @@ checks:
     kinds: [pd_policy]
     anchors: [st-12/ch-1, st-12/ch-3]
     severity: advice
-    title: Не сказано о трансграничной передаче
-    requirement: Политика говорит, передаются ли персональные данные за рубеж и на каких условиях.
-    recommendation: Укажите прямо, что трансграничная передача не осуществляется, или опишите её условия и уведомление Роскомнадзора.
+    title:
+      ru: Не сказано о трансграничной передаче
+      en: Cross-border transfer not addressed
+    requirement:
+      ru: Политика говорит, передаются ли персональные данные за рубеж и на каких условиях.
+      en: The policy says whether personal data is transferred abroad and on what terms.
+    recommendation:
+      ru: Укажите прямо, что трансграничная передача не осуществляется, или опишите её условия и уведомление Роскомнадзора.
+      en: State plainly that there is no cross-border transfer, or describe its terms and the notification of Roskomnadzor.
     brief:
       question: Сказано ли в документе, осуществляет ли оператор трансграничную передачу персональных данных, и если осуществляет — на каких условиях?
       criteria: Есть прямое указание, что трансграничная передача не осуществляется, или описаны её условия и уведомление уполномоченного органа.
@@ -148,9 +204,15 @@ checks:
     kinds: [pd_policy]
     anchors: [st-6/ch-3]
     severity: advice
-    title: Не сказано о поручении обработки другим лицам
-    requirement: Политика говорит, поручает ли оператор обработку другим лицам и на каких условиях.
-    recommendation: Укажите, поручается ли обработка другим лицам; если поручается — что это делается по договору с требованиями части 3 статьи 6.
+    title:
+      ru: Не сказано о поручении обработки другим лицам
+      en: Processing by other persons not addressed
+    requirement:
+      ru: Политика говорит, поручает ли оператор обработку другим лицам и на каких условиях.
+      en: The policy says whether the operator assigns processing to other persons and on what terms.
+    recommendation:
+      ru: Укажите, поручается ли обработка другим лицам; если поручается — что это делается по договору с требованиями части 3 статьи 6.
+      en: State whether processing is assigned to other persons; if it is, say that this is done under a contract meeting the requirements of Part 3 of Article 6.
     brief:
       question: Сказано ли в документе, поручает ли оператор обработку персональных данных другим лицам и на каких условиях?
       criteria: Есть указание, что обработка поручается другим лицам на основании договора (поручения) с требованиями к ним, или что не поручается.
@@ -162,9 +224,15 @@ checks:
     kinds: [pd_policy]
     anchors: [st-20/ch-1]
     severity: important
-    title: Не описано, как субъекту обратиться к оператору
-    requirement: Политика описывает, как субъект направляет запрос или отзывает согласие и в какой срок оператор отвечает.
-    recommendation: Укажите адрес и e-mail для запросов и срок ответа — 10 рабочих дней.
+    title:
+      ru: Не описано, как субъекту обратиться к оператору
+      en: No way for data subjects to contact the operator
+    requirement:
+      ru: Политика описывает, как субъект направляет запрос или отзывает согласие и в какой срок оператор отвечает.
+      en: The policy describes how a data subject sends a request or withdraws consent, and how soon the operator replies.
+    recommendation:
+      ru: Укажите адрес и e-mail для запросов и срок ответа — 10 рабочих дней.
+      en: "Give the postal address and e-mail for requests and the reply period: 10 working days."
     brief:
       question: Описано ли в документе, как субъект может обратиться к оператору (запрос, отзыв согласия) и в какой срок оператор отвечает?
       criteria: Указан способ обращения — адрес, e-mail, форма запроса — или срок ответа на запросы субъектов.
@@ -176,9 +244,15 @@ checks:
     kinds: *local_acts
     anchors: [st-18.1/ch-1/p-1, st-22.1/ch-1]
     severity: advice
-    title: Не назначен ответственный за организацию обработки
-    requirement: Документ называет лицо, ответственное за организацию обработки персональных данных.
-    recommendation: Укажите, что оператор назначает ответственного за организацию обработки персональных данных, и его обязанности.
+    title:
+      ru: Не назначен ответственный за организацию обработки
+      en: No person responsible for organising processing
+    requirement:
+      ru: Документ называет лицо, ответственное за организацию обработки персональных данных.
+      en: The document names the person responsible for organising the processing of personal data.
+    recommendation:
+      ru: Укажите, что оператор назначает ответственного за организацию обработки персональных данных, и его обязанности.
+      en: State that the operator appoints a person responsible for organising the processing of personal data, and list their duties.
     brief:
       question: Сказано ли в документе о лице, ответственном за организацию обработки персональных данных?
       criteria: Упомянуто назначение ответственного за организацию обработки персональных данных (по должности или по имени).
@@ -191,9 +265,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-1]
     severity: critical
-    title: Нет данных субъекта
-    requirement: В согласии есть фамилия, имя, отчество и адрес субъекта, номер документа, удостоверяющего личность, дата выдачи и выдавший орган.
-    recommendation: Добавьте поля для ФИО, адреса и реквизитов паспорта — номер, дата выдачи, кем выдан.
+    title:
+      ru: Нет данных субъекта
+      en: No data subject details
+    requirement:
+      ru: В согласии есть фамилия, имя, отчество и адрес субъекта, номер документа, удостоверяющего личность, дата выдачи и выдавший орган.
+      en: The consent contains the data subject's surname, first name, patronymic and address, and the number, date of issue and issuing authority of their identity document.
+    recommendation:
+      ru: Добавьте поля для ФИО, адреса и реквизитов паспорта — номер, дата выдачи, кем выдан.
+      en: "Add fields for the full name, the address and the passport details: number, date of issue, issuing authority."
     brief:
       question: Есть ли в согласии фамилия, имя, отчество, адрес субъекта и сведения об основном документе, удостоверяющем его личность?
       criteria: Есть поля или текст для ФИО, адреса и номера документа, удостоверяющего личность, с датой выдачи и выдавшим органом.
@@ -205,9 +285,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-3]
     severity: critical
-    title: Не указан оператор
-    requirement: Согласие называет оператора — наименование и адрес.
-    recommendation: Укажите полное наименование оператора и его адрес.
+    title:
+      ru: Не указан оператор
+      en: Operator not named
+    requirement:
+      ru: Согласие называет оператора — наименование и адрес.
+      en: "The consent names the operator: its name and address."
+    recommendation:
+      ru: Укажите полное наименование оператора и его адрес.
+      en: Give the operator's full name and address.
     brief:
       question: Указаны ли в согласии наименование и адрес оператора, получающего согласие?
       criteria: Названы наименование (или ФИО) оператора и его адрес.
@@ -219,9 +305,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-4, st-9/ch-1]
     severity: critical
-    title: Не указана конкретная цель
-    requirement: Согласие указывает конкретную цель обработки.
-    recommendation: Укажите конкретную цель — например, «оформление и исполнение договора поставки».
+    title:
+      ru: Не указана конкретная цель
+      en: No specific purpose stated
+    requirement:
+      ru: Согласие указывает конкретную цель обработки.
+      en: The consent states a specific purpose of processing.
+    recommendation:
+      ru: Укажите конкретную цель — например, «оформление и исполнение договора поставки».
+      en: State a specific purpose, e.g. “concluding and performing a supply contract”.
     brief:
       question: Указана ли в согласии конкретная цель обработки персональных данных?
       criteria: Названа конкретная цель (одна или несколько), а не «любые цели» или «цели деятельности оператора».
@@ -233,9 +325,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-5]
     severity: critical
-    title: Нет перечня данных
-    requirement: Согласие перечисляет персональные данные, на обработку которых оно даётся.
-    recommendation: Перечислите данные — например, «ФИО, номер телефона, адрес электронной почты».
+    title:
+      ru: Нет перечня данных
+      en: No list of data
+    requirement:
+      ru: Согласие перечисляет персональные данные, на обработку которых оно даётся.
+      en: The consent lists the personal data it is given for.
+    recommendation:
+      ru: Перечислите данные — например, «ФИО, номер телефона, адрес электронной почты».
+      en: List the data, e.g. “full name, phone number, e-mail address”.
     brief:
       question: Перечислены ли в согласии персональные данные, на обработку которых оно даётся?
       criteria: Есть конкретный перечень данных, а не «любые персональные данные».
@@ -247,9 +345,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-6]
     severity: advice
-    title: Не названо лицо, которому поручена обработка
-    requirement: Если обработка поручается другому лицу, согласие называет его наименование и адрес.
-    recommendation: Укажите наименование и адрес лица, которому поручается обработка, или прямо напишите, что обработка другим лицам не поручается.
+    title:
+      ru: Не названо лицо, которому поручена обработка
+      en: Person processing on the operator's behalf not named
+    requirement:
+      ru: Если обработка поручается другому лицу, согласие называет его наименование и адрес.
+      en: If processing is assigned to another person, the consent gives that person's name and address.
+    recommendation:
+      ru: Укажите наименование и адрес лица, которому поручается обработка, или прямо напишите, что обработка другим лицам не поручается.
+      en: Give the name and address of the person who processes the data on the operator's behalf, or state plainly that processing is not assigned to other persons.
     brief:
       question: Названо ли в согласии лицо, которому оператор поручает обработку, с наименованием и адресом — или сказано, что обработка другим лицам не поручается?
       criteria: Есть наименование и адрес лица, обрабатывающего данные по поручению оператора, или прямое указание, что обработка не поручается. Упоминание «третьих лиц» без названия — нарушение.
@@ -261,9 +365,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-7]
     severity: important
-    title: Нет перечня действий с данными
-    requirement: Согласие перечисляет действия с данными и описывает способы обработки.
-    recommendation: Перечислите действия — сбор, запись, систематизация, хранение, уточнение, удаление — и укажите, ведётся ли обработка автоматизированно.
+    title:
+      ru: Нет перечня действий с данными
+      en: No list of actions with the data
+    requirement:
+      ru: Согласие перечисляет действия с данными и описывает способы обработки.
+      en: The consent lists the actions with the data and describes the methods of processing.
+    recommendation:
+      ru: Перечислите действия — сбор, запись, систематизация, хранение, уточнение, удаление — и укажите, ведётся ли обработка автоматизированно.
+      en: List the actions (collection, recording, systematisation, storage, updating, deletion) and state whether processing is automated.
     brief:
       question: Перечислены ли в согласии действия с персональными данными и описаны ли способы обработки?
       criteria: Перечислены действия (сбор, запись, хранение, уточнение, передача, удаление и т. п.) и сказано, автоматизированная обработка или нет.
@@ -275,9 +385,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-8]
     severity: critical
-    title: Нет срока действия и способа отзыва
-    requirement: Согласие указывает срок своего действия и способ отзыва.
-    recommendation: Укажите срок действия согласия и как его отозвать — например, письменным заявлением по адресу оператора.
+    title:
+      ru: Нет срока действия и способа отзыва
+      en: No validity period or way to withdraw
+    requirement:
+      ru: Согласие указывает срок своего действия и способ отзыва.
+      en: The consent states how long it is valid and how it can be withdrawn.
+    recommendation:
+      ru: Укажите срок действия согласия и как его отозвать — например, письменным заявлением по адресу оператора.
+      en: State the validity period of the consent and how to withdraw it, e.g. by a written notice sent to the operator's address.
     brief:
       question: Указаны ли в согласии срок его действия и способ его отзыва?
       criteria: Есть срок действия согласия и описание, как его отозвать. Срок «бессрочно» без способа отзыва — нарушение.
@@ -289,9 +405,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-4/p-9]
     severity: important
-    title: Нет места для подписи субъекта
-    requirement: В согласии есть место для подписи субъекта.
-    recommendation: Добавьте место для подписи субъекта и даты.
+    title:
+      ru: Нет места для подписи субъекта
+      en: No place for the data subject's signature
+    requirement:
+      ru: В согласии есть место для подписи субъекта.
+      en: The consent has a place for the data subject's signature.
+    recommendation:
+      ru: Добавьте место для подписи субъекта и даты.
+      en: Add a place for the data subject's signature and the date.
     brief:
       question: Есть ли в согласии место для подписи субъекта персональных данных?
       criteria: Есть строка или поле для подписи субъекта (обычно с датой и расшифровкой).
@@ -303,9 +425,15 @@ checks:
     kinds: [pd_consent]
     anchors: [st-9/ch-1]
     severity: important
-    title: Согласие сформулировано слишком широко
-    requirement: Согласие конкретное, предметное, информированное, сознательное и однозначное.
-    recommendation: Уберите формулировки «на любые цели», «любым третьим лицам», «бессрочно» и опишите обработку конкретно.
+    title:
+      ru: Согласие сформулировано слишком широко
+      en: Consent worded too broadly
+    requirement:
+      ru: Согласие конкретное, предметное, информированное, сознательное и однозначное.
+      en: The consent is specific, substantive, informed, conscious and unambiguous.
+    recommendation:
+      ru: Уберите формулировки «на любые цели», «любым третьим лицам», «бессрочно» и опишите обработку конкретно.
+      en: Remove wording such as “for any purpose”, “to any third parties” or “indefinitely” and describe the processing specifically.
     brief:
       question: Является ли согласие конкретным, предметным, информированным, сознательным и однозначным?
       criteria: Согласие касается определённых целей и данных и не содержит формулировок вроде «на любые цели», «любым третьим лицам», «в том числе для иных целей».
@@ -318,9 +446,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3]
     severity: critical
-    title: В поручении нет перечня персональных данных
-    requirement: Договор поручения определяет перечень персональных данных.
-    recommendation: Перечислите персональные данные, которые обрабатываются по поручению.
+    title:
+      ru: В поручении нет перечня персональных данных
+      en: No list of personal data in the assignment
+    requirement:
+      ru: Договор поручения определяет перечень персональных данных.
+      en: The processing assignment defines the list of personal data.
+    recommendation:
+      ru: Перечислите персональные данные, которые обрабатываются по поручению.
+      en: List the personal data processed under the assignment.
     brief:
       question: Определён ли в договоре перечень персональных данных, которые обрабатываются по поручению?
       criteria: Есть конкретный перечень данных (ФИО, телефон, адрес и т. п.) или ссылка на приложение с таким перечнем.
@@ -332,9 +466,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3]
     severity: critical
-    title: В поручении нет перечня действий
-    requirement: Договор поручения определяет перечень действий с персональными данными.
-    recommendation: Перечислите действия, которые исполнитель совершает с данными — сбор, запись, хранение, передача, удаление.
+    title:
+      ru: В поручении нет перечня действий
+      en: No list of actions in the assignment
+    requirement:
+      ru: Договор поручения определяет перечень действий с персональными данными.
+      en: The processing assignment defines the list of actions with personal data.
+    recommendation:
+      ru: Перечислите действия, которые исполнитель совершает с данными — сбор, запись, хранение, передача, удаление.
+      en: "List the actions the processor performs with the data: collection, recording, storage, transfer, deletion."
     brief:
       question: Определён ли в договоре перечень действий (операций) с персональными данными, которые совершает исполнитель?
       criteria: Перечислены действия — сбор, запись, систематизация, хранение, уточнение, передача, удаление и т. п.
@@ -346,9 +486,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3]
     severity: critical
-    title: В поручении не указаны цели обработки
-    requirement: Договор поручения определяет цели обработки.
-    recommendation: Укажите цели, для которых исполнитель обрабатывает данные.
+    title:
+      ru: В поручении не указаны цели обработки
+      en: Purposes of processing not stated in the assignment
+    requirement:
+      ru: Договор поручения определяет цели обработки.
+      en: The processing assignment defines the purposes of processing.
+    recommendation:
+      ru: Укажите цели, для которых исполнитель обрабатывает данные.
+      en: State the purposes for which the processor processes the data.
     brief:
       question: Указаны ли в договоре цели обработки персональных данных исполнителем?
       criteria: Названы конкретные цели обработки данных по поручению.
@@ -360,9 +506,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3]
     severity: important
-    title: Нет обязанности соблюдать конфиденциальность
-    requirement: Договор поручения обязывает исполнителя соблюдать конфиденциальность персональных данных.
-    recommendation: Добавьте обязанность исполнителя соблюдать конфиденциальность персональных данных.
+    title:
+      ru: Нет обязанности соблюдать конфиденциальность
+      en: No confidentiality obligation
+    requirement:
+      ru: Договор поручения обязывает исполнителя соблюдать конфиденциальность персональных данных.
+      en: The processing assignment obliges the processor to keep personal data confidential.
+    recommendation:
+      ru: Добавьте обязанность исполнителя соблюдать конфиденциальность персональных данных.
+      en: Add the processor's obligation to keep personal data confidential.
     brief:
       question: Установлена ли в договоре обязанность исполнителя соблюдать конфиденциальность персональных данных?
       criteria: Есть прямая обязанность соблюдать конфиденциальность или не раскрывать данные третьим лицам.
@@ -374,9 +526,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3, st-19/ch-2]
     severity: important
-    title: Нет требований к защите данных
-    requirement: Договор поручения обязывает обеспечивать безопасность данных и указывает требования к защите по статье 19.
-    recommendation: Добавьте обязанность обеспечивать безопасность данных и требования к защите — меры по статье 19 152-ФЗ.
+    title:
+      ru: Нет требований к защите данных
+      en: No data protection requirements
+    requirement:
+      ru: Договор поручения обязывает обеспечивать безопасность данных и указывает требования к защите по статье 19.
+      en: The processing assignment obliges the processor to keep the data secure and sets protection requirements under Article 19.
+    recommendation:
+      ru: Добавьте обязанность обеспечивать безопасность данных и требования к защите — меры по статье 19 152-ФЗ.
+      en: "Add the obligation to keep the data secure and the protection requirements: the measures of Article 19 of 152-FZ."
     brief:
       question: Установлены ли в договоре обязанность исполнителя обеспечивать безопасность персональных данных и требования к их защите в соответствии со статьёй 19?
       criteria: Есть обязанность обеспечивать безопасность и указаны требования или меры защиты (по статье 19 или конкретные).
@@ -388,9 +546,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3]
     severity: important
-    title: Нет обязанности предоставлять документы по запросу
-    requirement: Договор поручения обязывает исполнителя по запросу оператора подтверждать документами принятые меры.
-    recommendation: Добавьте обязанность исполнителя по запросу оператора предоставлять документы, подтверждающие принятые меры и соблюдение требований.
+    title:
+      ru: Нет обязанности предоставлять документы по запросу
+      en: No obligation to provide documents on request
+    requirement:
+      ru: Договор поручения обязывает исполнителя по запросу оператора подтверждать документами принятые меры.
+      en: The processing assignment obliges the processor to confirm the measures taken with documents when the operator asks.
+    recommendation:
+      ru: Добавьте обязанность исполнителя по запросу оператора предоставлять документы, подтверждающие принятые меры и соблюдение требований.
+      en: Add the processor's obligation to provide, at the operator's request, documents confirming the measures taken and compliance with the requirements.
     brief:
       question: Есть ли в договоре обязанность исполнителя по запросу оператора предоставлять документы и информацию, подтверждающие принятие мер и соблюдение требований?
       criteria: Прямо установлена обязанность по запросу оператора предоставлять документы или информацию о принятых мерах.
@@ -402,9 +566,15 @@ checks:
     kinds: [pd_assignment]
     anchors: [st-6/ch-3, st-21/ch-3.1]
     severity: important
-    title: Нет обязанности уведомлять об инцидентах
-    requirement: Договор поручения обязывает исполнителя уведомлять оператора об утечках и неправомерной передаче данных.
-    recommendation: Добавьте обязанность исполнителя незамедлительно уведомлять оператора о неправомерной или случайной передаче персональных данных.
+    title:
+      ru: Нет обязанности уведомлять об инцидентах
+      en: No obligation to report incidents
+    requirement:
+      ru: Договор поручения обязывает исполнителя уведомлять оператора об утечках и неправомерной передаче данных.
+      en: The processing assignment obliges the processor to notify the operator of leaks and unlawful transfers of data.
+    recommendation:
+      ru: Добавьте обязанность исполнителя незамедлительно уведомлять оператора о неправомерной или случайной передаче персональных данных.
+      en: Add the processor's obligation to notify the operator without delay of any unlawful or accidental transfer of personal data.
     brief:
       question: Обязан ли исполнитель по договору уведомлять оператора о неправомерной или случайной передаче (утечке) персональных данных?
       criteria: Есть обязанность уведомлять оператора об инцидентах — утечке, неправомерной или случайной передаче данных.

@@ -27,6 +27,7 @@ from snoska.domain.billing.usage import LedgerReason, ensure_allowance
 from snoska.domain.checks.catalog import LawNorm
 from snoska.domain.shared.errors import NotFoundError, ValidationError
 from snoska.domain.shared.ids import new_id
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.ai import (
@@ -154,8 +155,13 @@ class NormQuestions:
         return ConversationView(conversation=conversation, turns=turns)
 
     async def ask(
-        self, access: OrganizationAccess, question: str, conversation_id: UUID | None
+        self,
+        access: OrganizationAccess,
+        question: str,
+        conversation_id: UUID | None,
+        locale: Locale,
     ) -> ConversationView:
+        """Answer in the asker's language, with quotes in the law's own words."""
         access.require(Permission.NORMS_ASK)
         text = " ".join(question.split())[:QUESTION_MAX_LENGTH]
         if not text:
@@ -173,7 +179,7 @@ class NormQuestions:
             used.get(UsageMetric.QUESTIONS, 0),
             1,
         )
-        answer = await self._answer(text, earlier)
+        answer = await self._answer(text, earlier, locale)
         return await self._store(access, text, answer, conversation_id, len(earlier))
 
     async def record(self, access: OrganizationAccess, recorded: RecordedAnswer) -> Conversation:
@@ -206,7 +212,7 @@ class NormQuestions:
         )
         return view.conversation
 
-    async def _answer(self, question: str, earlier: Sequence[Turn]) -> Answer:
+    async def _answer(self, question: str, earlier: Sequence[Turn], locale: Locale) -> Answer:
         space = self._embedder.space
         async with self._uow_factory.for_platform() as uow:
             indexed = await uow.corpus.indexed_active_editions(space, None)
@@ -215,7 +221,7 @@ class NormQuestions:
         [vector] = await self._embedder.embed([question])
         provisions = await self._norms.nearest(self._embedder.space, vector, PROVISIONS)
         sources = _sources(provisions)
-        messages: tuple[ChatMessage, ...] = build_messages(question, sources, earlier)
+        messages: tuple[ChatMessage, ...] = build_messages(question, sources, earlier, locale)
         for attempt in range(1, MAX_ATTEMPTS + 1):
             raw = ""
             try:

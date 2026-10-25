@@ -8,6 +8,7 @@ from pydantic import Field
 from snoska.api.schemas.common import ApiModel
 from snoska.application.ask.service import AskStatus, ConversationView
 from snoska.domain.ask.answer import AnswerStatus, Citation, Conversation, Turn
+from snoska.domain.shared.locale import Locale
 
 
 class AskStatusOut(ApiModel):
@@ -27,6 +28,9 @@ class AskStatusOut(ApiModel):
 
 
 class CitationOut(ApiModel):
+    """A footnote: the provision cited in the language of the request, and
+    its words as the law has them."""
+
     number: int
     act_code: str
     anchor: str
@@ -34,12 +38,12 @@ class CitationOut(ApiModel):
     quote: str
 
     @classmethod
-    def of(cls, citation: Citation) -> CitationOut:
+    def of(cls, citation: Citation, locale: Locale) -> CitationOut:
         return cls(
             number=citation.number,
             act_code=citation.act_code,
             anchor=citation.anchor,
-            citation=citation.citation,
+            citation=citation.citation.resolve(locale),
             quote=citation.quote,
         )
 
@@ -54,13 +58,13 @@ class TurnOut(ApiModel):
     asked_at: datetime
 
     @classmethod
-    def of(cls, turn: Turn) -> TurnOut:
+    def of(cls, turn: Turn, locale: Locale) -> TurnOut:
         return cls(
             id=turn.id,
             question=turn.question,
             status=turn.answer.status,
             answer=turn.answer.text,
-            citations=[CitationOut.of(item) for item in turn.answer.citations],
+            citations=[CitationOut.of(item, locale) for item in turn.answer.citations],
             asked_at=turn.asked_at,
         )
 
@@ -81,11 +85,11 @@ class ConversationOut(ApiModel):
     turns: list[TurnOut]
 
     @classmethod
-    def of(cls, view: ConversationView) -> ConversationOut:
+    def of(cls, view: ConversationView, locale: Locale) -> ConversationOut:
         return cls(
             id=view.conversation.id,
             title=view.conversation.title,
-            turns=[TurnOut.of(turn) for turn in view.turns],
+            turns=[TurnOut.of(turn, locale) for turn in view.turns],
         )
 
 

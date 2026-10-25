@@ -15,6 +15,7 @@ from snoska.ports.identity import (
     MemberSpec,
     OrganizationProfile,
 )
+from snoska.ports.operations.notifications import Recipient
 
 TOKEN_SAFETY_MARGIN_SECONDS = 30
 PAGE_SIZE = 100
@@ -135,12 +136,16 @@ class KeycloakAdminClient:
                 return found
             first += PAGE_SIZE
 
-    async def realm_role_emails(self, role: str) -> list[str]:
-        """Emails of the users holding a realm role (the platform's operators)."""
+    async def realm_role_recipients(self, role: str) -> list[Recipient]:
+        """The users holding a realm role (the platform's operators) who have an email."""
         users = (await self._call("GET", f"/roles/{role}/users", ok=(200, 404))).json()
         if not isinstance(users, list):
             return []
-        return [str(user["email"]) for user in users if user.get("email")]
+        return [
+            Recipient(user_id=UUID(str(user["id"])), email=str(user["email"]))
+            for user in users
+            if user.get("email")
+        ]
 
     # ── Member administration ────────────────────────────────────────────────
 
@@ -164,6 +169,8 @@ class KeycloakAdminClient:
                     "enabled": True,
                     "emailVerified": False,
                     "requiredActions": INVITE_ACTIONS,
+                    # Keycloak writes the invitation and its pages in this language.
+                    "attributes": {"locale": [invitation.locale.value]},
                 },
             )
             created = (

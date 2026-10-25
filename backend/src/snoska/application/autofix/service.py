@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import PurePath
 from uuid import UUID
@@ -28,12 +28,16 @@ from snoska.domain.checks.run import RunStatus
 from snoska.domain.documents.document import Document
 from snoska.domain.documents.version import DocumentVersion, ParseStatus
 from snoska.domain.shared.errors import InvalidStateError
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.organization import UserProfile
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.autofix.patching import DocumentPatcher
 from snoska.ports.blob_storage import BlobStorage
 from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
+
+# The name a corrected copy is saved under, after the original's.
+FIXED_SUFFIX: Mapping[Locale, str] = {Locale.RU: "исправлено", Locale.EN: "fixed"}
 
 
 class NothingToFixError(InvalidStateError):
@@ -135,7 +139,9 @@ class Autofix:
         author: UserProfile,
         document_id: UUID,
         version_number: int,
+        locale: Locale,
     ) -> AutofixOutcome:
+        """A corrected copy as a new version, its file named in the author's language."""
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
             source = await self._source(uow, access, document_id, version_number, read_only=False)
             structure = await uow.structures.load(source.version.id)
@@ -146,7 +152,7 @@ class Autofix:
         if not patched.changes:
             raise NothingToFixError("the corrections could not be applied to the file")
         stem = PurePath(source.version.file.filename).stem
-        filename = f"{stem} (исправлено).docx"
+        filename = f"{stem} ({FIXED_SUFFIX[locale]}).docx"
 
         async def record(uow: UnitOfWork, document: Document, version: DocumentVersion) -> None:
             await self._meter.consume(

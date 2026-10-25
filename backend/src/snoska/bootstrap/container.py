@@ -164,7 +164,7 @@ async def build_container(
     core = await build_core(settings, overrides or Overrides())
     uow, clock = core.uow, core.clock
     checks = build_checks(core)
-    acts = YamlActCatalog(settings.corpus_catalog)
+    acts = core.acts
     corpus_indexing = IndexCorpusEdition(uow, core.embedder, clock)
     limits = UploadLimits(max_bytes=settings.max_upload_bytes)
     uploads = DocumentUploads(

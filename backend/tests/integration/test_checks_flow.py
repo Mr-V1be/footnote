@@ -66,6 +66,42 @@ async def test_parsed_document_is_checked_with_grounded_findings(
     assert by_check["personal_data.subject_rights"]["kind"] == "review"
 
 
+async def test_a_finding_reads_in_the_language_of_the_request(
+    api: httpx.AsyncClient, container: Container, tokens: TokenFactory
+) -> None:
+    """One finding, two readers: titles, the model's explanation and the
+    citation follow the language asked for; the law is quoted as it is."""
+    document_id, russian = await checked_policy(api, container, tokens)
+    response = await api.get(
+        f"{BASE}/documents/{document_id}/versions/1/checks/latest",
+        headers={**auth(tokens, ALICE), "Accept-Language": "en-GB,en;q=0.9,ru;q=0.5"},
+    )
+    assert response.headers["content-language"] == "en"
+    english = response.json()
+
+    def finding(report: dict, code: str) -> dict:  # type: ignore[type-arg]
+        return next(item for item in report["findings"] if item["checkCode"] == code)
+
+    ru, en = (finding(report, "personal_data.cross_border") for report in (russian, english))
+    assert (ru["title"], en["title"]) == (
+        "Не сказано о трансграничной передаче",
+        "Cross-border transfer not addressed",
+    )
+    assert (ru["detail"]["text"], en["detail"]["text"]) == (
+        "Записанный ответ: absent.",
+        "Recorded: absent.",
+    )
+    assert en["recommendation"] == "Complete the document."
+    assert (ru["norm"]["citation"], en["norm"]["citation"]) == (
+        "ч. 1 ст. 12 152-ФЗ",
+        "Art. 12, Part 1, 152-FZ",
+    )
+    assert en["norm"]["quote"] == ru["norm"]["quote"], "the law is quoted in its own words"
+    checks = {check["code"]: check for check in english["checks"]}
+    assert checks["formatting.page_margins"]["title"] == "Page margins narrower than allowed"
+    assert checks["formatting.page_margins"]["citations"] == ["Cl. 6.1, GOST R 7.0.97-2016"]
+
+
 async def test_review_follows_roles_and_revisions_and_survives_a_recheck(
     api: httpx.AsyncClient, container: Container, tokens: TokenFactory
 ) -> None:
@@ -135,6 +171,10 @@ async def test_catalogue_lists_every_check_with_what_it_cites(
     catalog = (await api.get("/api/v1/checks/catalog", headers=auth(tokens, ALICE))).json()
     assert {family["code"] for family in catalog["families"]} == {"formatting", "personal_data"}
     assert all(check["citations"] for check in catalog["checks"])
+    english = (await api.get("/api/v1/checks/catalog", headers={"Accept-Language": "en"})).json()
+    purposes = next(c for c in english["checks"] if c["code"] == "personal_data.purposes")
+    assert purposes["title"] == "Specific purposes of processing not stated"
+    assert purposes["citations"] == ["Art. 18.1, Part 1, Cl. 2, 152-FZ", "Art. 5, Part 2, 152-FZ"]
 
 
 async def test_quality_of_the_checks_is_published_from_the_last_benchmark(

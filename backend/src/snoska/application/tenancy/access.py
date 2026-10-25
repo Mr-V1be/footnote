@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from snoska.domain.shared.errors import NotFoundError
 from snoska.domain.shared.ids import new_id
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.access import (
     AccessPolicy,
     MembershipClaim,
@@ -110,9 +111,13 @@ class TenantAccessService:
             views.append(MembershipView(organization=organization, roles=roles))
         return sorted(views, key=lambda view: view.organization.name.casefold())
 
-    async def sync_profile(self, principal: Principal) -> None:
+    async def sync_profile(self, principal: Principal, locale: Locale | None = None) -> None:
+        """Keep the person's display data as their token gives it, and the
+        interface language they use when the request states one."""
         async with self._uow_factory.for_platform() as uow:
             await uow.profiles.upsert(principal.profile, self._clock.now())
+            if locale is not None:
+                await uow.profiles.remember_locale(principal.user_id, locale)
             await uow.commit()
 
     async def _ensure_tenant(self, membership: MembershipClaim) -> Organization:

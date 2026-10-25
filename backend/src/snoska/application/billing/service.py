@@ -14,6 +14,7 @@ from snoska.domain.billing.subscription import Invoice, InvoiceStatus, Subscript
 from snoska.domain.billing.usage import LedgerEntry
 from snoska.domain.shared.errors import NotFoundError
 from snoska.domain.shared.ids import new_id
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.access import Actor, ActorKind, OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.billing.payments import (
@@ -27,6 +28,11 @@ from snoska.ports.unit_of_work import UnitOfWork, UnitOfWorkFactory
 
 INVOICE_PAGE = 24
 PAYMENT_ACTOR = Actor(kind=ActorKind.SYSTEM, id=None, label="Платёжный сервис")
+# How the payment page names what is paid for.
+INVOICE_DESCRIPTION: Mapping[Locale, str] = {
+    Locale.RU: "Счёт № {number}",
+    Locale.EN: "Invoice No. {number}",
+}
 
 
 class InvoiceNotFoundError(NotFoundError):
@@ -121,8 +127,11 @@ class BillingService:
             rows = await uow.ledger.page(subscription.period_start, after=after, limit=size + 1)
         return next_page(rows, size, lambda entry: TimeCursor(entry.created_at, entry.id))
 
-    async def change_plan(self, access: OrganizationAccess, plan_code: str) -> PlanChangeOutcome:
-        """A cheaper plan starts next month; a pricier one once its invoice is paid."""
+    async def change_plan(
+        self, access: OrganizationAccess, plan_code: str, locale: Locale
+    ) -> PlanChangeOutcome:
+        """A cheaper plan starts next month; a pricier one once its invoice is
+        paid, on a payment page that names the invoice in ``locale``."""
         access.require(Permission.BILLING_MANAGE)
         target = self._plans.get(plan_code)
         async with self._uow_factory.for_tenant(access.organization_id) as uow:
@@ -146,7 +155,7 @@ class BillingService:
                 return PlanChangeOutcome(change=change, subscription=subscription)
             invoice = await uow.invoices.open_for_plan(target.code)
             if invoice is None:
-                invoice = await self._issue(uow, access, target, subscription)
+                invoice = await self._issue(uow, access, target, subscription, locale)
             await uow.commit()
         return PlanChangeOutcome(
             change=PlanChange.AWAITING_PAYMENT, subscription=subscription, invoice=invoice
@@ -158,6 +167,7 @@ class BillingService:
         access: OrganizationAccess,
         target: Plan,
         subscription: Subscription,
+        locale: Locale,
     ) -> Invoice:
         now = self._clock.now()
         invoice = Invoice(
@@ -176,7 +186,7 @@ class BillingService:
                 organization_id=access.organization_id,
                 amount_kopecks=invoice.amount_kopecks,
                 currency=self._plans.currency,
-                description=f"Счёт № {invoice.number}",
+                description=INVOICE_DESCRIPTION[locale].format(number=invoice.number),
                 return_url=f"{self._web_url}/o/{access.organization.alias}/settings/billing",
             )
         )

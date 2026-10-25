@@ -18,6 +18,7 @@ from snoska.domain.billing.plans import PlanCatalog
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES
 from snoska.infrastructure.ai.budget import RedisRequestBudget, UnlimitedBudget
 from snoska.infrastructure.billing.plans import load_plans
+from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
 from snoska.infrastructure.identity.claims import KeycloakClaimsMapper
 from snoska.infrastructure.identity.jwks import JwksKeySource
 from snoska.infrastructure.identity.jwt_verifier import JwtTokenVerifier, KeySource, TokenPolicy
@@ -83,6 +84,7 @@ class Core:
     verifier: TokenVerifier
     parsers: ParserRegistry
     plans: PlanCatalog
+    acts: YamlActCatalog
     gate: WorkspaceGate = field(init=False)
     audit: AuditTrail = field(init=False)
     events: OrganizationEvents = field(init=False)
@@ -184,4 +186,5 @@ async def build_core(settings: Settings, overrides: Overrides) -> Core:
             [DocxParser(), PdfParser(TesseractOcrEngine(TesseractConfig()), PdfLimits())]
         ),
         plans=load_plans(settings.billing.plans),
+        acts=YamlActCatalog(settings.corpus_catalog),
     )

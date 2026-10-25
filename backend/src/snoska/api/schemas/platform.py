@@ -10,6 +10,7 @@ from snoska.api.schemas.common import ApiModel
 from snoska.application.operations.platform import OrganizationSummary, SystemStatus
 from snoska.domain.billing.plans import UsageMetric
 from snoska.domain.operations.schedule import EditionCheck, WatchOutcome
+from snoska.domain.shared.locale import Locale
 
 
 class OrganizationRowOut(ApiModel):
@@ -84,7 +85,7 @@ class SystemOut(ApiModel):
     model_requests_left: int | None
 
     @classmethod
-    def of(cls, status: SystemStatus) -> SystemOut:
+    def of(cls, status: SystemStatus, locale: Locale) -> SystemOut:
         return cls(
             health=[HealthOut(name=name, ok=ok) for name, ok in status.health.items()],
             model_configured=status.model_configured,
@@ -93,7 +94,7 @@ class SystemOut(ApiModel):
             acts=[
                 ActStateOut(
                     code=act.code,
-                    title=act.title,
+                    title=act.title.resolve(locale),
                     revision=act.edition.source_revision if act.edition else None,
                     activated_at=act.edition.activated_at if act.edition else None,
                     indexed=act.indexed,

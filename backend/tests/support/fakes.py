@@ -136,8 +136,12 @@ class RecordedLanguageModel:
             "verdict": verdict,
             "quotes": quotes,
             "norm": norms.split(",", maxsplit=1)[0].strip(),
-            "explanation": f"Записанный ответ: {verdict}.",
-            "recommendation": "Дополните документ." if verdict in ("partial", "absent") else "",
+            "explanation": {"ru": f"Записанный ответ: {verdict}.", "en": f"Recorded: {verdict}."},
+            "recommendation": (
+                {"ru": "Дополните документ.", "en": "Complete the document."}
+                if verdict in ("partial", "absent")
+                else {"ru": "", "en": ""}
+            ),
         }
 
     def _completion(self, answer: Mapping[str, object]) -> Completion:

@@ -13,6 +13,7 @@ from snoska.domain.corpus.acts import ActKind, Edition, EditionStatus, LegalAct
 from snoska.domain.corpus.citation import article_title
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.corpus.units import NormUnit, UnitKind
+from snoska.domain.shared.locale import LocalizedText
 from snoska.infrastructure.persistence.tables.corpus import (
     corpus_editions,
     edition_indexes,
@@ -31,8 +32,8 @@ def _act(row: RowMapping) -> LegalAct:
     return LegalAct(
         code=row["code"],
         kind=ActKind(row["kind"]),
-        short_title=row["short_title"],
-        title=row["title"],
+        short_title=LocalizedText.from_mapping(row["short_title"]),
+        title=LocalizedText.from_mapping(row["title"]),
         adopted_on=row["adopted_on"],
     )
 
@@ -97,8 +98,8 @@ class SqlCorpusRepository:
         statement = pg_insert(legal_acts).values(
             code=act.code,
             kind=act.kind.value,
-            short_title=act.short_title,
-            title=act.title,
+            short_title=act.short_title.as_mapping(),
+            title=act.title.as_mapping(),
             adopted_on=act.adopted_on,
         )
         await self._connection.execute(

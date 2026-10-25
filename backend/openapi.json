@@ -11,7 +11,33 @@
           "session"
         ],
         "summary": "Me",
+        "description": "The signed-in person, their organizations and roles. The language the\nrequest states is remembered as theirs, for the mail sent to them.",
         "operationId": "me",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -103,12 +129,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/catalog": {
@@ -1390,7 +1411,7 @@
           "admin"
         ],
         "summary": "Invite Member",
-        "description": "Add a member with a role; a new person gets an email to set a password.",
+        "description": "Add a member with a role; a new person gets an email to set a password,\nin the language of the request.",
         "operationId": "invite_member",
         "security": [
           {
@@ -1409,6 +1430,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "requestBody": {
@@ -4189,6 +4228,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "requestBody": {
@@ -5635,6 +5692,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "responses": {
@@ -6059,6 +6134,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "responses": {
@@ -6455,6 +6548,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "requestBody": {
@@ -6569,6 +6680,26 @@
         "summary": "Check Catalog",
         "description": "Every check the product runs, what it requires and what it cites\n(public: the methodology is shown to guests too).",
         "operationId": "check_catalog",
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6780,16 +6911,41 @@
         ],
         "summary": "List Acts",
         "operationId": "list_acts",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ActOut"
                   },
-                  "type": "array",
                   "title": "Response List Acts"
                 }
               }
@@ -6875,12 +7031,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/corpus/acts/{act_code}/units": {
@@ -6904,6 +7055,24 @@
               "type": "string",
               "title": "Act Code"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "responses": {
@@ -7427,6 +7596,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "responses": {
@@ -7529,7 +7716,7 @@
           "ask"
         ],
         "summary": "Ask",
-        "description": "Ask the corpus; the answer quotes the provisions it rests on, or says\nhonestly that the norm does not answer.",
+        "description": "Ask the corpus; the answer, in the language of the request, quotes the\nprovisions it rests on, or says honestly that the norm does not answer.",
         "operationId": "ask",
         "security": [
           {
@@ -7548,6 +7735,24 @@
               "pattern": "^[a-z0-9-]+$",
               "title": "Organization"
             }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
           }
         ],
         "requestBody": {
@@ -8005,6 +8210,31 @@
         "summary": "System Status",
         "description": "Health of dependencies, models, the corpus and its weekly check.",
         "operationId": "system_status",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is.",
+              "title": "Accept-Language"
+            },
+            "description": "Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -8096,12 +8326,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/platform/corpus/watch": {
@@ -9181,7 +9406,7 @@
           "citations"
         ],
         "title": "CheckOut",
-        "description": "A check of the registry as the product describes it."
+        "description": "A check of the registry as the product describes it, in the language\nof the request."
       },
       "CheckReportOut": {
         "properties": {
@@ -9250,7 +9475,8 @@
           "citation",
           "quote"
         ],
-        "title": "CitationOut"
+        "title": "CitationOut",
+        "description": "A footnote: the provision cited in the language of the request, and\nits words as the law has them."
       },
       "ConversationOut": {
         "properties": {
@@ -9492,7 +9718,7 @@
           "text"
         ],
         "title": "DetailOut",
-        "description": "Either a message code with parameters (translated by the client) or\ntext written by the language model."
+        "description": "Either a message code with parameters (translated by the client) or\ntext written by the language model, in the language of the request."
       },
       "DocumentFormatOut": {
         "properties": {
@@ -10037,7 +10263,8 @@
           "reviewedAt",
           "revision"
         ],
-        "title": "FindingOut"
+        "title": "FindingOut",
+        "description": "A finding with its texts in the language of the request."
       },
       "FontOut": {
         "properties": {
@@ -10812,7 +11039,8 @@
           "notes",
           "repealed"
         ],
-        "title": "NormUnitOut"
+        "title": "NormUnitOut",
+        "description": "A unit of the law as the corpus holds it: its text, and its citation\nin the law's own language."
       },
       "OrganizationOut": {
         "properties": {

@@ -5,9 +5,15 @@
 # Each entry is a check. `rule` names a deterministic rule of the engine and
 # `params` configure it; `kinds` are the document kinds the check applies to.
 # A new check is a new entry: the engine does not change.
+#
+# What a check tells a reader — `title`, `requirement`, `recommendation` and
+# the standard's name — is written in every interface language (`ru`, `en`);
+# the catalogue is refused at load when a wording is missing.
 family: formatting
 rank: 1
-standard: ГОСТ Р 7.0.97-2016
+standard:
+  ru: ГОСТ Р 7.0.97-2016
+  en: GOST R 7.0.97-2016
 
 # When one rule is broken in most elements of a kind — more than `share` of
 # them and at least `min_places`, or in more than `max_local` places — the
@@ -30,9 +36,15 @@ checks:
     clause: "6.1"
     severity: important
     kinds: *all
-    title: Поля страницы уже допустимых
-    requirement: Поля каждой страницы — не меньше 20 мм слева, 10 мм справа, 20 мм сверху и 20 мм снизу.
-    recommendation: Задайте поля в параметрах страницы — левое 20 мм (30 мм для документов, которые хранятся дольше 10 лет), правое 10 мм, верхнее и нижнее 20 мм.
+    title:
+      ru: Поля страницы уже допустимых
+      en: Page margins narrower than allowed
+    requirement:
+      ru: Поля каждой страницы — не меньше 20 мм слева, 10 мм справа, 20 мм сверху и 20 мм снизу.
+      en: Every page has margins of at least 20 mm on the left, 10 mm on the right, 20 mm at the top and 20 mm at the bottom.
+    recommendation:
+      ru: Задайте поля в параметрах страницы — левое 20 мм (30 мм для документов, которые хранятся дольше 10 лет), правое 10 мм, верхнее и нижнее 20 мм.
+      en: "Set the margins in the page setup: left 20 mm (30 mm for documents kept longer than 10 years), right 10 mm, top and bottom 20 mm."
 
   - code: formatting.font_size
     method: deterministic
@@ -41,9 +53,15 @@ checks:
     clause: "3.3"
     severity: advice
     kinds: *all
-    title: Кегль основного текста вне 12–14 пт
-    requirement: Основной текст набран шрифтом 12, 13 или 14 пт; в таблицах допускается мельче.
-    recommendation: Установите для основного текста размер шрифта 12–14 пт.
+    title:
+      ru: Кегль основного текста вне 12–14 пт
+      en: Body text font size outside 12–14 pt
+    requirement:
+      ru: Основной текст набран шрифтом 12, 13 или 14 пт; в таблицах допускается мельче.
+      en: Body text is set in 12, 13 or 14 pt; tables may use a smaller size.
+    recommendation:
+      ru: Установите для основного текста размер шрифта 12–14 пт.
+      en: Set the body text font size to 12–14 pt.
 
   - code: formatting.line_spacing
     method: deterministic
@@ -52,9 +70,15 @@ checks:
     clause: "3.4"
     severity: advice
     kinds: *all
-    title: Межстрочный интервал вне 1–1,5
-    requirement: Основной текст печатается с межстрочным интервалом от одинарного до полуторного.
-    recommendation: Установите для основного текста межстрочный интервал от 1 до 1,5.
+    title:
+      ru: Межстрочный интервал вне 1–1,5
+      en: Line spacing outside 1–1.5
+    requirement:
+      ru: Основной текст печатается с межстрочным интервалом от одинарного до полуторного.
+      en: Body text is printed with line spacing from single to one and a half.
+    recommendation:
+      ru: Установите для основного текста межстрочный интервал от 1 до 1,5.
+      en: Set the body text line spacing between 1 and 1.5.
 
   - code: formatting.paragraph_indent
     method: deterministic
@@ -63,9 +87,15 @@ checks:
     clause: "3.4"
     severity: advice
     kinds: *issued
-    title: Абзацный отступ отличается от 1,25 см
-    requirement: Абзацы основного текста начинаются с отступа 1,25 см.
-    recommendation: Задайте отступ первой строки абзаца 1,25 см.
+    title:
+      ru: Абзацный отступ отличается от 1,25 см
+      en: Paragraph indent differs from 1.25 cm
+    requirement:
+      ru: Абзацы основного текста начинаются с отступа 1,25 см.
+      en: Paragraphs of body text start with a 1.25 cm indent.
+    recommendation:
+      ru: Задайте отступ первой строки абзаца 1,25 см.
+      en: Set the first-line indent of paragraphs to 1.25 cm.
 
   - code: formatting.document_type
     method: deterministic
@@ -74,9 +104,15 @@ checks:
     clause: "5.9"
     severity: important
     kinds: *acts
-    title: Не указан вид документа
-    requirement: В начале документа назван его вид — приказ, положение, политика.
-    recommendation: Укажите вид документа прописными буквами над заголовком.
+    title:
+      ru: Не указан вид документа
+      en: Document type not stated
+    requirement:
+      ru: В начале документа назван его вид — приказ, положение, политика.
+      en: "The document names its type at the top: order, regulation, policy."
+    recommendation:
+      ru: Укажите вид документа прописными буквами над заголовком.
+      en: State the document type in capital letters above the title.
 
   - code: formatting.date
     method: deterministic
@@ -85,9 +121,15 @@ checks:
     clause: "5.10"
     severity: important
     kinds: [pd_policy, pd_assignment, contract, regulation, order]
-    title: Нет даты документа
-    requirement: У документа есть дата — подписания или утверждения.
-    recommendation: Добавьте дату документа; для утверждаемого документа — в гриф утверждения.
+    title:
+      ru: Нет даты документа
+      en: No document date
+    requirement:
+      ru: У документа есть дата — подписания или утверждения.
+      en: The document has a date, of signing or of approval.
+    recommendation:
+      ru: Добавьте дату документа; для утверждаемого документа — в гриф утверждения.
+      en: Add the document date; for a document that is approved, put it in the approval stamp.
 
   - code: formatting.registration_number
     method: deterministic
@@ -96,9 +138,15 @@ checks:
     clause: "5.11"
     severity: important
     kinds: [order]
-    title: Нет регистрационного номера
-    requirement: Приказ зарегистрирован — у него есть номер.
-    recommendation: Присвойте приказу номер по журналу регистрации и укажите его рядом с датой.
+    title:
+      ru: Нет регистрационного номера
+      en: No registration number
+    requirement:
+      ru: Приказ зарегистрирован — у него есть номер.
+      en: "The order is registered: it has a number."
+    recommendation:
+      ru: Присвойте приказу номер по журналу регистрации и укажите его рядом с датой.
+      en: Give the order a number from the registration log and put it next to the date.
 
   - code: formatting.place
     method: deterministic
@@ -107,9 +155,15 @@ checks:
     clause: "5.13"
     severity: advice
     kinds: [pd_policy, pd_assignment, contract, regulation, order]
-    title: Не указано место составления
-    requirement: Указано место составления документа, если его нет в наименовании организации.
-    recommendation: Укажите город, где составлен документ, например «г. Москва».
+    title:
+      ru: Не указано место составления
+      en: Place of issue not stated
+    requirement:
+      ru: Указано место составления документа, если его нет в наименовании организации.
+      en: The document states where it was drawn up, unless the organisation's name already says so.
+    recommendation:
+      ru: Укажите город, где составлен документ, например «г. Москва».
+      en: State the city where the document was drawn up, e.g. “г. Москва”.
 
   - code: formatting.approval_stamp
     method: deterministic
@@ -118,9 +172,15 @@ checks:
     clause: "5.16"
     severity: important
     kinds: [pd_policy, regulation]
-    title: Нет грифа утверждения
-    requirement: Локальный акт утверждён — в правом верхнем углу есть гриф «УТВЕРЖДЕН(А)» или «УТВЕРЖДАЮ» с реквизитами.
-    recommendation: Добавьте гриф утверждения с названием распорядительного документа, его датой и номером.
+    title:
+      ru: Нет грифа утверждения
+      en: No approval stamp
+    requirement:
+      ru: Локальный акт утверждён — в правом верхнем углу есть гриф «УТВЕРЖДЕН(А)» или «УТВЕРЖДАЮ» с реквизитами.
+      en: "The local act is approved: its top right corner carries the stamp “УТВЕРЖДЕН(А)” or “УТВЕРЖДАЮ” with the details of the approval."
+    recommendation:
+      ru: Добавьте гриф утверждения с названием распорядительного документа, его датой и номером.
+      en: Add an approval stamp with the name of the approving order, its date and number.
 
   - code: formatting.title
     method: deterministic
@@ -129,9 +189,15 @@ checks:
     clause: "5.17"
     severity: important
     kinds: [order]
-    title: Нет заголовка к тексту
-    requirement: У приказа есть заголовок, который отвечает на вопрос «о чём?» и начинается с «О» («Об»).
-    recommendation: Добавьте заголовок, например «Об утверждении Политики обработки персональных данных».
+    title:
+      ru: Нет заголовка к тексту
+      en: No title to the text
+    requirement:
+      ru: У приказа есть заголовок, который отвечает на вопрос «о чём?» и начинается с «О» («Об»).
+      en: The order has a title that says what it is about and starts with “О” (“Об”).
+    recommendation:
+      ru: Добавьте заголовок, например «Об утверждении Политики обработки персональных данных».
+      en: Add a title, e.g. “Об утверждении Политики обработки персональных данных”.
 
   - code: formatting.signature
     method: deterministic
@@ -140,9 +206,15 @@ checks:
     clause: "5.22"
     severity: important
     kinds: [order]
-    title: Нет подписи
-    requirement: Приказ подписан — есть должность, подпись и расшифровка подписи.
-    recommendation: Добавьте подпись — должность, место для подписи, инициалы и фамилию.
+    title:
+      ru: Нет подписи
+      en: No signature
+    requirement:
+      ru: Приказ подписан — есть должность, подпись и расшифровка подписи.
+      en: "The order is signed: it has the signatory's position, signature and printed name."
+    recommendation:
+      ru: Добавьте подпись — должность, место для подписи, инициалы и фамилию.
+      en: "Add the signature block: position, space for the signature, initials and surname."
 
   - code: formatting.signature_order
     method: deterministic
@@ -150,9 +222,15 @@ checks:
     clause: "5.22"
     severity: advice
     kinds: *issued
-    title: В расшифровке подписи фамилия перед инициалами
-    requirement: В расшифровке подписи инициалы стоят перед фамилией — «А.С. Ковалёва».
-    recommendation: Поставьте инициалы перед фамилией.
+    title:
+      ru: В расшифровке подписи фамилия перед инициалами
+      en: Surname before initials in the signature block
+    requirement:
+      ru: В расшифровке подписи инициалы стоят перед фамилией — «А.С. Ковалёва».
+      en: "In the printed name under a signature the initials come before the surname: “А.С. Ковалёва”."
+    recommendation:
+      ru: Поставьте инициалы перед фамилией.
+      en: Put the initials before the surname.
 
   - code: formatting.date_format
     method: deterministic
@@ -160,9 +238,15 @@ checks:
     clause: "5.10"
     severity: advice
     kinds: *all
-    title: Дата записана не по стандарту
-    requirement: Даты записываются цифрами через точку — 05.06.2026 — или словами и цифрами — 5 июня 2026 г.
-    recommendation: Запишите дату в виде ДД.ММ.ГГГГ или «5 июня 2026 г.».
+    title:
+      ru: Дата записана не по стандарту
+      en: Date not written to the standard
+    requirement:
+      ru: Даты записываются цифрами через точку — 05.06.2026 — или словами и цифрами — 5 июня 2026 г.
+      en: Dates are written in digits separated by full stops, 05.06.2026, or in words and digits, “5 июня 2026 г.”.
+    recommendation:
+      ru: Запишите дату в виде ДД.ММ.ГГГГ или «5 июня 2026 г.».
+      en: Write the date as DD.MM.YYYY or as “5 июня 2026 г.”.
 
   - code: formatting.numbering
     method: deterministic
@@ -171,9 +255,15 @@ checks:
     clause: "5.18"
     severity: important
     kinds: *issued
-    title: Нумерация не арабскими цифрами или глубже четырёх уровней
-    requirement: Разделы и пункты нумеруются арабскими цифрами, уровней нумерации — не больше четырёх.
-    recommendation: Пронумеруйте разделы и пункты арабскими цифрами и сократите вложенность до четырёх уровней.
+    title:
+      ru: Нумерация не арабскими цифрами или глубже четырёх уровней
+      en: Numbering not in Arabic numerals or deeper than four levels
+    requirement:
+      ru: Разделы и пункты нумеруются арабскими цифрами, уровней нумерации — не больше четырёх.
+      en: Sections and clauses are numbered in Arabic numerals, with no more than four levels of numbering.
+    recommendation:
+      ru: Пронумеруйте разделы и пункты арабскими цифрами и сократите вложенность до четырёх уровней.
+      en: Number sections and clauses in Arabic numerals and reduce nesting to four levels.
 
   - code: formatting.numbering_sequence
     method: deterministic
@@ -181,6 +271,12 @@ checks:
     clause: "5.18"
     severity: advice
     kinds: *all
-    title: Пропуск или повтор в нумерации
-    requirement: Номера разделов и пунктов идут подряд, без пропусков и повторов.
-    recommendation: Перенумеруйте пункты по порядку.
+    title:
+      ru: Пропуск или повтор в нумерации
+      en: Gap or repeat in numbering
+    requirement:
+      ru: Номера разделов и пунктов идут подряд, без пропусков и повторов.
+      en: Section and clause numbers run in order, without gaps or repeats.
+    recommendation:
+      ru: Перенумеруйте пункты по порядку.
+      en: Renumber the clauses in order.

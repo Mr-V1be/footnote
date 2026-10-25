@@ -7,6 +7,7 @@ from fastapi import APIRouter, Query, Request
 from snoska.api.cursors import decode_time_cursor, encode_time_cursor
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.billing.billing import (
     BillingOut,
     LedgerEntryOut,
@@ -70,10 +71,10 @@ async def billing_ledger(
     response_model_by_alias=True,
 )
 async def change_plan(
-    container: ContainerDep, access: OrganizationAccessDep, body: PlanChangeIn
+    container: ContainerDep, access: OrganizationAccessDep, locale: LocaleDep, body: PlanChangeIn
 ) -> PlanChangeOut:
     """A cheaper plan from next month; a pricier one after paying its invoice."""
-    return PlanChangeOut.of(await container.billing.change_plan(access, body.plan))
+    return PlanChangeOut.of(await container.billing.change_plan(access, body.plan, locale))
 
 
 @router.post("/billing/webhooks/{provider}", include_in_schema=False)

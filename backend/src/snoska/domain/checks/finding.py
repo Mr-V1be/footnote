@@ -8,6 +8,7 @@ from uuid import UUID
 from snoska.domain.checks.catalog import Severity
 from snoska.domain.checks.outcome import Detail, FindingKind, TextLocation
 from snoska.domain.shared.errors import ValidationError
+from snoska.domain.shared.locale import LocalizedText
 from snoska.domain.shared.text import normalize_text
 from snoska.domain.tenancy.permissions import Permission
 
@@ -41,10 +42,11 @@ class NormCitation:
 
     For a law, ``edition_id`` and ``anchor`` point at an immutable provision of
     the corpus, so its quote is always the text that was in force when the
-    check ran. For a standard, ``citation`` names the clause.
+    check ran. For a standard, ``citation`` names the clause. The citation
+    reads as each interface language cites it.
     """
 
-    citation: str
+    citation: LocalizedText
     act_code: str | None = None
     edition_id: UUID | None = None
     anchor: str | None = None
@@ -52,7 +54,11 @@ class NormCitation:
 
 @dataclass(slots=True)
 class Finding:
-    """A remark on a document version, produced by one check of a run."""
+    """A remark on a document version, produced by one check of a run.
+
+    Its texts are those of the catalogue (or the model) when the check ran,
+    kept in every interface language.
+    """
 
     id: UUID
     organization_id: UUID
@@ -61,9 +67,9 @@ class Finding:
     kind: FindingKind
     severity: Severity
     ordinal: int
-    title: str
+    title: LocalizedText
     detail: Detail
-    recommendation: str
+    recommendation: LocalizedText
     norm: NormCitation
     location: TextLocation | None
     fingerprint: str

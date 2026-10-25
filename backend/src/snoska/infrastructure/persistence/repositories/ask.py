@@ -8,6 +8,7 @@ from sqlalchemy import RowMapping, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from snoska.domain.ask.answer import Answer, AnswerStatus, Citation, Conversation, Turn
+from snoska.domain.shared.locale import LocalizedText
 from snoska.infrastructure.persistence.tables.ask import conversation_turns, conversations
 
 
@@ -37,7 +38,7 @@ def _turn(row: RowMapping) -> Turn:
                     act_code=item["act"],
                     edition_id=UUID(item["edition"]),
                     anchor=item["anchor"],
-                    citation=item["citation"],
+                    citation=LocalizedText.from_mapping(item["citation"]),
                     quote=item["quote"],
                 )
                 for item in row["citations"]
@@ -111,7 +112,7 @@ class SqlConversationRepository:
                         "act": citation.act_code,
                         "edition": str(citation.edition_id),
                         "anchor": citation.anchor,
-                        "citation": citation.citation,
+                        "citation": citation.citation.as_mapping(),
                         "quote": citation.quote,
                     }
                     for citation in turn.answer.citations

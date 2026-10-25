@@ -27,9 +27,11 @@ legal_acts = Table(
     metadata,
     Column("code", Text, primary_key=True),
     Column("kind", Text, nullable=False),
-    Column("short_title", Text, nullable=False),
-    Column("title", Text, nullable=False),
+    # Names in every interface language, by language code.
+    Column("short_title", JSONB, nullable=False),
+    Column("title", JSONB, nullable=False),
     Column("adopted_on", Date, nullable=False),
+    CheckConstraint("short_title ? 'ru' AND title ? 'ru'", name="names_in_source_language"),
 )
 
 corpus_editions = Table(

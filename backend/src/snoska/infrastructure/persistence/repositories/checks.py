@@ -19,6 +19,7 @@ from snoska.domain.checks.outcome import (
 )
 from snoska.domain.checks.result import CheckResult
 from snoska.domain.checks.run import CheckRun, RunFailureCode, RunStatus
+from snoska.domain.shared.locale import LocalizedText
 from snoska.infrastructure.persistence.tables.checks import check_results, check_runs, findings
 from snoska.ports.checks.repositories import RunSummary
 from snoska.ports.unit_of_work import ConcurrentModificationError
@@ -74,7 +75,7 @@ def _result(row: RowMapping) -> CheckResult:
             act_code=row["cited_act"],
             edition_id=row["cited_edition_id"],
             anchor=row["cited_anchor"],
-            citation=row["cited_citation"],
+            citation=LocalizedText.from_mapping(row["cited_citation"]),
         )
         if row["cited_edition_id"] is not None
         else None
@@ -97,13 +98,13 @@ def _result(row: RowMapping) -> CheckResult:
 
 def _detail(value: Mapping[str, Any]) -> Detail:
     if value.get("text") is not None:
-        return Detail.written(str(value["text"]))
+        return Detail.written(LocalizedText.from_mapping(value["text"]))
     return Detail(code=str(value["code"]), params=dict(value.get("params") or {}))
 
 
 def _detail_json(detail: Detail) -> dict[str, Any]:
     if detail.text is not None:
-        return {"text": detail.text}
+        return {"text": detail.text.as_mapping()}
     return {"code": detail.code, "params": dict(detail.params)}
 
 
@@ -121,11 +122,11 @@ def _finding(row: RowMapping) -> Finding:
         kind=FindingKind(row["kind"]),
         severity=Severity(row["severity"]),
         ordinal=row["ordinal"],
-        title=row["title"],
+        title=LocalizedText.from_mapping(row["title"]),
         detail=_detail(row["detail"]),
-        recommendation=row["recommendation"],
+        recommendation=LocalizedText.from_mapping(row["recommendation"]),
         norm=NormCitation(
-            citation=row["norm_citation"],
+            citation=LocalizedText.from_mapping(row["norm_citation"]),
             act_code=row["norm_act"],
             edition_id=row["norm_edition_id"],
             anchor=row["norm_anchor"],
@@ -150,10 +151,10 @@ def _finding_row(finding: Finding) -> dict[str, Any]:
         "kind": finding.kind.value,
         "severity": finding.severity.value,
         "ordinal": finding.ordinal,
-        "title": finding.title,
+        "title": finding.title.as_mapping(),
         "detail": _detail_json(finding.detail),
-        "recommendation": finding.recommendation,
-        "norm_citation": finding.norm.citation,
+        "recommendation": finding.recommendation.as_mapping(),
+        "norm_citation": finding.norm.citation.as_mapping(),
         "norm_act": finding.norm.act_code,
         "norm_edition_id": finding.norm.edition_id,
         "norm_anchor": finding.norm.anchor,
@@ -327,7 +328,7 @@ class SqlCheckResultRepository:
                 cited_act=cited.act_code if cited else None,
                 cited_edition_id=cited.edition_id if cited else None,
                 cited_anchor=cited.anchor if cited else None,
-                cited_citation=cited.citation if cited else None,
+                cited_citation=cited.citation.as_mapping() if cited else None,
                 error_code=result.error_code,
                 attempts=result.attempts,
                 duration_ms=result.duration_ms,

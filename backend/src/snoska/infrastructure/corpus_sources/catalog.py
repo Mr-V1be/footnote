@@ -9,6 +9,7 @@ import yaml
 
 from snoska.domain.corpus.acts import ActKind, LegalAct
 from snoska.domain.shared.errors import NotFoundError
+from snoska.infrastructure.localized import read_localized
 from snoska.ports.corpus.source import TrackedAct
 
 
@@ -42,8 +43,8 @@ class YamlActCatalog:
             act = LegalAct(
                 code=raw["code"],
                 kind=ActKind(raw["kind"]),
-                short_title=raw["short_title"],
-                title=raw["title"],
+                short_title=read_localized(raw["short_title"], f"{raw['code']}.short_title"),
+                title=read_localized(raw["title"], f"{raw['code']}.title"),
                 adopted_on=date.fromisoformat(str(raw["adopted_on"])),
             )
             snapshot = raw.get("snapshot")

@@ -59,6 +59,26 @@ async def test_an_answer_quotes_the_provisions_it_rests_on(
     assert (await api.get(f"{BASE}/conversations", headers=auth(tokens, OLGA))).status_code == 403
 
 
+async def test_the_answer_is_asked_for_in_the_askers_language(
+    api: httpx.AsyncClient, tokens: TokenFactory, container: Container
+) -> None:
+    await indexed(container)
+    model = container.questions._model
+    assert isinstance(model, RecordedLanguageModel)
+    asked = await api.post(
+        BASE,
+        headers={**auth(tokens, EVA), "Accept-Language": "en"},
+        json={"question": "Is consent needed to process personal data?"},
+    )
+    assert asked.status_code == 200, asked.text
+    instructions = model.requests[-1].messages[0].content
+    assert "по-английски" in instructions, "the answer is asked for in English"
+    assert "не переводи" in instructions, "and the quotes in the law's own words"
+    [citation] = asked.json()["turns"][0]["citations"]
+    assert citation["citation"].startswith("Art. ")
+    assert citation["citation"].endswith(", 152-FZ")
+
+
 async def test_an_unfounded_quote_is_sent_back_for_correction(
     api: httpx.AsyncClient, tokens: TokenFactory, container: Container
 ) -> None:

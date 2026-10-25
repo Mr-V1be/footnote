@@ -12,13 +12,14 @@ from snoska.application.integrations.events import OrganizationEvents
 from snoska.application.tenancy.gate import WorkspaceGate
 from snoska.domain.audit.event import AuditAction
 from snoska.domain.audit.targets import document_target
-from snoska.domain.checks.catalog import CheckCatalog, LawNorm, StandardNorm
+from snoska.domain.checks.catalog import CheckCatalog, StandardNorm
 from snoska.domain.checks.finding import REVIEW_PERMISSIONS, Finding, ReviewStatus
 from snoska.domain.checks.result import CheckResult
 from snoska.domain.checks.run import CheckRun
 from snoska.domain.documents.version import ParseStatus
 from snoska.domain.integrations.webhooks import WebhookEvent
 from snoska.domain.shared.errors import InvalidStateError, NotFoundError
+from snoska.domain.shared.locale import SOURCE_LOCALE, LocalizedText
 from snoska.domain.tenancy.access import OrganizationAccess
 from snoska.domain.tenancy.permissions import Permission
 from snoska.ports.checks.repositories import RunSummary
@@ -134,24 +135,16 @@ class CheckService:
             quotes={key: provision.text for key, provision in provisions.items()},
         )
 
-    async def citations(self) -> Mapping[str, tuple[str, ...]]:
+    def citations(self) -> Mapping[str, tuple[LocalizedText, ...]]:
         """What each check of the catalogue refers to, as it is cited."""
-        cited: dict[str, tuple[str, ...]] = {}
-        anchors_by_act: dict[str, set[str]] = {}
+        cited: dict[str, tuple[LocalizedText, ...]] = {}
         for check in self.catalog.all():
-            if isinstance(check.norm, StandardNorm):
-                cited[check.code] = (check.norm.citation,)
+            norm = check.norm
+            if isinstance(norm, StandardNorm):
+                cited[check.code] = (norm.citation,)
             else:
-                anchors_by_act.setdefault(check.norm.act_code, set()).update(check.norm.anchors)
-        resolved = {
-            act: await self._norms.citations(act, anchors)
-            for act, anchors in anchors_by_act.items()
-        }
-        for check in self.catalog.all():
-            if isinstance(check.norm, LawNorm):
-                found = resolved.get(check.norm.act_code, {})
                 cited[check.code] = tuple(
-                    found.get(anchor, anchor) for anchor in check.norm.anchors
+                    self._norms.cite(norm.act_code, anchor) for anchor in norm.anchors
                 )
         return cited
 
@@ -183,7 +176,11 @@ class CheckService:
                 access,
                 AuditAction.FINDING_REVIEWED,
                 document_target(document),
-                {"finding": finding.title, "from": previous.value, "to": status.value},
+                {
+                    "finding": finding.title.resolve(SOURCE_LOCALE),
+                    "from": previous.value,
+                    "to": status.value,
+                },
             )
             await self._events.emit(
                 uow,

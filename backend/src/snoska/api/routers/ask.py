@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.ask import (
     AskStatusOut,
     ConversationOut,
@@ -41,16 +42,18 @@ async def conversations(
     "/conversations/{conversation_id}", response_model=ConversationOut, response_model_by_alias=True
 )
 async def conversation(
-    container: ContainerDep, access: OrganizationAccessDep, conversation_id: UUID
+    container: ContainerDep, access: OrganizationAccessDep, locale: LocaleDep, conversation_id: UUID
 ) -> ConversationOut:
-    return ConversationOut.of(await container.questions.conversation(access, conversation_id))
+    return ConversationOut.of(
+        await container.questions.conversation(access, conversation_id), locale
+    )
 
 
 @router.post("", response_model=ConversationOut, response_model_by_alias=True)
 async def ask(
-    container: ContainerDep, access: OrganizationAccessDep, body: QuestionIn
+    container: ContainerDep, access: OrganizationAccessDep, locale: LocaleDep, body: QuestionIn
 ) -> ConversationOut:
-    """Ask the corpus; the answer quotes the provisions it rests on, or says
-    honestly that the norm does not answer."""
-    view = await container.questions.ask(access, body.question, body.conversation_id)
-    return ConversationOut.of(view)
+    """Ask the corpus; the answer, in the language of the request, quotes the
+    provisions it rests on, or says honestly that the norm does not answer."""
+    view = await container.questions.ask(access, body.question, body.conversation_id, locale)
+    return ConversationOut.of(view, locale)

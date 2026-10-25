@@ -72,7 +72,7 @@ class ChecksAssembly:
 def build_checks(core: Core) -> ChecksAssembly:
     settings = core.settings
     catalog = load_check_catalog(settings.checks)
-    norms = NormLibrary(core.uow)
+    norms = NormLibrary(core.uow, core.acts)
     engine = check_engine(settings.checks, core.embedder, core.language_model, norms)
     scheduler = CheckScheduler(catalog, core.clock, core.meter)
     store = JsonQualityReportStore(settings.checks.quality_report)

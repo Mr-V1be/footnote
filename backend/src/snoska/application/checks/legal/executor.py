@@ -71,7 +71,7 @@ def outcome_of(answer: Answer, context: Context, attempts: int) -> CheckOutcome:
     """Turn a grounded answer into a verdict with findings."""
     cited = _cited(context, answer)
     first = answer.quotes[0] if answer.quotes else None
-    recommendation = answer.recommendation or None
+    recommendation = answer.recommendation
     detail = Detail.written(answer.explanation)
     match answer.verdict:
         case "present":

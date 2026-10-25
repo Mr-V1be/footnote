@@ -6,6 +6,7 @@ from uuid import UUID
 from snoska.api.schemas.common import ApiModel
 from snoska.domain.corpus.acts import ActKind
 from snoska.domain.corpus.units import NormUnit, UnitKind
+from snoska.domain.shared.locale import Locale
 from snoska.ports.corpus.repositories import ActOverview, NormSearchHit
 
 
@@ -28,13 +29,13 @@ class ActOut(ApiModel):
     unit_count: int
 
     @classmethod
-    def of(cls, overview: ActOverview) -> ActOut:
+    def of(cls, overview: ActOverview, locale: Locale) -> ActOut:
         edition = overview.active_edition
         return cls(
             code=overview.act.code,
             kind=overview.act.kind,
-            short_title=overview.act.short_title,
-            title=overview.act.title,
+            short_title=overview.act.short_title.resolve(locale),
+            title=overview.act.title.resolve(locale),
             adopted_on=overview.act.adopted_on,
             edition=(
                 EditionOut(
@@ -53,6 +54,9 @@ class ActOut(ApiModel):
 
 
 class NormUnitOut(ApiModel):
+    """A unit of the law as the corpus holds it: its text, and its citation
+    in the law's own language."""
+
     id: UUID
     parent_id: UUID | None
     depth: int

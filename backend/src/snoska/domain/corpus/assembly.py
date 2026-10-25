@@ -10,6 +10,7 @@ from snoska.domain.corpus.acts import LegalAct
 from snoska.domain.corpus.citation import PathStep, anchor_of, article_title, citation_of
 from snoska.domain.corpus.embedding import EMBEDDABLE_KINDS, content_hash, embedding_text
 from snoska.domain.corpus.units import NormUnit, ParsedUnit, UnitKind
+from snoska.domain.shared.locale import SOURCE_LOCALE
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,7 +78,7 @@ def assemble_edition(
     ) -> None:
         step_path = [*path, PathStep(kind=unit.kind, number=unit.number)]
         step_chain = [*chain, _ChainLink(unit.kind, unit.number, unit.heading, unit.text)]
-        citation = citation_of(step_path, act.short_title)
+        citation = citation_of(step_path, act.short_title.resolve(SOURCE_LOCALE))
         sha: str | None = None
         if _is_embeddable(unit.kind, unit.text, unit.repealed):
             passage = _passage(step_chain, citation)

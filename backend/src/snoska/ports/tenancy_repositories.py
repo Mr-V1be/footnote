@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from datetime import datetime
 from typing import Protocol
 from uuid import UUID
 
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.organization import Organization, UserProfile, Workspace
 from snoska.domain.tenancy.workspace_access import WorkspaceMember
 
@@ -63,3 +64,12 @@ class UserProfileRepository(Protocol):
     async def upsert(self, profile: UserProfile, now: datetime) -> None: ...
 
     async def get_many(self, user_ids: Sequence[UUID]) -> Mapping[UUID, UserProfile]: ...
+
+    async def remember_locale(self, user_id: UUID, locale: Locale) -> None:
+        """The interface language a person uses now, for mail sent to them
+        (the profile exists: it is written first)."""
+        ...
+
+    async def locales(self, user_ids: Collection[UUID]) -> Mapping[UUID, Locale]:
+        """The interface languages people last used; those never seen are left out."""
+        ...

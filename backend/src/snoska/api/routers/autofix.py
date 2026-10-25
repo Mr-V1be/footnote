@@ -6,6 +6,7 @@ from fastapi import APIRouter, status
 
 from snoska.api.dependencies import ActorProfileDep, ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.autofix import AutofixOut, AutofixPreviewOut, ChangeOut
 
 router = APIRouter(
@@ -33,11 +34,12 @@ async def apply_autofix(
     container: ContainerDep,
     access: OrganizationAccessDep,
     author: ActorProfileDep,
+    locale: LocaleDep,
     document_id: UUID,
     number: int,
 ) -> AutofixOut:
     """Correct the formatting into a new version; this one stays as it is."""
-    return AutofixOut.of(await container.autofix.apply(access, author, document_id, number))
+    return AutofixOut.of(await container.autofix.apply(access, author, document_id, number, locale))
 
 
 @router.get("/changes", response_model=list[ChangeOut], response_model_by_alias=True)

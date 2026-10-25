@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query
 
 from snoska.api.dependencies import ContainerDep, CorpusReaderDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.corpus import (
     ActOut,
     EditionContentOut,
@@ -19,19 +20,20 @@ router = APIRouter(prefix="/v1/corpus", tags=["corpus"], responses=PROBLEM_RESPO
 
 
 @router.get("/acts", response_model=list[ActOut], response_model_by_alias=True)
-async def list_acts(container: ContainerDep, _: CorpusReaderDep) -> list[ActOut]:
-    return [ActOut.of(overview) for overview in await container.corpus.acts()]
+async def list_acts(container: ContainerDep, _: CorpusReaderDep, locale: LocaleDep) -> list[ActOut]:
+    return [ActOut.of(overview, locale) for overview in await container.corpus.acts()]
 
 
 @router.get(
     "/acts/{act_code}/units", response_model=EditionContentOut, response_model_by_alias=True
 )
 async def act_units(
-    container: ContainerDep, _: CorpusReaderDep, act_code: str
+    container: ContainerDep, _: CorpusReaderDep, locale: LocaleDep, act_code: str
 ) -> EditionContentOut:
     content = await container.corpus.active_content(act_code)
     return EditionContentOut(
-        act=ActOut.of(content.overview), units=[NormUnitOut.of(unit) for unit in content.units]
+        act=ActOut.of(content.overview, locale),
+        units=[NormUnitOut.of(unit) for unit in content.units],
     )
 
 

@@ -8,6 +8,7 @@ from snoska.application.checks.legal.prompt import MAX_QUOTES, VERDICTS, BatchCo
 from snoska.domain.checks.grounding import locate_quote
 from snoska.domain.checks.outcome import TextLocation
 from snoska.domain.documents.structure import Block
+from snoska.domain.shared.locale import Locale, LocalizedText
 from snoska.domain.shared.text import normalize_whitespace
 
 MAX_TEXT_CHARS = 700
@@ -24,20 +25,38 @@ class InvalidAnswer(Exception):  # noqa: N818 - the name reads as the verdict on
 
 @dataclass(frozen=True, slots=True)
 class Answer:
-    """A model answer that passed every check of form and grounding."""
+    """A model answer that passed every check of form and grounding.
+
+    The explanation is in every interface language; so is the
+    recommendation, when the model gave one."""
 
     verdict: str
     quotes: tuple[TextLocation, ...]
     norm_key: str
-    explanation: str
-    recommendation: str
+    explanation: LocalizedText
+    recommendation: LocalizedText | None
 
 
-def _text(data: Mapping[str, object], key: str) -> str:
+def _wordings(data: Mapping[str, object], key: str) -> LocalizedText | None:
+    """A text the model wrote in every interface language; None when it
+    wrote nothing. A text in some languages and not in others is refused."""
     value = data.get(key)
-    if not isinstance(value, str):
-        raise InvalidAnswer(f"поле {key} должно быть строкой.")
-    return normalize_whitespace(value)[:MAX_TEXT_CHARS]
+    languages = ", ".join(locale.value for locale in Locale)
+    if not isinstance(value, dict):
+        raise InvalidAnswer(f"поле {key} должно быть объектом с текстом на языках {languages}.")
+    wordings: dict[Locale, str] = {}
+    for locale in Locale:
+        text = value.get(locale.value)
+        if not isinstance(text, str):
+            raise InvalidAnswer(f"поле {key}.{locale.value} должно быть строкой.")
+        if text.strip():
+            wordings[locale] = normalize_whitespace(text)[:MAX_TEXT_CHARS]
+    if not wordings:
+        return None
+    missing = [locale.value for locale in Locale if locale not in wordings]
+    if missing:
+        raise InvalidAnswer(f"в поле {key} нет текста на языках: {', '.join(missing)}.")
+    return LocalizedText(wordings)
 
 
 def _quotes(
@@ -98,15 +117,15 @@ def parse_verdict(
     quotes = _quotes(data, context, blocks)
     if verdict in GROUNDED_VERDICTS and not quotes:
         raise InvalidAnswer("для present и partial нужна хотя бы одна дословная цитата.")
-    explanation = _text(data, "explanation")
-    if not explanation:
+    explanation = _wordings(data, "explanation")
+    if explanation is None:
         raise InvalidAnswer("поле explanation не заполнено.")
     return Answer(
         verdict=str(verdict),
         quotes=quotes,
         norm_key=norm,
         explanation=explanation,
-        recommendation=_text(data, "recommendation"),
+        recommendation=_wordings(data, "recommendation"),
     )
 
 

@@ -5,11 +5,13 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from snoska.domain.checks.catalog import LawNorm
-from snoska.domain.corpus.citation import provision_text
+from snoska.domain.corpus.citation import cite, provision_text
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.corpus.units import NormUnit
 from snoska.domain.shared.errors import NotFoundError
+from snoska.domain.shared.locale import LocalizedText
 from snoska.ports.corpus.repositories import CorpusRepository
+from snoska.ports.corpus.source import ActCatalog
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 
@@ -19,40 +21,47 @@ class ProvisionNotFoundError(NotFoundError):
 
 @dataclass(frozen=True, slots=True)
 class Provision:
-    """A provision of a law as it is quoted: citation and words of the edition."""
+    """A provision of a law as it is quoted: citation and words of the edition.
+
+    The words are the law's own; the citation reads as each interface
+    language cites the provision."""
 
     edition_id: UUID
     act_code: str
     anchor: str
-    citation: str
+    citation: LocalizedText
     text: str
-
-
-async def _with_lead_ins(
-    corpus: CorpusRepository, act_code: str, units: Sequence[NormUnit]
-) -> list[Provision]:
-    parent_ids = {unit.parent_id for unit in units if unit.parent_id is not None}
-    parents = {parent.id: parent for parent in await corpus.units_by_ids(parent_ids)}
-    provisions: list[Provision] = []
-    for unit in units:
-        parent = parents.get(unit.parent_id) if unit.parent_id else None
-        provisions.append(
-            Provision(
-                edition_id=unit.edition_id,
-                act_code=act_code,
-                anchor=unit.anchor,
-                citation=unit.citation,
-                text=provision_text(unit.kind, unit.text, parent.text if parent else None),
-            )
-        )
-    return provisions
 
 
 class NormLibrary:
     """Provisions of the corpus for checks and their findings."""
 
-    def __init__(self, uow_factory: UnitOfWorkFactory) -> None:
+    def __init__(self, uow_factory: UnitOfWorkFactory, acts: ActCatalog) -> None:
         self._uow_factory = uow_factory
+        self._acts = acts
+
+    def cite(self, act_code: str, anchor: str) -> LocalizedText:
+        """How a provision of a tracked act is cited, in every interface language."""
+        return cite(anchor, self._acts.get(act_code).act.short_title)
+
+    async def _with_lead_ins(
+        self, corpus: CorpusRepository, act_code: str, units: Sequence[NormUnit]
+    ) -> list[Provision]:
+        parent_ids = {unit.parent_id for unit in units if unit.parent_id is not None}
+        parents = {parent.id: parent for parent in await corpus.units_by_ids(parent_ids)}
+        provisions: list[Provision] = []
+        for unit in units:
+            parent = parents.get(unit.parent_id) if unit.parent_id else None
+            provisions.append(
+                Provision(
+                    edition_id=unit.edition_id,
+                    act_code=act_code,
+                    anchor=unit.anchor,
+                    citation=self.cite(act_code, unit.anchor),
+                    text=provision_text(unit.kind, unit.text, parent.text if parent else None),
+                )
+            )
+        return provisions
 
     async def provisions(self, norm: LawNorm) -> list[Provision]:
         """The norm's provisions in the edition in force, in the order of the norm."""
@@ -61,7 +70,7 @@ class NormLibrary:
             if edition is None:
                 raise ProvisionNotFoundError(f"no edition of {norm.act_code} is in force")
             units = await uow.corpus.units_by_anchors(edition.id, norm.anchors)
-            provisions = await _with_lead_ins(uow.corpus, norm.act_code, units)
+            provisions = await self._with_lead_ins(uow.corpus, norm.act_code, units)
         by_anchor = {provision.anchor: provision for provision in provisions}
         missing = [anchor for anchor in norm.anchors if anchor not in by_anchor]
         if missing:
@@ -84,7 +93,7 @@ class NormLibrary:
                 space, vector, act_code=act_code, limit=limit + len(exclude)
             )
             units = [hit.unit for hit in hits if hit.unit.anchor not in exclude][:limit]
-            return await _with_lead_ins(uow.corpus, act_code, units)
+            return await self._with_lead_ins(uow.corpus, act_code, units)
 
     async def nearest(
         self, space: EmbeddingSpace, vector: Sequence[float], limit: int
@@ -101,20 +110,13 @@ class NormLibrary:
                 if edition is None:
                     continue
                 for unit, provision in zip(
-                    units, await _with_lead_ins(uow.corpus, edition.act_code, units), strict=True
+                    units,
+                    await self._with_lead_ins(uow.corpus, edition.act_code, units),
+                    strict=True,
                 ):
                     found[unit.id] = provision
         # In the order of closeness.
         return [found[hit.unit.id] for hit in hits if hit.unit.id in found]
-
-    async def citations(self, act_code: str, anchors: Collection[str]) -> Mapping[str, str]:
-        """How provisions are cited in the edition in force, by anchor."""
-        async with self._uow_factory.for_platform() as uow:
-            edition = await uow.corpus.active_edition(act_code)
-            if edition is None:
-                return {}
-            units = await uow.corpus.units_by_anchors(edition.id, anchors)
-        return {unit.anchor: unit.citation for unit in units}
 
     async def quotes(
         self, references: Collection[tuple[UUID, str]]
@@ -130,6 +132,6 @@ class NormLibrary:
                 if edition is None:
                     continue
                 units = await uow.corpus.units_by_anchors(edition_id, anchors)
-                for provision in await _with_lead_ins(uow.corpus, edition.act_code, units):
+                for provision in await self._with_lead_ins(uow.corpus, edition.act_code, units):
                     resolved[(edition_id, provision.anchor)] = provision
         return resolved

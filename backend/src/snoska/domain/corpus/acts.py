@@ -6,6 +6,7 @@ from enum import StrEnum
 from uuid import UUID
 
 from snoska.domain.shared.errors import InvalidStateError
+from snoska.domain.shared.locale import LocalizedText
 
 
 class ActKind(StrEnum):
@@ -16,12 +17,14 @@ class ActKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class LegalAct:
-    """A normative act tracked by the corpus."""
+    """A normative act tracked by the corpus, named as each interface
+    language names it ("152-ФЗ", "152-FZ"); the source wording is the act's
+    own, the one the corpus cites it by."""
 
     code: str
     kind: ActKind
-    short_title: str
-    title: str
+    short_title: LocalizedText
+    title: LocalizedText
     adopted_on: date
 
 

@@ -84,7 +84,8 @@ check_results = Table(
     Column("cited_act", Text, nullable=True),
     Column("cited_edition_id", Uuid, nullable=True),
     Column("cited_anchor", Text, nullable=True),
-    Column("cited_citation", Text, nullable=True),
+    # How the cited provision reads in every interface language.
+    Column("cited_citation", JSONB, nullable=True),
     Column("error_code", Text, nullable=True),
     Column("attempts", Integer, nullable=False),
     Column("duration_ms", Integer, nullable=False),
@@ -112,10 +113,12 @@ findings = Table(
     Column("kind", Text, nullable=False),
     Column("severity", Text, nullable=False),
     Column("ordinal", Integer, nullable=False),
-    Column("title", Text, nullable=False),
+    # Texts in every interface language, by language code (the source one
+    # always there): {"ru": "…", "en": "…"}.
+    Column("title", JSONB, nullable=False),
     Column("detail", JSONB, nullable=False),
-    Column("recommendation", Text, nullable=False),
-    Column("norm_citation", Text, nullable=False),
+    Column("recommendation", JSONB, nullable=False),
+    Column("norm_citation", JSONB, nullable=False),
     Column("norm_act", Text, nullable=True),
     Column("norm_edition_id", Uuid, nullable=True),
     Column("norm_anchor", Text, nullable=True),
@@ -144,6 +147,10 @@ findings = Table(
     CheckConstraint("kind IN ('violation', 'review')", name="kind_known"),
     CheckConstraint("severity IN ('critical', 'important', 'advice')", name="severity_known"),
     CheckConstraint(f"review IN {REVIEW_STATUSES}", name="review_known"),
+    CheckConstraint(
+        "title ? 'ru' AND recommendation ? 'ru' AND norm_citation ? 'ru'",
+        name="texts_in_source_language",
+    ),
     CheckConstraint(
         "(block_ordinal IS NULL AND span_start IS NULL AND span_end IS NULL) OR "
         "(block_ordinal >= 0 AND span_start >= 0 AND span_end > span_start)",

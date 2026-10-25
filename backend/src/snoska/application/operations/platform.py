@@ -12,6 +12,7 @@ from snoska.domain.billing.plans import Plan, UsageMetric
 from snoska.domain.corpus.acts import Edition
 from snoska.domain.corpus.embedding import EmbeddingSpace
 from snoska.domain.operations.schedule import EditionCheck
+from snoska.domain.shared.locale import LocalizedText
 from snoska.domain.tenancy.access import PlatformAccess
 from snoska.domain.tenancy.organization import Organization
 from snoska.domain.tenancy.permissions import Permission
@@ -37,7 +38,7 @@ class OrganizationSummary:
 @dataclass(frozen=True, slots=True)
 class ActState:
     code: str
-    title: str
+    title: LocalizedText
     edition: Edition | None
     indexed: bool
 

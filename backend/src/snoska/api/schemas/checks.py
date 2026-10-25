@@ -11,6 +11,7 @@ from snoska.domain.checks.finding import Finding, ReviewStatus
 from snoska.domain.checks.outcome import DetailValue, FindingKind, ResultStatus, TextLocation
 from snoska.domain.checks.result import CheckResult
 from snoska.domain.checks.run import CheckRun, RunFailureCode, RunStatus
+from snoska.domain.shared.locale import Locale, LocalizedText
 from snoska.ports.checks.repositories import RunSummary
 
 
@@ -67,7 +68,7 @@ class ResultOut(ApiModel):
     citation: str | None
 
     @classmethod
-    def of(cls, result: CheckResult) -> ResultOut:
+    def of(cls, result: CheckResult, locale: Locale) -> ResultOut:
         return cls(
             check_code=result.check_code,
             method=result.method,
@@ -76,13 +77,13 @@ class ResultOut(ApiModel):
             error_code=result.error_code,
             attempts=result.attempts,
             duration_ms=result.duration_ms,
-            citation=result.cited.citation if result.cited else None,
+            citation=result.cited.citation.resolve(locale) if result.cited else None,
         )
 
 
 class DetailOut(ApiModel):
     """Either a message code with parameters (translated by the client) or
-    text written by the language model."""
+    text written by the language model, in the language of the request."""
 
     code: str | None
     params: dict[str, DetailValue]
@@ -98,6 +99,8 @@ class NormOut(ApiModel):
 
 
 class FindingOut(ApiModel):
+    """A finding with its texts in the language of the request."""
+
     id: UUID
     check_code: str
     kind: FindingKind
@@ -115,21 +118,22 @@ class FindingOut(ApiModel):
     revision: int
 
     @classmethod
-    def of(cls, finding: Finding, quote: str | None = None) -> FindingOut:
+    def of(cls, finding: Finding, locale: Locale, quote: str | None = None) -> FindingOut:
+        written = finding.detail.text
         return cls(
             id=finding.id,
             check_code=finding.check_code,
             kind=finding.kind,
             severity=finding.severity,
-            title=finding.title,
+            title=finding.title.resolve(locale),
             detail=DetailOut(
                 code=finding.detail.code,
                 params=dict(finding.detail.params),
-                text=finding.detail.text,
+                text=written.resolve(locale) if written else None,
             ),
-            recommendation=finding.recommendation,
+            recommendation=finding.recommendation.resolve(locale),
             norm=NormOut(
-                citation=finding.norm.citation,
+                citation=finding.norm.citation.resolve(locale),
                 act_code=finding.norm.act_code,
                 anchor=finding.norm.anchor,
                 quote=quote,
@@ -143,7 +147,8 @@ class FindingOut(ApiModel):
 
 
 class CheckOut(ApiModel):
-    """A check of the registry as the product describes it."""
+    """A check of the registry as the product describes it, in the language
+    of the request."""
 
     code: str
     family: str
@@ -155,16 +160,21 @@ class CheckOut(ApiModel):
     citations: list[str]
 
     @classmethod
-    def of(cls, check: CheckDefinition, citations: Mapping[str, tuple[str, ...]]) -> CheckOut:
+    def of(
+        cls,
+        check: CheckDefinition,
+        citations: Mapping[str, tuple[LocalizedText, ...]],
+        locale: Locale,
+    ) -> CheckOut:
         return cls(
             code=check.code,
             family=check.family,
             method=check.method,
             severity=check.severity,
             kinds=sorted(check.kinds),
-            title=check.title,
-            requirement=check.requirement,
-            citations=list(citations.get(check.code, ())),
+            title=check.title.resolve(locale),
+            requirement=check.requirement.resolve(locale),
+            citations=[citation.resolve(locale) for citation in citations.get(check.code, ())],
         )
 
 
@@ -179,7 +189,8 @@ class CheckReportOut(ApiModel):
         cls,
         report: CheckReport,
         catalog: CheckCatalog,
-        citations: Mapping[str, tuple[str, ...]],
+        citations: Mapping[str, tuple[LocalizedText, ...]],
+        locale: Locale,
     ) -> CheckReportOut:
         codes = {result.check_code for result in report.results} | {
             finding.check_code for finding in report.findings
@@ -187,17 +198,22 @@ class CheckReportOut(ApiModel):
         known = {check.code: check for check in catalog.all()}
         return cls(
             run=RunOut.of(report.run),
-            results=[ResultOut.of(result) for result in report.results],
+            results=[ResultOut.of(result, locale) for result in report.results],
             findings=[
                 FindingOut.of(
                     finding,
+                    locale,
                     report.quotes.get((finding.norm.edition_id, finding.norm.anchor))
                     if finding.norm.edition_id and finding.norm.anchor
                     else None,
                 )
                 for finding in report.findings
             ],
-            checks=[CheckOut.of(known[code], citations) for code in sorted(codes) if code in known],
+            checks=[
+                CheckOut.of(known[code], citations, locale)
+                for code in sorted(codes)
+                if code in known
+            ],
         )
 
 
@@ -230,13 +246,14 @@ class CheckCatalogOut(ApiModel):
     def of(
         cls,
         catalog: CheckCatalog,
-        citations: Mapping[str, tuple[str, ...]],
+        citations: Mapping[str, tuple[LocalizedText, ...]],
         models: ModelsOut,
+        locale: Locale,
     ) -> CheckCatalogOut:
         return cls(
             revision=catalog.revision,
             families=[FamilyOut(code=f.code, rank=f.rank) for f in catalog.families()],
-            checks=[CheckOut.of(check, citations) for check in catalog.all()],
+            checks=[CheckOut.of(check, citations, locale) for check in catalog.all()],
             models=models,
         )
 

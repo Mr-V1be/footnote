@@ -56,6 +56,9 @@ user_profiles = Table(
     Column("email", Text, nullable=True),
     Column("display_name", Text, nullable=False),
     Column("updated_at", DateTime(timezone=True), nullable=False),
+    # The interface language the person last used, for mail sent to them.
+    Column("locale", Text, nullable=True),
+    CheckConstraint("locale ~ '^[a-z]{2,3}$'", name="locale_is_a_language_code"),
 )
 
 workspace_members = Table(

@@ -6,6 +6,7 @@ from typing import Protocol
 from uuid import UUID
 
 from snoska.domain.shared.errors import DomainError
+from snoska.domain.shared.locale import Locale
 from snoska.domain.tenancy.access import Principal
 from snoska.domain.tenancy.members import Member
 
@@ -45,6 +46,9 @@ class Invitation:
     first_name: str
     last_name: str
     role_code: str
+    # The language the invitation is written in: the inviter's, the best
+    # guess there is about a person who has not signed in yet.
+    locale: Locale
 
 
 class MemberAdministration(Protocol):

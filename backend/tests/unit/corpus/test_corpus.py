@@ -13,13 +13,20 @@ from snoska.domain.corpus.assembly import (
     edition_content_hash,
     embedding_texts_for,
 )
-from snoska.domain.corpus.citation import PathStep, anchor_of, citation_of
+from snoska.domain.corpus.citation import PathStep, anchor_of, citation_of, cite, cite_clause
 from snoska.domain.corpus.units import UnitKind
+from snoska.domain.shared.locale import Locale, LocalizedText
 from snoska.infrastructure.corpus_sources.law_html import ParsedLaw, parse_law_html
 from snoska.infrastructure.corpus_sources.pravo_ips import PORTAL_ENCODING
 
 SNAPSHOT = Path(__file__).parents[3] / "data" / "corpus" / "snapshots" / "152-fz.pravo-ips.html.gz"
-ACT = LegalAct("152-fz", ActKind.FEDERAL_LAW, "152-ФЗ", "О персональных данных", date(2006, 7, 27))
+ACT = LegalAct(
+    "152-fz",
+    ActKind.FEDERAL_LAW,
+    LocalizedText({Locale.RU: "152-ФЗ", Locale.EN: "152-FZ"}),
+    LocalizedText({Locale.RU: "О персональных данных", Locale.EN: "On Personal Data"}),
+    date(2006, 7, 27),
+)
 
 
 @pytest.fixture(scope="module")
@@ -36,6 +43,33 @@ def test_citation_reads_innermost_first() -> None:
     ]
     assert citation_of(path, "152-ФЗ") == "п. 2 ч. 1 ст. 18.1 152-ФЗ"
     assert anchor_of(path, 2) == "st-18.1/ch-1/p-2"
+
+
+def test_a_provision_reads_as_each_language_cites_it() -> None:
+    cited = cite("st-18.1/ch-1/p-2", ACT.short_title)
+    assert cited.values == {
+        Locale.RU: "п. 2 ч. 1 ст. 18.1 152-ФЗ",
+        Locale.EN: "Art. 18.1, Part 1, Cl. 2, 152-FZ",
+    }
+    assert cite("st-9/ch-4/p-1/pp-а", ACT.short_title).resolve(Locale.EN) == (
+        "Art. 9, Part 4, Cl. 1, Subcl. (а), 152-FZ"
+    )
+    standard = LocalizedText({Locale.RU: "ГОСТ Р 7.0.97-2016", Locale.EN: "GOST R 7.0.97-2016"})
+    assert cite_clause("6.1", standard).values == {
+        Locale.RU: "п. 6.1 ГОСТ Р 7.0.97-2016",
+        Locale.EN: "Cl. 6.1, GOST R 7.0.97-2016",
+    }
+
+
+def test_every_unit_of_the_law_is_cited_from_its_anchor_as_it_is_stored(law: ParsedLaw) -> None:
+    """The anchor holds all a citation needs: rendered from it, the source
+    language gives exactly what the corpus stores, and every language has one."""
+    ids = iter(UUID(int=i) for i in range(1, 10_000))
+    assembled = assemble_edition(uuid4(), ACT, law.units, lambda: next(ids))
+    for unit in assembled.units:
+        cited = cite(unit.anchor, ACT.short_title)
+        assert cited.resolve(Locale.RU) == unit.citation
+        assert not cited.missing
 
 
 def test_unnumbered_text_gets_positional_anchor() -> None:

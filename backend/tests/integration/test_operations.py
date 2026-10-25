@@ -12,7 +12,7 @@ from snoska.application.operations.corpus_watch import WatchCorpusEditions
 from snoska.bootstrap.container import Container
 from snoska.domain.operations.schedule import WatchOutcome
 from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
-from snoska.ports.operations.notifications import Email
+from snoska.ports.operations.notifications import Email, Recipient
 from tests.support.scenario import ALICE, ORG_A, auth, run_jobs
 from tests.support.tokens import MemberIdentity, TokenFactory
 
@@ -34,8 +34,8 @@ class Inbox:
 
 
 class Admins:
-    async def emails(self) -> list[str]:
-        return [OPERATOR.email]
+    async def recipients(self) -> list[Recipient]:
+        return [Recipient(OPERATOR.user_id, OPERATOR.email)]
 
 
 def watch(container: Container, inbox: Inbox) -> WatchCorpusEditions:
@@ -61,6 +61,17 @@ async def test_a_new_edition_is_loaded_and_the_operator_told_once(container: Con
     assert email.to == (OPERATOR.email,)
     assert "новая редакция" in email.text
     assert "snoska checks recheck" in email.text
+
+
+async def test_the_notice_is_written_in_the_language_the_operator_last_used(
+    api: httpx.AsyncClient, tokens: TokenFactory, container: Container
+) -> None:
+    await api.get("/api/v1/me", headers={**auth(tokens, OPERATOR), "Accept-Language": "en"})
+    inbox = Inbox()
+    await watch(container, inbox).run()
+    [email] = inbox.sent
+    assert email.subject == "Snoska: a new edition of a law in the corpus"
+    assert "152-FZ: the portal has a new edition" in email.text
 
 
 async def test_periodic_tasks_are_queued_once_when_due(container: Container) -> None:

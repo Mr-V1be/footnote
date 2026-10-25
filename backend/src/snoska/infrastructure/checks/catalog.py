@@ -23,6 +23,8 @@ from snoska.domain.checks.rules.base import RuleParams
 from snoska.domain.checks.rules.registry import RuleRegistry
 from snoska.domain.checks.spread import SpreadPolicy
 from snoska.domain.documents.kinds import DocumentKindRegistry, UnknownDocumentKindError
+from snoska.domain.shared.locale import LocalizedText
+from snoska.infrastructure.localized import IncompleteTranslationError, read_localized
 
 REVISION_LENGTH = 12
 
@@ -34,6 +36,13 @@ def _text(entry: Mapping[str, Any], key: str, where: str) -> str:
     return value.strip()
 
 
+def _localized(entry: Mapping[str, Any], key: str, where: str) -> LocalizedText:
+    try:
+        return read_localized(entry.get(key), f"{where}.{key}")
+    except IncompleteTranslationError as exc:
+        raise CatalogError(str(exc)) from exc
+
+
 def _norm(family: Mapping[str, Any], entry: Mapping[str, Any], code: str) -> Norm:
     if "anchors" in entry:
         act = _text(family, "act", code)
@@ -42,7 +51,7 @@ def _norm(family: Mapping[str, Any], entry: Mapping[str, Any], code: str) -> Nor
             raise CatalogError(f"{code}: anchors must be a list of strings")
         return LawNorm(act_code=act, anchors=tuple(anchors))
     return StandardNorm(
-        standard=_text(family, "standard", code), clause=_text(entry, "clause", code)
+        standard=_localized(family, "standard", code), clause=_text(entry, "clause", code)
     )
 
 
@@ -83,8 +92,9 @@ class YamlCheckCatalog:
     """Loads the check registry from the YAML files of a directory.
 
     Every entry is validated before the first run: its rule exists and accepts
-    its parameters, its document kinds are registered. The revision is a hash
-    of the files, so any change to any check gives a new revision.
+    its parameters, its document kinds are registered, what it tells a reader
+    is written in every interface language. The revision is a hash of the
+    files, so any change to any check gives a new revision.
     """
 
     def __init__(self, directory: Path, rules: RuleRegistry, kinds: DocumentKindRegistry) -> None:
@@ -131,9 +141,9 @@ class YamlCheckCatalog:
             kinds=frozenset(kinds),
             norm=_norm(data, entry, code),
             severity=Severity(_text(entry, "severity", code)),
-            title=_text(entry, "title", code),
-            requirement=_text(entry, "requirement", code),
-            recommendation=_text(entry, "recommendation", code),
+            title=_localized(entry, "title", code),
+            requirement=_localized(entry, "requirement", code),
+            recommendation=_localized(entry, "recommendation", code),
             rule=entry.get("rule"),
             params=params,
             brief=_brief(entry, code),

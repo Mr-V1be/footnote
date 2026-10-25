@@ -21,6 +21,7 @@ from snoska.domain.checks.catalog import (
 )
 from snoska.domain.checks.outcome import FindingKind, ResultStatus
 from snoska.domain.documents.structure import Block, BlockKind
+from snoska.domain.shared.locale import Locale, LocalizedText
 
 PURPOSES = "Оператор обрабатывает персональные данные в целях исполнения трудовых договоров."
 TERMS = "Персональные данные хранятся не дольше, чем этого требуют цели обработки."
@@ -28,8 +29,13 @@ BLOCKS = {
     4: Block(4, BlockKind.PARAGRAPH, PURPOSES),
     9: Block(9, BlockKind.PARAGRAPH, TERMS),
 }
-PURPOSES_LAW = Provision(uuid4(), "152-fz", "st-18.1/ch-1/p-2", "п. 2 ч. 1 ст. 18.1 152-ФЗ", "…")
-TERMS_LAW = Provision(uuid4(), "152-fz", "st-5/ch-7", "ч. 7 ст. 5 152-ФЗ", "…")
+PURPOSES_LAW = Provision(
+    uuid4(), "152-fz", "st-18.1/ch-1/p-2", LocalizedText.source("п. 2 ч. 1 ст. 18.1 152-ФЗ"), "…"
+)
+TERMS_LAW = Provision(
+    uuid4(), "152-fz", "st-5/ch-7", LocalizedText.source("ч. 7 ст. 5 152-ФЗ"), "…"
+)
+TEXT = LocalizedText({Locale.RU: "…", Locale.EN: "…"})
 
 
 def prepared(code: str, law: Provision, fragments: list[Fragment]) -> PreparedCheck:
@@ -40,9 +46,9 @@ def prepared(code: str, law: Provision, fragments: list[Fragment]) -> PreparedCh
         method=CheckMethod.MODEL,
         severity=Severity.IMPORTANT,
         kinds=frozenset({"pd_policy"}),
-        title=code,
-        requirement="…",
-        recommendation="…",
+        title=TEXT,
+        requirement=TEXT,
+        recommendation=TEXT,
         norm=LawNorm(act_code="152-fz", anchors=(law.anchor,)),
         brief=brief,
     )
@@ -58,15 +64,19 @@ CONTEXT = build_batch_context(
 
 
 def verdict(
-    check: str, value: str, quotes: list[dict[str, str]], norm: str = "N1"
+    check: str,
+    value: str,
+    quotes: list[dict[str, str]],
+    norm: str = "N1",
+    explanation: dict[str, str] | None = None,
 ) -> dict[str, object]:
     return {
         "check": check,
         "verdict": value,
         "quotes": quotes,
         "norm": norm,
-        "explanation": "Пояснение.",
-        "recommendation": "",
+        "explanation": explanation or {"ru": "Пояснение.", "en": "An explanation."},
+        "recommendation": {"ru": "", "en": ""},
     }
 
 
@@ -107,8 +117,16 @@ def test_a_grounded_verdict_locates_its_quote_and_a_bad_one_is_kept_apart() -> N
         ),
         (batch(verdict("C1", "present", [])), "цитата"),
         (batch(), "нет вердикта"),
+        (batch(verdict("C1", "absent", [], explanation={"ru": "Нет целей.", "en": ""})), "en"),
     ],
-    ids=["not json", "unknown verdict", "another requirement's norm", "no quote", "missing"],
+    ids=[
+        "not json",
+        "unknown verdict",
+        "another requirement's norm",
+        "no quote",
+        "missing",
+        "explained in one language only",
+    ],
 )
 def test_ungrounded_or_malformed_verdicts_are_refused(text: str, problem: str) -> None:
     parsed = parse_batch(text, CONTEXT, BLOCKS)
@@ -126,6 +144,10 @@ def test_verdicts_map_to_findings_honestly() -> None:
     review = outcome_of(parsed.answers["C2"], CONTEXT.context_of("C2"), attempts=2)
     assert missing.status is ResultStatus.VIOLATION
     assert missing.findings[0].location is None, "absence concerns the whole document"
+    explained = missing.findings[0].detail.text
+    assert explained is not None
+    assert explained.resolve(Locale.EN) == "An explanation."
+    assert explained.resolve(Locale.RU) == "Пояснение."
     assert review.status is ResultStatus.NEEDS_REVIEW
     assert review.findings[0].kind is FindingKind.REVIEW
     assert review.cited is not None

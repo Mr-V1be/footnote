@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from snoska.api.dependencies import ContainerDep, PrincipalDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import StatedLocaleDep
 from snoska.api.schemas.catalog import CatalogOut, DocumentFormatOut, DocumentKindOut
 from snoska.api.schemas.tenancy import MembershipOut, MeOut, OrganizationOut
 
@@ -11,9 +12,11 @@ router = APIRouter(prefix="/v1", tags=["session"], responses=PROBLEM_RESPONSES)
 
 
 @router.get("/me", response_model=MeOut, response_model_by_alias=True)
-async def me(container: ContainerDep, principal: PrincipalDep) -> MeOut:
+async def me(container: ContainerDep, principal: PrincipalDep, locale: StatedLocaleDep) -> MeOut:
+    """The signed-in person, their organizations and roles. The language the
+    request states is remembered as theirs, for the mail sent to them."""
     access = container.tenant_access
-    await access.sync_profile(principal)
+    await access.sync_profile(principal, locale)
     memberships = await access.memberships(principal)
     platform = access.platform_access(principal)
     return MeOut(

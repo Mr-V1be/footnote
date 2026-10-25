@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from datetime import datetime
 from uuid import UUID
 
@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from snoska.domain.shared.locale import Locale, parse_locale
 from snoska.domain.tenancy.organization import (
     Organization,
     SlugTakenError,
@@ -264,3 +265,24 @@ class SqlUserProfileRepository:
             )
             for row in result.mappings()
         }
+
+    async def remember_locale(self, user_id: UUID, locale: Locale) -> None:
+        await self._connection.execute(
+            update(user_profiles)
+            .where(
+                user_profiles.c.id == user_id,
+                user_profiles.c.locale.is_distinct_from(locale.value),
+            )
+            .values(locale=locale.value)
+        )
+
+    async def locales(self, user_ids: Collection[UUID]) -> Mapping[UUID, Locale]:
+        if not user_ids:
+            return {}
+        result = await self._connection.execute(
+            select(user_profiles.c.id, user_profiles.c.locale).where(
+                user_profiles.c.id.in_(list(user_ids)), user_profiles.c.locale.is_not(None)
+            )
+        )
+        found = {row.id: parse_locale(row.locale) for row in result}
+        return {user_id: locale for user_id, locale in found.items() if locale is not None}

@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from uuid import UUID
 
+from snoska.domain.shared.locale import LocalizedText
+
 
 class ResultStatus(StrEnum):
     """The verdict of one check on one document version."""
@@ -47,12 +49,12 @@ class Detail:
 
     A rule states it as a message ``code`` with ``params``; the interface
     renders it through its translations. A language model states it in its
-    own words (``text``), which are shown as they are.
+    own words (``text``), written in every interface language.
     """
 
     code: str | None = None
     params: Mapping[str, DetailValue] = field(default_factory=dict)
-    text: str | None = None
+    text: LocalizedText | None = None
 
     def __post_init__(self) -> None:
         if (self.code is None) == (self.text is None):
@@ -63,7 +65,7 @@ class Detail:
         return cls(code=code, params=params)
 
     @classmethod
-    def written(cls, text: str) -> Detail:
+    def written(cls, text: LocalizedText) -> Detail:
         return cls(text=text)
 
 
@@ -80,7 +82,7 @@ class FindingDraft:
     kind: FindingKind
     detail: Detail
     location: TextLocation | None = None
-    recommendation: str | None = None
+    recommendation: LocalizedText | None = None
     places: tuple[TextLocation, ...] = ()
 
     def __post_init__(self) -> None:
@@ -95,7 +97,7 @@ class CitedProvision:
     act_code: str
     edition_id: UUID
     anchor: str
-    citation: str
+    citation: LocalizedText
 
 
 @dataclass(frozen=True, slots=True)

@@ -6,6 +6,7 @@ from fastapi import APIRouter, status
 
 from snoska.api.dependencies import ContainerDep, OrganizationAccessDep
 from snoska.api.errors import PROBLEM_RESPONSES
+from snoska.api.locale import LocaleDep
 from snoska.api.schemas.admin.members import InviteIn, MemberOut, RoleIn
 from snoska.domain.tenancy.roles import ORGANIZATION_ROLES
 from snoska.ports.identity import Invitation
@@ -30,9 +31,10 @@ async def list_members(container: ContainerDep, access: OrganizationAccessDep) -
     status_code=status.HTTP_201_CREATED,
 )
 async def invite_member(
-    container: ContainerDep, access: OrganizationAccessDep, body: InviteIn
+    container: ContainerDep, access: OrganizationAccessDep, locale: LocaleDep, body: InviteIn
 ) -> MemberOut:
-    """Add a member with a role; a new person gets an email to set a password."""
+    """Add a member with a role; a new person gets an email to set a password,
+    in the language of the request."""
     member = await container.members.invite(
         access,
         Invitation(
@@ -40,6 +42,7 @@ async def invite_member(
             first_name=body.first_name.strip(),
             last_name=body.last_name.strip(),
             role_code=body.role,
+            locale=locale,
         ),
     )
     return MemberOut.of(member, RANKS)

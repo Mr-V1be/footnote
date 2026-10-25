@@ -7,29 +7,41 @@ from typing import Any
 
 from snoska.application.checks.legal.index import Fragment
 from snoska.application.checks.norms import Provision
+from snoska.application.shared.languages import LANGUAGE_NAMES
 from snoska.domain.checks.catalog import CheckDefinition, ModelBrief
+from snoska.domain.shared.locale import SOURCE_LOCALE, Locale
 from snoska.ports.ai import ChatMessage, MessageRole
 
 VERDICTS = ("present", "partial", "absent", "uncertain")
 MAX_QUOTES = 2
 # The prompt's wording is part of every cached answer's key: change it and
 # the answers are asked again.
-PROMPT_VERSION = "batch-3"
-# An answer takes about this many tokens per requirement; the reserve covers
-# the wrapper and a model's reasoning, which counts against the same limit.
-TOKENS_PER_VERDICT = 300
+PROMPT_VERSION = "batch-4"
+# An answer takes about this many tokens per requirement (an explanation and
+# a recommendation in every interface language); the reserve covers the
+# wrapper and a model's reasoning, which counts against the same limit.
+TOKENS_PER_VERDICT = 450
 TOKENS_RESERVE = 1500
 MAX_ANSWER_TOKENS = 12000
 
+_LANGUAGES = ", ".join(f"{locale.value} — {LANGUAGE_NAMES[locale]}" for locale in Locale)
+
+
+def _in_every_language(text: str) -> dict[str, str]:
+    return {locale.value: f"{text} {LANGUAGE_NAMES[locale]}" for locale in Locale}
+
+
 # The language of the instructions is the language of the documents: the
-# model reads Russian law and Russian documents and answers in Russian.
+# model reads Russian law and Russian documents and quotes them as they are.
+# What it explains to a reader it writes in every interface language, so a
+# finding reads in the language of whoever opens it.
 VERDICT_EXAMPLE = {
     "check": "C1",
     "verdict": "present | partial | absent | uncertain",
     "quotes": [{"fragment": "D1", "text": "дословная цитата"}],
     "norm": "N1",
-    "explanation": "одно предложение",
-    "recommendation": "одно предложение, как исправить",
+    "explanation": _in_every_language("одно предложение"),
+    "recommendation": _in_every_language("как исправить, одним предложением"),
 }
 
 SYSTEM_PROMPT = "\n".join(
@@ -42,7 +54,10 @@ SYSTEM_PROMPT = "\n".join(
         "Правила:",
         "- опирайся только на данные фрагменты и нормы, ничего не додумывай;",
         "- цитаты — короткие дословные отрывки из текста фрагментов D, не длиннее 15 слов;",
-        "- норму указывай только из тех, что перечислены у требования.",
+        "- норму указывай только из тех, что перечислены у требования;",
+        "- цитаты не переводи: они дословно на языке документа;",
+        f"- explanation и recommendation пиши на каждом языке ({_LANGUAGES}) "
+        "с одним и тем же смыслом.",
         "",
         "verdict:",
         "- present — требование выполнено; приведи цитату, которая это подтверждает;",
@@ -53,11 +68,17 @@ SYSTEM_PROMPT = "\n".join(
         "Ответь одним JSON-объектом без пояснений вокруг: "
         '{"verdicts": [...]} — ровно по одному элементу на каждое требование, вида',
         json.dumps(VERDICT_EXAMPLE, ensure_ascii=False),
-        "Для present и uncertain recommendation — пустая строка.",
+        "Для present и uncertain recommendation — пустые строки.",
         f"Версия инструкции: {PROMPT_VERSION}.",
     ]
 )
 
+_WORDINGS_SCHEMA: Mapping[str, Any] = {
+    "type": "object",
+    "properties": {locale.value: {"type": "string"} for locale in Locale},
+    "required": [locale.value for locale in Locale],
+    "additionalProperties": False,
+}
 _QUOTE_SCHEMA: Mapping[str, Any] = {
     "type": "object",
     "properties": {"fragment": {"type": "string"}, "text": {"type": "string"}},
@@ -71,8 +92,8 @@ VERDICT_SCHEMA: Mapping[str, Any] = {
         "verdict": {"type": "string", "enum": list(VERDICTS)},
         "quotes": {"type": "array", "maxItems": MAX_QUOTES, "items": _QUOTE_SCHEMA},
         "norm": {"type": "string"},
-        "explanation": {"type": "string"},
-        "recommendation": {"type": "string"},
+        "explanation": _WORDINGS_SCHEMA,
+        "recommendation": _WORDINGS_SCHEMA,
     },
     "required": ["check", "verdict", "quotes", "norm", "explanation", "recommendation"],
     "additionalProperties": False,
@@ -174,7 +195,7 @@ def build_messages(
         for key, item in context.checks.items()
     )
     norms = "\n".join(
-        f"[{key}] {provision.citation}: {provision.text}"
+        f"[{key}] {provision.citation.resolve(SOURCE_LOCALE)}: {provision.text}"
         for key, provision in context.norms.items()
     )
     fragments = "\n".join(_fragment_line(key, item) for key, item in context.fragments.items())

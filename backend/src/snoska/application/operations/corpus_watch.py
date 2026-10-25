@@ -3,12 +3,14 @@ from __future__ import annotations
 import structlog
 
 from snoska.application.corpus.sync import CorpusSync, SyncOutcome
+from snoska.application.operations.edition_notice import edition_notice
 from snoska.domain.operations.schedule import EditionCheck, WatchOutcome
 from snoska.domain.shared.ids import new_id
+from snoska.domain.shared.locale import SOURCE_LOCALE, Locale
 from snoska.ports.clock import Clock
 from snoska.ports.corpus.source import ActCatalog, CorpusSourceError
 from snoska.ports.jobs import JobPayload
-from snoska.ports.operations.notifications import Email, Mailer, PlatformAdmins
+from snoska.ports.operations.notifications import Mailer, PlatformAdmins
 from snoska.ports.unit_of_work import UnitOfWorkFactory
 
 log = structlog.get_logger(__name__)
@@ -20,7 +22,8 @@ class WatchCorpusEditions:
     """Weekly job: is there a newer redaction of a tracked act on the
     official portal? A new one is loaded into the corpus (and indexed in the
     background); the platform's administrators get an email either way it
-    matters — a new edition, or a source that could not be read."""
+    matters — a new edition, or a source that could not be read — each in
+    the language they last used the product in."""
 
     def __init__(
         self,
@@ -55,10 +58,24 @@ class WatchCorpusEditions:
             await uow.commit()
         notable = [check for check in checks if check.outcome is not WatchOutcome.UNCHANGED]
         if notable:
-            recipients = tuple(await self._admins.emails())
-            if recipients:
-                await self._mailer.send(self._email(recipients, notable))
+            await self._notify(notable)
         return checks
+
+    async def _notify(self, notable: list[EditionCheck]) -> None:
+        recipients = await self._admins.recipients()
+        if not recipients:
+            return
+        async with self._uow_factory.for_platform() as uow:
+            locales = await uow.profiles.locales([person.user_id for person in recipients])
+        by_locale: dict[Locale, list[str]] = {}
+        for person in recipients:
+            by_locale.setdefault(locales.get(person.user_id, SOURCE_LOCALE), []).append(
+                person.email
+            )
+        for locale, emails in by_locale.items():
+            await self._mailer.send(
+                edition_notice(tuple(emails), notable, self._catalog, locale, self._web_url)
+            )
 
     async def _check(self, act_code: str) -> EditionCheck:
         now = self._clock.now()
@@ -89,36 +106,3 @@ class WatchCorpusEditions:
             revision=result.source_revision,
             edition_id=result.edition_id,
         )
-
-    def _email(self, recipients: tuple[str, ...], checks: list[EditionCheck]) -> Email:
-        lines: list[str] = []
-        for check in checks:
-            title = self._catalog.get(check.act_code).act.short_title
-            if check.outcome is WatchOutcome.NEW_EDITION:
-                lines.append(
-                    f"• {title}: на портале новая редакция ({check.revision}). Она загружена "
-                    "в корпус и стала действующей; индексация для поиска идёт в фоне."
-                )
-            else:
-                lines.append(f"• {title}: не удалось проверить источник — {check.error}.")
-        new = any(check.outcome is WatchOutcome.NEW_EDITION for check in checks)
-        subject = (
-            "Сноска: новая редакция закона в корпусе"
-            if new
-            else "Сноска: не удалось проверить редакцию закона"
-        )
-        footer = (
-            "Проверки документов, сделанные по прежней редакции, стоит повторить: "
-            "snoska checks recheck."
-            if new
-            else "Проверка повторится по расписанию; запустить её вручную: snoska corpus watch."
-        )
-        text = "\n\n".join(
-            (
-                "Еженедельная проверка корпуса норм.",
-                "\n".join(lines),
-                footer,
-                f"Состояние системы: {self._web_url}/platform/system",
-            )
-        )
-        return Email(to=recipients, subject=subject, text=text)

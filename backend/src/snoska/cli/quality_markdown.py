@@ -6,6 +6,7 @@ from collections.abc import Iterable, Mapping, Sequence
 
 from snoska.domain.checks.catalog import CheckCatalog, CheckMethod
 from snoska.domain.checks.quality import DocumentTiming, Metrics, QualityReport
+from snoska.domain.shared.locale import SOURCE_LOCALE
 
 _FAMILIES = {
     "formatting": "Оформление по ГОСТ Р 7.0.97-2016",
@@ -126,7 +127,8 @@ def _trials(trials: Sequence[QualityReport]) -> list[str]:
 def render(
     report: QualityReport, catalog: CheckCatalog, trials: Sequence[QualityReport] = ()
 ) -> str:
-    titles = {check.code: check.title for check in catalog.all()}
+    # The report is written in Russian, as the rest of the documentation.
+    titles = {check.code: check.title.resolve(SOURCE_LOCALE) for check in catalog.all()}
     model = report.model or "не подключена — юридические проверки не измерены"
     by_method = report.by_method()
     by_family = report.by_family()
@@ -182,7 +184,7 @@ def render(
         *_table(
             "Проверка",
             (
-                (f"{check.title} (`{check.code}`)", by_check[check.code])
+                (f"{titles[check.code]} (`{check.code}`)", by_check[check.code])
                 for check in catalog.all()
                 if check.code in by_check
             ),

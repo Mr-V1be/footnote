@@ -10,6 +10,7 @@ from typing import Any
 from uuid import UUID
 
 from snoska.domain.checks.grounding import locate_parts
+from snoska.domain.shared.locale import LocalizedText
 
 QUESTION_MAX_LENGTH = 1_000
 TITLE_LENGTH = 80
@@ -30,20 +31,21 @@ class SourceProvision:
     act_code: str
     edition_id: UUID
     anchor: str
-    citation: str
+    citation: LocalizedText
     text: str
 
 
 @dataclass(frozen=True, slots=True)
 class Citation:
     """A footnote of an answer: the number in the text, the provision, and
-    the words of the provision the answer rests on."""
+    the words of the provision the answer rests on (the law's own words,
+    whatever language the answer is in)."""
 
     number: int
     act_code: str
     edition_id: UUID
     anchor: str
-    citation: str
+    citation: LocalizedText
     quote: str
 
 
