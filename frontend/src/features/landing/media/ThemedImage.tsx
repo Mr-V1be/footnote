@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 
-import { useResolvedTheme } from "@/shared/theme/useResolvedTheme";
+import { useMediaPath } from "./useMediaPath";
 
-/** A screenshot of the product in the theme the page is shown in. */
+/** A screenshot of the product in the language and the theme the page is shown in. */
 export function ThemedImage({
   name,
   alt,
@@ -16,14 +16,6 @@ export function ThemedImage({
   width: number;
   height: number;
 }) {
-  const theme = useResolvedTheme();
-  return (
-    <Image
-      src={`/landing/${name}-${theme}.webp`}
-      alt={alt}
-      width={width}
-      height={height}
-      unoptimized
-    />
-  );
+  const media = useMediaPath();
+  return <Image src={media(name, "webp")} alt={alt} width={width} height={height} unoptimized />;
 }

@@ -4,13 +4,11 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
-import { useResolvedTheme } from "@/shared/theme/useResolvedTheme";
 
-/** Where the landing's recordings of the product live (see e2e/landing). */
-const MEDIA_ROOT = "/landing";
+import { useMediaPath } from "./useMediaPath";
 
 /**
- * A short silent loop of the product in the current theme. It plays only
+ * A short silent loop of the product in the current language and theme. It plays only
  * while on screen, and not at all for those who ask for reduced motion:
  * they see its first frame.
  */
@@ -25,10 +23,11 @@ export function LoopVideo({
   width: number;
   height: number;
 }) {
-  const theme = useResolvedTheme();
+  const media = useMediaPath();
   const still = useMediaQuery("(prefers-reduced-motion: reduce)");
   const video = useRef<HTMLVideoElement>(null);
-  const poster = `${MEDIA_ROOT}/${name}-${theme}.webp`;
+  const poster = media(name, "webp");
+  const source = media(name, "mp4");
 
   useEffect(() => {
     const element = video.current;
@@ -39,16 +38,16 @@ export function LoopVideo({
     });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [still, theme]);
+  }, [still, source]);
 
   if (still) {
     return <Image src={poster} alt={label} width={width} height={height} unoptimized />;
   }
   return (
     <video
-      key={theme}
+      key={source}
       ref={video}
-      src={`${MEDIA_ROOT}/${name}-${theme}.mp4`}
+      src={source}
       poster={poster}
       width={width}
       height={height}

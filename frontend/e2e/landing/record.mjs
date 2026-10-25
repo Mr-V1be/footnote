@@ -1,6 +1,8 @@
 // Records the landing page's media from the running stand: short silent
-// loops of the product (H.264 + WebP poster) and stills, in both themes.
-//   node e2e/landing/record.mjs            everything
+// loops of the product (H.264 + WebP poster) and stills, in both themes, in
+// one interface language (a set per language: public/landing/<locale>).
+//   node e2e/landing/record.mjs                   everything, in Russian
+//   LOCALE=en node e2e/landing/record.mjs         everything, in English
 //   CLIPS=ask,result node e2e/landing/record.mjs
 // Needs the stand with the seed and checked documents (make demo-refresh).
 import { mkdir, rm } from "node:fs/promises";
@@ -8,15 +10,31 @@ import { resolve } from "node:path";
 
 import { chromium } from "playwright";
 
-import { BASE, ROOT, credentials, restoreStand, signIn } from "../runner.mjs";
+import {
+  BASE,
+  LOCALE,
+  ROOT,
+  checkTitle,
+  credentials,
+  literally,
+  messages,
+  restoreStand,
+  signIn,
+} from "../runner.mjs";
 import { encodeLoop, encodeStill, glide, launchRecorder, pause, recording } from "./media.mjs";
 
-const OUT = resolve(ROOT, "frontend/public/landing");
-const WORK = resolve(ROOT, ".run/landing-media");
+const OUT = resolve(ROOT, "frontend/public/landing", LOCALE);
+const WORK = resolve(ROOT, ".run/landing-media", LOCALE);
 const THEMES = ["light", "dark"];
 const LAPTOP = { width: 1280, height: 800 };
 const PHONE = { width: 390, height: 844 };
-const QUESTION = "В какой срок нужно прекратить обработку после отзыва согласия?";
+const QUESTIONS = {
+  ru: "В какой срок нужно прекратить обработку после отзыва согласия?",
+  en: "How soon must processing stop after consent is withdrawn?",
+};
+const m = await messages();
+const DATE_FINDING = literally(await checkTitle("formatting.date_format"));
+const FONT_FINDING = literally(await checkTitle("formatting.font_size"));
 
 /**
  * The autofix clip shows version 2 of the policy, the automatic fix of
@@ -24,13 +42,10 @@ const QUESTION = "В какой срок нужно прекратить обр�
  */
 async function ensureFixed(page, organization, id) {
   await page.goto(`${BASE}/o/${organization}/documents/${id}`, { waitUntil: "networkidle" });
-  const compare = page.getByRole("button", { name: /Было и стало/ });
+  const compare = page.getByRole("button", { name: literally(m.autofix.compare) });
   if ((await compare.count()) > 0) return;
-  await page.getByRole("button", { name: "Исправить оформление" }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Создать исправленную версию" })
-    .click();
+  await page.getByRole("button", { name: m.checks.summary.autofix }).click();
+  await page.getByRole("dialog").getByRole("button", { name: m.autofix.apply }).click();
   await compare.waitFor({ timeout: 300_000 });
 }
 
@@ -52,10 +67,7 @@ const CLIPS = {
         await pause(page, 900);
         await glide(page, 520, 3200);
         await pause(page, 700);
-        await page
-          .getByRole("button", { name: /Дата записана не по стандарту/ })
-          .first()
-          .click();
+        await page.getByRole("button", { name: DATE_FINDING }).first().click();
         await pause(page, 1600);
         await glide(page, -520, 2200);
         await pause(page, 600);
@@ -75,7 +87,8 @@ const CLIPS = {
         await pause(page, 700);
         await glide(page, 640, 2800);
         await pause(page, 500);
-        await page.getByRole("button", { name: /^Замечания/ }).click();
+        const findings = new RegExp(`^${literally(m.checks.findings).source}`);
+        await page.getByRole("button", { name: findings }).click();
         await pause(page, 2400);
       };
     },
@@ -89,12 +102,9 @@ const CLIPS = {
       await pause(page, 600);
       return async () => {
         await pause(page, 700);
-        await page
-          .getByRole("button", { name: /Кегль основного текста/ })
-          .first()
-          .click();
+        await page.getByRole("button", { name: FONT_FINDING }).first().click();
         await pause(page, 900);
-        await page.getByRole("button", { name: "К первому месту" }).click();
+        await page.getByRole("button", { name: m.checks.firstPlace }).click();
         await pause(page, 1500);
         await glide(page, 360, 2400);
         await pause(page, 900);
@@ -112,7 +122,7 @@ const CLIPS = {
       await pause(page, 600);
       return async () => {
         await pause(page, 900);
-        await page.getByRole("button", { name: /Было и стало/ }).click();
+        await page.getByRole("button", { name: literally(m.autofix.compare) }).click();
         await pause(page, 1800);
         await glide(page, 260, 1800, "[role=dialog] > div:last-child");
         await pause(page, 1400);
@@ -131,11 +141,11 @@ const CLIPS = {
       await pause(page, 600);
       return async () => {
         await pause(page, 500);
-        await page.getByRole("textbox", { name: "Вопрос" }).click();
-        await page.keyboard.type(QUESTION, { delay: 35 });
+        await page.getByRole("textbox", { name: m.ask.question }).click();
+        await page.keyboard.type(QUESTIONS[LOCALE], { delay: 35 });
         await pause(page, 400);
         await page.keyboard.press("Enter");
-        await page.getByRole("list", { name: "Цитаты из закона" }).waitFor({ timeout: 120_000 });
+        await page.getByRole("list", { name: m.ask.citations }).waitFor({ timeout: 120_000 });
         await pause(page, 900);
         await glide(page, 360, 2200);
         await pause(page, 1600);
@@ -150,7 +160,7 @@ const STILLS = {
     viewport: { width: 1200, height: 800 },
     async run(page) {
       await page.goto(`${BASE}/o/zarya/w/main/documents`, { waitUntil: "networkidle" });
-      await page.getByRole("button", { name: "Загрузить" }).first().click();
+      await page.getByRole("button", { name: m.documents.upload }).first().click();
       await page
         .locator("[role=dialog] input[type=file]")
         .setInputFiles(resolve(ROOT, "backend/demo/reference/politika-zarya.docx"));
@@ -162,10 +172,7 @@ const STILLS = {
     viewport: { width: 1200, height: 800 },
     async run(page, { policy }) {
       await page.goto(`${BASE}/o/zarya/documents/${policy}?v=1`, { waitUntil: "networkidle" });
-      await page
-        .getByRole("button", { name: /Дата записана не по стандарту/ })
-        .first()
-        .click();
+      await page.getByRole("button", { name: DATE_FINDING }).first().click();
       await pause(page, 600);
     },
   },
@@ -174,8 +181,8 @@ const STILLS = {
     viewport: { width: 1200, height: 800 },
     async run(page, { policy }) {
       await page.goto(`${BASE}/o/zarya/documents/${policy}?v=1`, { waitUntil: "networkidle" });
-      await page.getByRole("button", { name: "Исправить оформление" }).click();
-      await page.getByRole("dialog").getByText("Исправим").waitFor();
+      await page.getByRole("button", { name: m.checks.summary.autofix }).click();
+      await page.getByRole("dialog").getByText(m.autofix.planned).waitFor();
       await pause(page, 400);
     },
   },

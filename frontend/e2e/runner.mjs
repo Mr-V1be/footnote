@@ -11,6 +11,30 @@ import { chromium } from "playwright";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const BASE = process.env.WEB_URL ?? "http://localhost:46300";
+/** The interface language of a run (LOCALE=en); Russian, as the milestones were shot, by default. */
+export const LOCALE = process.env.LOCALE ?? "ru";
+const LOCALE_COOKIE = { name: "snoska_locale", value: LOCALE, url: BASE };
+
+/** The interface's texts in the run's language, to find controls by their names. */
+export async function messages() {
+  return JSON.parse(await readFile(resolve(ROOT, `frontend/messages/${LOCALE}.json`), "utf8"));
+}
+
+/** The title a check of the catalogue has in the run's language. */
+export async function checkTitle(code) {
+  const { parse } = await import("yaml");
+  for (const file of ["formatting.yaml", "personal-data.yaml"]) {
+    const catalogue = parse(await readFile(resolve(ROOT, "backend/data/checks", file), "utf8"));
+    const check = catalogue.checks.find((entry) => entry.code === code);
+    if (check) return check.title[LOCALE];
+  }
+  throw new Error(`no check ${code}`);
+}
+
+/** A pattern that finds a text as it is, whatever characters it has. */
+export function literally(text, flags = "") {
+  return new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), flags);
+}
 export const VIEWPORTS = {
   // The smallest phone the layout is checked on; only for screens that ask for it.
   small: { width: 360, height: 780 },
@@ -54,6 +78,8 @@ export async function restoreStand() {
 
 export async function signIn(browser, email, password) {
   const context = await browser.newContext({ viewport: VIEWPORTS.desktop });
+  // The session's state carries the language to every context opened from it.
+  await context.addCookies([LOCALE_COOKIE]);
   const page = await context.newPage();
   // The root is the public landing now; sign-in is its own route.
   await page.goto(`${BASE}/auth/login`);
@@ -113,7 +139,10 @@ export async function capture({ screens, users, outDir }) {
           isMobile: viewport === "phone" || viewport === "small",
           hasTouch: viewport !== "desktop",
         });
-        await context.addCookies([{ name: "snoska_theme", value: theme, url: BASE }]);
+        await context.addCookies([
+          { name: "snoska_theme", value: theme, url: BASE },
+          LOCALE_COOKIE,
+        ]);
         const page = await context.newPage();
         page.on("pageerror", (error) =>
           problems.push(`${screen.name} ${viewport} ${theme}: ${error.message}`),

@@ -8,7 +8,8 @@
 #   4. benchmark         reference set, the model timed   -> backend/data/quality/benchmark.json,
 #                                                            docs/quality.md
 #   5. screenshots       milestone 4, 3 sizes x 2 themes  -> docs/screenshots/m4
-#   6. landing media     clips and stills of the landing  -> frontend/public/landing
+#   6. landing media     clips and stills of the landing, -> frontend/public/landing/<locale>
+#                        in every interface language
 #   7. product video     1920x1080 and 1080x1920          -> docs/case/video
 #
 # The runs leave no trace: the stand is returned to its seed at the end.
@@ -61,7 +62,9 @@ step "5/7 screenshots"
 MILESTONE=m4 node e2e/screenshots.mjs
 
 step "6/7 landing media"
-node e2e/landing/record.mjs
+for locale in ru en; do
+  LOCALE="$locale" node e2e/landing/record.mjs
+done
 
 step "7/7 product video"
 node e2e/video/record.mjs
