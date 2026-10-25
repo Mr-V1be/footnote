@@ -39,7 +39,8 @@ jobs:
       - id: plan
         env:
           PLAN: ${{ inputs.plan }}
-        run: echo "images=$(jq -c 'map(. + {args: (.args | to_entries | map("\(.key)=\(.value)") | join("\n"))})' <<<"$PLAN")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "images=$(jq -c 'map(. + {args: (.args | to_entries | map("\(.key)=\(.value)") | join("\n"))})' <<<"$PLAN")" >> "$GITHUB_OUTPUT"
 
   image:
     name: ${{ matrix.image }}
