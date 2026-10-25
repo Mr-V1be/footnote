@@ -1,0 +1,78 @@
+name: Images
+run-name: images ${{ inputs.revision }} ${{ inputs.key }}
+
+# Release images, built on request of the hosting's deploy script (scripts/deploy.sh): it resolves
+# the build plan from the server's settings, so deployment-specific build arguments live only in
+# the hosting. The registry gets each image as <name>:sha-<commit>-<key>, where the key fingerprints
+# the plan; the server then pulls only the layers it lacks. Build arguments are public values (they
+# end up in image layers), never secrets.
+#
+# This file is the same in every project repository; its source is tehniki-hosting/ci/images.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Commit to build
+        required: true
+      key:
+        description: Fingerprint of the build plan
+        required: true
+      plan:
+        description: 'JSON list of {image, context, file, target, args}'
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: images-${{ inputs.revision }}-${{ inputs.key }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.plan.outputs.images }}
+    steps:
+      - id: plan
+        env:
+          PLAN: ${{ inputs.plan }}
+        run: echo "images=$(jq -c 'map(. + {args: (.args | to_entries | map("\(.key)=\(.value)") | join("\n"))})' <<<"$PLAN")" >> "$GITHUB_OUTPUT"
+
+  image:
+    name: ${{ matrix.image }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.revision }}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reference
+        id: ref
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${{ matrix.image }}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          build-args: ${{ matrix.args }}
+          push: true
+          tags: ${{ steps.ref.outputs.ref }}:sha-${{ inputs.revision }}-${{ inputs.key }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ inputs.revision }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
