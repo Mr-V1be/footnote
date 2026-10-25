@@ -18,9 +18,25 @@
 
 <#-- The wordmark: the product name carries its own footnote marker, as in the app. -->
 <#macro wordmark>
-  <span class="wordmark" aria-label="${realm.displayName!''}">
-    <span class="wordmark__word" aria-hidden="true">${realm.displayName!''}</span><sup class="wordmark__mark" aria-hidden="true">1</sup>
+  <span class="wordmark" aria-label="${msg("snoskaName")}">
+    <span class="wordmark__word" aria-hidden="true">${msg("snoskaName")}</span><sup class="wordmark__mark" aria-hidden="true">1</sup>
   </span>
+</#macro>
+
+<#--
+  The interface languages, each by its code; the current one is marked.
+  Choosing one also tells the app (js/language.js), so it opens in it.
+-->
+<#macro languages>
+  <#if realm.internationalizationEnabled && locale?? && locale.supported?size gt 1>
+    <nav class="languages" aria-label="${msg("snoskaLanguages")}">
+      <#list locale.supported as language>
+        <a class="languages__item" href="${language.url}" hreflang="${language.languageTag}" lang="${language.languageTag}"
+           title="${language.label}" data-snoska-locale="${language.languageTag}"
+           <#if language.languageTag == locale.currentLanguageTag>aria-current="true"</#if>>${language.languageTag?upper_case}</a>
+      </#list>
+    </nav>
+  </#if>
 </#macro>
 
 <#macro demoMark>
@@ -38,7 +54,7 @@
 <#-- A finding as the product shows it: a marked phrase, its marker and the footnote. -->
 <#macro specimen>
   <figure class="specimen" aria-label="${msg("snoskaSpecimenLabel")}">
-    <div class="specimen__sheet" aria-hidden="true">
+    <div class="specimen__sheet" aria-hidden="true" lang="ru">
       <p class="specimen__heading">${msg("snoskaSpecimenHeading")}</p>
       <p class="specimen__text">${msg("snoskaSpecimenBefore")} <mark class="specimen__mark">${msg("snoskaSpecimenMarked")}</mark>&#8288;<sup class="specimen__marker">1</sup> ${msg("snoskaSpecimenAfter")}</p>
       <span class="specimen__line"></span>
@@ -52,7 +68,7 @@
         <span class="specimen__severity">${msg("snoskaSpecimenSeverity")}</span>
       </span>
       <span class="specimen__finding">${msg("snoskaSpecimenFinding")}</span>
-      <span class="specimen__quote">${msg("snoskaSpecimenQuote")}</span>
+      <span class="specimen__quote" lang="ru">${msg("snoskaSpecimenQuote")}</span>
       <span class="specimen__citation">${msg("snoskaSpecimenCitation")}</span>
     </figcaption>
   </figure>

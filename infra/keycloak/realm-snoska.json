@@ -2,6 +2,7 @@
   "realm": "snoska",
   "displayName": "Сноска",
   "loginTheme": "snoska",
+  "emailTheme": "snoska",
   "enabled": true,
   "organizationsEnabled": true,
   "sslRequired": "external",
@@ -12,9 +13,10 @@
   "rememberMe": true,
   "internationalizationEnabled": true,
   "supportedLocales": [
+    "en",
     "ru"
   ],
-  "defaultLocale": "ru",
+  "defaultLocale": "en",
   "accessTokenLifespan": 300,
   "ssoSessionIdleTimeout": 3600,
   "ssoSessionMaxLifespan": 36000,

@@ -51,6 +51,7 @@
     <header class="auth__brand">
       <@ui.wordmark/>
       <@ui.demoMark/>
+      <@ui.languages/>
     </header>
 
     <div class="auth__panel">
