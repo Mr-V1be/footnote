@@ -118,6 +118,7 @@ def test_a_grounded_verdict_locates_its_quote_and_a_bad_one_is_kept_apart() -> N
         (batch(verdict("C1", "present", [])), "цитата"),
         (batch(), "нет вердикта"),
         (batch(verdict("C1", "absent", [], explanation={"ru": "Нет целей.", "en": ""})), "en"),
+        (batch(verdict("C1", "absent", [], norm="N1, N2")), "одна норма"),
     ],
     ids=[
         "not json",
@@ -126,6 +127,7 @@ def test_a_grounded_verdict_locates_its_quote_and_a_bad_one_is_kept_apart() -> N
         "no quote",
         "missing",
         "explained in one language only",
+        "a list of norms",
     ],
 )
 def test_ungrounded_or_malformed_verdicts_are_refused(text: str, problem: str) -> None:

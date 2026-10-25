@@ -112,8 +112,11 @@ def parse_verdict(
     if verdict not in VERDICTS:
         raise InvalidAnswer(f"verdict должен быть одним из: {', '.join(VERDICTS)}.")
     norm = data.get("norm")
+    given = ", ".join(context.norms)
+    if isinstance(norm, str) and "," in norm:
+        raise InvalidAnswer(f"в поле norm — одна норма, а не список: выбери одну из {given}.")
     if not isinstance(norm, str) or norm not in context.norms:
-        raise InvalidAnswer(f"норма {norm!r} не из списка требования: {', '.join(context.norms)}.")
+        raise InvalidAnswer(f"норма {norm!r} не из списка требования: {given}.")
     quotes = _quotes(data, context, blocks)
     if verdict in GROUNDED_VERDICTS and not quotes:
         raise InvalidAnswer("для present и partial нужна хотя бы одна дословная цитата.")
