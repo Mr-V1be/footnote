@@ -466,7 +466,8 @@
       "serviceAccountsEnabled": false,
       "frontchannelLogout": true,
       "redirectUris": [
-        "${SNOSKA_WEB_URL}/auth/callback"
+        "${SNOSKA_WEB_URL}/auth/callback",
+        "${SNOSKA_WEB_URL}"
       ],
       "webOrigins": [
         "${SNOSKA_WEB_URL}"

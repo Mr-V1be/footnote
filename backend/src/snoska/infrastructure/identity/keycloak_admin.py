@@ -188,7 +188,7 @@ class KeycloakAdminClient:
                 f"/users/{user_id}/execute-actions-email",
                 params={
                     "client_id": self._config.web_client_id,
-                    "redirect_uri": self._config.web_url,
+                    "redirect_uri": self._config.web_url.rstrip("/"),
                     "lifespan": INVITE_LIFESPAN_SECONDS,
                 },
                 json=INVITE_ACTIONS,
