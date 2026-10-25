@@ -66,9 +66,18 @@ export function MenuItem({
   );
 }
 
-export function MenuRadioItem({ value, children }: { value: string; children: ReactNode }) {
+export function MenuRadioItem({
+  value,
+  lang,
+  children,
+}: {
+  value: string;
+  /** The language of the item's text when it differs from the page's. */
+  lang?: string;
+  children: ReactNode;
+}) {
   return (
-    <Primitive.RadioItem className={styles.item} value={value}>
+    <Primitive.RadioItem className={styles.item} value={value} lang={lang}>
       <span className={styles.icon}>
         <Primitive.ItemIndicator>
           <IconCheck stroke={1.75} />

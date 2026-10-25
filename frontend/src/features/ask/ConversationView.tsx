@@ -4,6 +4,7 @@ import { IconSearchOff } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
 import type { ConversationTurn } from "@/shared/api/types";
+import { DOCUMENT_LOCALE } from "@/shared/i18n/locales";
 import { Typeset } from "@/shared/typography/Typeset";
 import { Notice } from "@/shared/ui/notice/Notice";
 import { Skeleton } from "@/shared/ui/skeleton/Skeleton";
@@ -79,7 +80,7 @@ function Answer({ turn }: { turn: ConversationTurn }) {
             </span>
             <div className={styles.citationBody}>
               <p className={styles.citationRef}>{citation.citation}</p>
-              <blockquote className={styles.quote}>
+              <blockquote className={styles.quote} lang={DOCUMENT_LOCALE}>
                 <Typeset text={`«${citation.quote}»`} />
               </blockquote>
             </div>

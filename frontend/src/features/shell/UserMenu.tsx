@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
 import { useSession } from "@/features/session/session";
+import { isLocale, LOCALE_NAMES, LOCALES } from "@/shared/i18n/locales";
+import { useLocaleChoice } from "@/shared/i18n/useLocaleChoice";
 import { parseTheme, THEMES } from "@/shared/theme/theme";
 import { useThemePreference } from "@/shared/theme/ThemeContext";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
@@ -34,6 +36,7 @@ export function UserMenu({
   const t = useTranslations("user");
   const me = useSession();
   const { theme, setTheme } = useThemePreference();
+  const { locale, setLocale } = useLocaleChoice();
   const logout = useRef<HTMLFormElement>(null);
   return (
     <>
@@ -62,6 +65,20 @@ export function UserMenu({
             {THEMES.map((option) => (
               <MenuRadioItem key={option} value={option}>
                 {t(THEME_LABELS[option])}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
+          <MenuSeparator />
+          <MenuLabel>{t("language")}</MenuLabel>
+          <MenuRadioGroup
+            value={locale}
+            onValueChange={(value) => {
+              if (isLocale(value)) setLocale(value);
+            }}
+          >
+            {LOCALES.map((option) => (
+              <MenuRadioItem key={option} value={option} lang={option}>
+                {LOCALE_NAMES[option]}
               </MenuRadioItem>
             ))}
           </MenuRadioGroup>

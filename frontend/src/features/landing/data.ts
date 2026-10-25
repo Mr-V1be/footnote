@@ -24,7 +24,7 @@ async function attempt<T>(load: () => Promise<{ data?: T }>): Promise<T | null> 
 }
 
 export async function publicFacts(): Promise<PublicFacts> {
-  const api = publicApi();
+  const api = await publicApi();
   const [checks, quality, kinds, plans] = await Promise.all([
     attempt(() => api.GET("/api/v1/checks/catalog")),
     attempt(() => api.GET("/api/v1/checks/quality")),

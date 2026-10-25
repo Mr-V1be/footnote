@@ -39,6 +39,8 @@
     "themeSystem": "Как в системе",
     "themeLight": "Светлая",
     "themeDark": "Тёмная",
+    "language": "Язык",
+    "languageOf": "Язык: {language}",
     "signOut": "Выйти",
     "role": "Роль"
   },
@@ -180,7 +182,8 @@
     "footnotes": "Сноски на реквизиты",
     "actions": "Действия с документом",
     "uploadedBy": "{date}, {name}",
-    "versionOptionAutofix": "Версия {number} · исправлена · {date}"
+    "versionOptionAutofix": "Версия {number} · исправлена · {date}",
+    "originalLanguage": "Текст документа — на русском, как в оригинале"
   },
   "requisites": {
     "organization_name": "Наименование организации",

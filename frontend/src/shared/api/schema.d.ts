@@ -8,7 +8,11 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Me */
+        /**
+         * Me
+         * @description The signed-in person, their organizations and roles. The language the
+         *     request states is remembered as theirs, for the mail sent to them.
+         */
         get: operations["me"];
         put?: never;
         post?: never;
@@ -147,7 +151,8 @@ export type paths = {
         put?: never;
         /**
          * Invite Member
-         * @description Add a member with a role; a new person gets an email to set a password.
+         * @description Add a member with a role; a new person gets an email to set a password,
+         *     in the language of the request.
          */
         post: operations["invite_member"];
         delete?: never;
@@ -884,8 +889,8 @@ export type paths = {
         put?: never;
         /**
          * Ask
-         * @description Ask the corpus; the answer quotes the provisions it rests on, or says
-         *     honestly that the norm does not answer.
+         * @description Ask the corpus; the answer, in the language of the request, quotes the
+         *     provisions it rests on, or says honestly that the norm does not answer.
          */
         post: operations["ask"];
         delete?: never;
@@ -1294,7 +1299,8 @@ export type components = {
         CheckMethod: "deterministic" | "model";
         /**
          * CheckOut
-         * @description A check of the registry as the product describes it.
+         * @description A check of the registry as the product describes it, in the language
+         *     of the request.
          */
         CheckOut: {
             /** Code */
@@ -1322,7 +1328,11 @@ export type components = {
             /** Checks */
             checks: components["schemas"]["CheckOut"][];
         };
-        /** CitationOut */
+        /**
+         * CitationOut
+         * @description A footnote: the provision cited in the language of the request, and
+         *     its words as the law has them.
+         */
         CitationOut: {
             /** Number */
             number: number;
@@ -1408,7 +1418,7 @@ export type components = {
         /**
          * DetailOut
          * @description Either a message code with parameters (translated by the client) or
-         *     text written by the language model.
+         *     text written by the language model, in the language of the request.
          */
         DetailOut: {
             /** Code */
@@ -1587,7 +1597,10 @@ export type components = {
          * @enum {string}
          */
         FindingKind: "violation" | "review";
-        /** FindingOut */
+        /**
+         * FindingOut
+         * @description A finding with its texts in the language of the request.
+         */
         FindingOut: {
             /**
              * Id
@@ -1862,7 +1875,11 @@ export type components = {
             /** Quote */
             quote: string | null;
         };
-        /** NormUnitOut */
+        /**
+         * NormUnitOut
+         * @description A unit of the law as the corpus holds it: its text, and its citation
+         *     in the law's own language.
+         */
         NormUnitOut: {
             /**
              * Id
@@ -2565,7 +2582,10 @@ export interface operations {
     me: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -3610,7 +3630,10 @@ export interface operations {
     invite_member: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 organization: string;
             };
@@ -5532,7 +5555,10 @@ export interface operations {
     change_plan: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 organization: string;
             };
@@ -6509,7 +6535,10 @@ export interface operations {
     apply_autofix: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 document_id: string;
                 number: number;
@@ -6797,7 +6826,10 @@ export interface operations {
     latest_check: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 document_id: string;
                 number: number;
@@ -7083,7 +7115,10 @@ export interface operations {
     review_finding: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 finding_id: string;
                 organization: string;
@@ -7182,7 +7217,10 @@ export interface operations {
     check_catalog: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7366,7 +7404,10 @@ export interface operations {
     list_acts: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7458,7 +7499,10 @@ export interface operations {
     act_units: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 act_code: string;
             };
@@ -7836,7 +7880,10 @@ export interface operations {
     conversation: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 conversation_id: string;
                 organization: string;
@@ -7931,7 +7978,10 @@ export interface operations {
     ask: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path: {
                 organization: string;
             };
@@ -8309,7 +8359,10 @@ export interface operations {
     system_status: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Languages the reader reads, e.g. `en` or `ru`; texts the product writes (titles, requirements, explanations, citations) come in the first supported one, in Russian when none is. */
+                "Accept-Language"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };

@@ -5,7 +5,8 @@ import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import { useState, type ReactNode } from "react";
 
 import { ApiProvider } from "@/shared/api/ApiProvider";
-import type { Locale } from "@/shared/i18n/messages";
+import type { Locale } from "@/shared/i18n/locales";
+import { TIME_ZONE } from "@/shared/i18n/time";
 import { ThemeProvider } from "@/shared/theme/ThemeContext";
 import type { ThemePreference } from "@/shared/theme/theme";
 import { ToastProvider } from "@/shared/ui/toast/Toast";
@@ -36,7 +37,7 @@ export function AppProviders({
       }),
   );
   return (
-    <NextIntlClientProvider locale={locale} messages={messages} now={now} timeZone="Europe/Moscow">
+    <NextIntlClientProvider locale={locale} messages={messages} now={now} timeZone={TIME_ZONE}>
       <QueryClientProvider client={queryClient}>
         <ApiProvider>
           <ThemeProvider initial={theme}>

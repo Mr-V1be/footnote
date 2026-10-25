@@ -41,6 +41,24 @@
   line-height: var(--leading-snug);
 }
 
+/* That the text is the original's, for a reader of another language: quiet, not a warning. */
+.caption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-block-end: var(--space-4);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.caption svg {
+  flex: none;
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
 .notice svg {
   flex: none;
   inline-size: var(--icon-sm);
@@ -95,6 +113,7 @@
 }
 
 .heading:first-child,
+.caption + .heading,
 .notice + .heading {
   margin-block-start: 0;
 }

@@ -17,7 +17,8 @@ export async function POST(
   const form = await request.formData();
   const token = String(form.get("token") ?? "");
   const succeeded = form.get("decision") === "pay";
-  const result = await publicApi().POST("/api/v1/test-payments/{payment_id}/decision", {
+  const api = await publicApi();
+  const result = await api.POST("/api/v1/test-payments/{payment_id}/decision", {
     params: { path: { payment_id: payment } },
     body: { token, succeeded },
   });

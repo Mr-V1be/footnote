@@ -2,6 +2,7 @@ import "server-only";
 
 import createClient from "openapi-fetch";
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 import type { ApiClient } from "@/shared/api/client";
 import type { paths } from "@/shared/api/schema";
@@ -14,7 +15,8 @@ export const BACKEND_TIMEOUT_MS = 15_000;
 
 /**
  * API client for server components, authenticated as the signed-in user.
- * Without a usable session the user is sent to sign in.
+ * Without a usable session the user is sent to sign in. The API writes its
+ * texts in the language the page is rendered in.
  */
 export async function serverApi(returnTo: string): Promise<ApiClient> {
   const session = await currentSession();
@@ -22,10 +24,12 @@ export async function serverApi(returnTo: string): Promise<ApiClient> {
   if (!token) {
     redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
+  const locale = await getLocale();
   const client = createClient<paths>({ baseUrl: serverConfig().SNOSKA_API_URL });
   client.use({
     onRequest({ request }) {
       request.headers.set("Authorization", `Bearer ${token}`);
+      request.headers.set("Accept-Language", locale);
       return new Request(request, { signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS) });
     },
   });
@@ -33,13 +37,15 @@ export async function serverApi(returnTo: string): Promise<ApiClient> {
 }
 
 /**
- * API client for the few public endpoints (the test payment provider's own
- * pages): no user, the signed token in the request is the access.
+ * API client for the public endpoints (the landing's facts, the test payment
+ * provider's own pages): no user, in the language the page is rendered in.
  */
-export function publicApi(): ApiClient {
+export async function publicApi(): Promise<ApiClient> {
+  const locale = await getLocale();
   const client = createClient<paths>({ baseUrl: serverConfig().SNOSKA_API_URL });
   client.use({
     onRequest({ request }) {
+      request.headers.set("Accept-Language", locale);
       return new Request(request, { signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS) });
     },
   });

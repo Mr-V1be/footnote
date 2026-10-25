@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button/Button";
 import { SkipLink } from "@/shared/ui/skip-link/SkipLink";
 
 import styles from "./landing.module.css";
+import { LanguageMenu } from "./LanguageMenu";
 import { ThemeMenu } from "./ThemeMenu";
 
 /** Sections of the public site: anchors on the landing and the methodology page. */
@@ -36,6 +37,7 @@ export async function MarketingShell({ demo, children }: { demo: boolean; childr
             ))}
           </nav>
           <div className={styles.headerActions}>
+            <LanguageMenu />
             <ThemeMenu />
             <Button asChild variant="ghost">
               <a href="/auth/login">{t("signIn")}</a>

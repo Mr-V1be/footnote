@@ -3,6 +3,8 @@ import { type NextRequest } from "next/server";
 import { readSession, SESSION_COOKIE } from "@/server/auth/session";
 import { accessToken } from "@/server/auth/tokens";
 import { serverConfig } from "@/server/config";
+import { LOCALE_COOKIE } from "@/shared/i18n/locales";
+import { resolveLocale } from "@/shared/i18n/negotiation";
 
 /** Only the versioned public API is reachable through the web server. */
 const ALLOWED_PREFIX = "api/v1/";
@@ -17,6 +19,7 @@ const FORWARDED_RESPONSE_HEADERS = [
   "content-type",
   "content-length",
   "content-disposition",
+  "content-language",
   "cache-control",
   "x-request-id",
 ];
@@ -40,7 +43,12 @@ async function forward(
   const token = session ? await accessToken(session) : null;
   if (!token) return problem(401, "unauthenticated");
 
-  const headers = new Headers({ Authorization: `Bearer ${token}` });
+  // The API writes its texts in the visitor's language, not in whatever the browser lists.
+  const locale = resolveLocale({
+    stored: request.cookies.get(LOCALE_COOKIE)?.value,
+    acceptLanguage: request.headers.get("accept-language"),
+  });
+  const headers = new Headers({ Authorization: `Bearer ${token}`, "Accept-Language": locale });
   for (const name of FORWARDED_REQUEST_HEADERS) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);

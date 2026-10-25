@@ -18,8 +18,9 @@ export default async function TestCheckoutPage({
 }) {
   const { payment } = await params;
   const { token = "", failed } = await searchParams;
+  const api = await publicApi();
   const result = token
-    ? await publicApi().GET("/api/v1/test-payments/{payment_id}", {
+    ? await api.GET("/api/v1/test-payments/{payment_id}", {
         params: { path: { payment_id: payment }, query: { token } },
       })
     : null;

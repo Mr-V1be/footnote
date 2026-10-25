@@ -1,5 +1,6 @@
 import * as client from "openid-client";
 import { NextResponse, type NextRequest } from "next/server";
+import { getLocale } from "next-intl/server";
 
 import { oidc, callbackUrl, SCOPES } from "@/server/auth/oidc";
 import { beginLogin, safeReturnTo } from "@/server/auth/session";
@@ -21,7 +22,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     nonce,
     code_challenge: await client.calculatePKCECodeChallenge(codeVerifier),
     code_challenge_method: "S256",
-    ui_locales: "ru",
+    // The sign-in pages speak the language the visitor reads the product in.
+    ui_locales: await getLocale(),
   });
   return NextResponse.redirect(url);
 }

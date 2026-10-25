@@ -6,6 +6,7 @@ import { useState, type Ref } from "react";
 
 import { anchors } from "@/features/documents/viewer/footnotes";
 import type { CheckDefinition, Finding, ReviewStatus } from "@/shared/api/types";
+import { DOCUMENT_LOCALE } from "@/shared/i18n/locales";
 import { useCodeLabel } from "@/shared/i18n/useCodeLabel";
 import { Typeset } from "@/shared/typography/Typeset";
 
@@ -38,7 +39,7 @@ function Norm({ finding, check }: { finding: Finding; check: CheckDefinition | u
   return (
     <figure className={styles.norm}>
       <figcaption className={styles.normLabel}>{t("norm")}</figcaption>
-      <blockquote className={styles.quote} lang="ru">
+      <blockquote className={styles.quote} lang={DOCUMENT_LOCALE}>
         <Typeset text={shown} />
       </blockquote>
       <p className={styles.citation}>

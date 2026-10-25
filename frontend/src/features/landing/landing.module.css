@@ -71,6 +71,12 @@
   display: none;
 }
 
+/* The language's code beside its icon; tight on a phone, among the actions. */
+.language {
+  padding-inline: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
 .footer {
   border-block-start: var(--border-width) solid var(--color-border);
   background: var(--color-surface-sunken);
