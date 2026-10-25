@@ -199,19 +199,9 @@ class KeycloakAdminClient:
         groups = await self._groups(organization_id)
         if role_code not in groups:
             raise IdentityProviderError(f"organization has no group for role {role_code!r}")
-        member = await self._call(
-            "GET", f"/organizations/{organization_id}/members/{user_id}", ok=(200, 404)
-        )
-        if member.status_code == 404:
+        current = await self._member_groups(organization_id, user_id)
+        if current is None:
             raise MemberNotFoundError("not a member of the organization")
-        current = {
-            group["name"]
-            for group in (
-                await self._call(
-                    "GET", f"/organizations/{organization_id}/members/{user_id}/groups"
-                )
-            ).json()
-        }
         for name, group_id in groups.items():
             path = f"/organizations/{organization_id}/groups/{group_id}/members/{user_id}"
             if name == role_code and name not in current:
@@ -220,16 +210,33 @@ class KeycloakAdminClient:
                 await self._call("DELETE", path)
 
     async def remove(self, organization_id: UUID, user_id: UUID) -> None:
-        groups = await self._groups(organization_id)
-        for group_id in groups.values():
-            await self._call(
-                "DELETE",
-                f"/organizations/{organization_id}/groups/{group_id}/members/{user_id}",
-                ok=(204, 404),
-            )
+        current = await self._member_groups(organization_id, user_id)
+        if current is None:
+            return
+        # Only the groups the member is in: Keycloak refuses (400) to take a
+        # user out of a group they are not a member of.
+        for name, group_id in (await self._groups(organization_id)).items():
+            if name in current:
+                await self._call(
+                    "DELETE",
+                    f"/organizations/{organization_id}/groups/{group_id}/members/{user_id}",
+                    ok=(204, 404),
+                )
         await self._call(
             "DELETE", f"/organizations/{organization_id}/members/{user_id}", ok=(204, 404)
         )
+
+    async def _member_groups(self, organization_id: UUID, user_id: UUID) -> set[str] | None:
+        """Names of the organization's groups a member is in; None for a non-member."""
+        member = await self._call(
+            "GET", f"/organizations/{organization_id}/members/{user_id}", ok=(200, 404)
+        )
+        if member.status_code == 404:
+            return None
+        groups = await self._call(
+            "GET", f"/organizations/{organization_id}/members/{user_id}/groups"
+        )
+        return {group["name"] for group in groups.json()}
 
     # ── Provisioning ─────────────────────────────────────────────────────────
 
