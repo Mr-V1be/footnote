@@ -1,6 +1,5 @@
 // Milestone 2: the check — results as footnotes, review, progress and the
-// methodology page. Captured against the demo stand after `footnote demo seed`
-// with no model API connected, so the legal checks honestly report that.
+// methodology page. Captured against the demo stand after `footnote demo seed`.
 //
 // The "queued" screens need the worker stopped, so the run stays queued:
 //   SCREENS=queued node e2e/screenshots.mjs, then the rest with SCREENS='!queued'.
@@ -44,7 +43,8 @@ export const SCREENS = [
   {
     name: "00-login",
     run: async (page) => {
-      await page.goto(`${BASE}/`);
+      // The root is the public landing; sign-in is its own route.
+      await page.goto(`${BASE}/auth/login`);
       await page.waitForSelector("#username");
     },
   },
