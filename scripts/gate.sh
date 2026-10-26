@@ -17,6 +17,9 @@ step() { printf '\n\033[1m▶ %s\033[0m\n' "$*"; }
 step "source limits (≤700 lines per file, ≤15 source files per folder)"
 python3 "$ROOT/scripts/check_source_limits.py"
 
+step "env examples: only the settings marked as secrets get random values"
+python3 "$ROOT/scripts/init-env.py" --check
+
 if [[ "$SCOPE" == all || "$SCOPE" == backend ]]; then
   cd "$ROOT/backend"
   step "backend: ruff lint"

@@ -119,7 +119,7 @@ KEYCLOAK_PATH=/auth
    cp infra/prod/env.example .env.prod && chmod 600 .env.prod
    ```
 
-   Заполнить `.env.prod`: адреса, почту, ключ модели. Каждый секрет — случайный: `openssl rand -hex 32`. `FOOTNOTE_SECRETS_KEY` после первого запуска не меняется (иначе секреты вебхуков станут нечитаемыми). `FOOTNOTE_DEMO_MODE=false` для настоящей установки.
+   Заполнить `.env.prod`: адреса, почту, ключ модели. Секреты помечены `# @secret`, каждому — случайное значение: `openssl rand -hex 32`. `FOOTNOTE_SECRETS_KEY` после первого запуска не меняется (иначе секреты вебхуков станут нечитаемыми). `FOOTNOTE_DEMO_MODE=false` для настоящей установки.
 
 4. **Сборка и запуск.**
 
