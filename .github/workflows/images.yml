@@ -1,13 +1,11 @@
 name: Images
 run-name: images ${{ inputs.revision }} ${{ inputs.key }}
 
-# Release images, built on request of the hosting's deploy script (scripts/deploy.sh): it resolves
-# the build plan from the server's settings, so deployment-specific build arguments live only in
-# the hosting. The registry gets each image as <name>:sha-<commit>-<key>, where the key fingerprints
-# the plan; the server then pulls only the layers it lacks. Build arguments are public values (they
-# end up in image layers), never secrets.
-#
-# This file is the same in every project repository; its source is tehniki-hosting/ci/images.yml.
+# Release images, built on request of the deployment: it resolves the build plan from the
+# server's settings, so deployment-specific build arguments live only there. The registry gets
+# each image as <name>:sha-<commit>-<key>, where the key fingerprints the plan; the server then
+# pulls only the layers it lacks. Build arguments are public values (they end up in image layers),
+# never secrets.
 
 on:
   workflow_dispatch:
