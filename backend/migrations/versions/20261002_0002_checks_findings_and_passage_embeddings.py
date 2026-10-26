@@ -24,7 +24,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 TENANT_TABLES = ("check_runs", "check_results", "findings", "text_embeddings")
-TENANT_PREDICATE = "organization_id = NULLIF(current_setting('snoska.tenant_id', true), '')::uuid"
+TENANT_PREDICATE = "organization_id = NULLIF(current_setting('footnote.tenant_id', true), '')::uuid"
 
 
 def upgrade() -> None:
@@ -219,7 +219,7 @@ def upgrade() -> None:
         CREATE FUNCTION notify_check_run() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
             PERFORM pg_notify(
-                'snoska_check_runs',
+                'footnote_check_runs',
                 json_build_object('organization_id', NEW.organization_id, 'run_id', NEW.id)::text
             );
             RETURN NULL;

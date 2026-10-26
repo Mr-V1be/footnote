@@ -5,7 +5,7 @@
 #   scripts/gate.sh backend    source limits + backend checks
 #   scripts/gate.sh frontend   source limits + frontend checks
 #
-# Backend integration tests need PostgreSQL with the `snoska_test` database
+# Backend integration tests need PostgreSQL with the `footnote_test` database
 # (the compose stack locally, a service container in CI).
 set -euo pipefail
 

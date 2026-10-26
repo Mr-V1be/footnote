@@ -1,4 +1,4 @@
-"""Integration tests run against PostgreSQL (database ``snoska_test``).
+"""Integration tests run against PostgreSQL (database ``footnote_test``).
 
 The schema is migrated once per session as the owner role; every test
 starts from empty tables. The API is exercised in-process with test
@@ -19,7 +19,7 @@ from alembic.config import Config
 from pydantic import SecretStr
 from sqlalchemy import text
 
-os.environ.setdefault("FOOTNOTE_DB_NAME", "snoska_test")
+os.environ.setdefault("FOOTNOTE_DB_NAME", "footnote_test")
 
 from footnote.api.app import create_app
 from footnote.bootstrap.container import Container, Overrides, build_container

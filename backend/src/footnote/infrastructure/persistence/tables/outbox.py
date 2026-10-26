@@ -24,4 +24,4 @@ outbox_messages = Table(
 )
 
 # Channel the database notifies when new messages are inserted.
-OUTBOX_CHANNEL = "snoska_outbox"
+OUTBOX_CHANNEL = "footnote_outbox"

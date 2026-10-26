@@ -22,7 +22,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 TABLES = ("api_keys", "webhook_endpoints", "webhook_deliveries")
-TENANT_PREDICATE = "organization_id = NULLIF(current_setting('snoska.tenant_id', true), '')::uuid"
+TENANT_PREDICATE = "organization_id = NULLIF(current_setting('footnote.tenant_id', true), '')::uuid"
 
 
 def upgrade() -> None:

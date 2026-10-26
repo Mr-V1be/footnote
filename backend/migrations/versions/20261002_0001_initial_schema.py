@@ -1,7 +1,7 @@
 """Initial schema: tenancy, documents, corpus, outbox.
 
 Tenant tables are protected by row-level security keyed on the
-transaction-local ``snoska.tenant_id`` setting; the runtime role does not own
+transaction-local ``footnote.tenant_id`` setting; the runtime role does not own
 them, so the policies always apply to it.
 
 Revision ID: 0001
@@ -30,7 +30,7 @@ TENANT_TABLES = (
     "document_structures",
     "document_blocks",
 )
-TENANT_PREDICATE = "organization_id = NULLIF(current_setting('snoska.tenant_id', true), '')::uuid"
+TENANT_PREDICATE = "organization_id = NULLIF(current_setting('footnote.tenant_id', true), '')::uuid"
 INITIAL_SPACE = ("bge-m3", 1024)
 
 
@@ -365,7 +365,7 @@ def upgrade() -> None:
         """
         CREATE FUNCTION notify_outbox() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
-            PERFORM pg_notify('snoska_outbox', '');
+            PERFORM pg_notify('footnote_outbox', '');
             RETURN NULL;
         END
         $$

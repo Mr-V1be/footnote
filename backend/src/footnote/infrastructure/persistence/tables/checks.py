@@ -173,4 +173,4 @@ text_embeddings = Table(
 )
 
 # Channel the database notifies when a run is created or changes.
-CHECK_RUNS_CHANNEL = "snoska_check_runs"
+CHECK_RUNS_CHANNEL = "footnote_check_runs"

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
+import re
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import httpx
 import pytest
+from alembic import command
+from alembic.config import Config
 from docx import Document
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
@@ -21,6 +25,7 @@ from tests.support.tokens import TokenFactory
 
 pytestmark = pytest.mark.integration
 NOW = datetime(2026, 10, 2, tzinfo=UTC)
+_QUOTED = re.compile(r"'([a-z_.]+)'")
 
 
 def docx_bytes(text_value: str) -> bytes:
@@ -72,7 +77,8 @@ async def test_writing_into_another_tenant_is_rejected_by_the_database(
 ) -> None:
     async with container.engine.connect() as connection:
         await connection.execute(
-            text("SELECT set_config('snoska.tenant_id', :tenant, true)"), {"tenant": str(ORG_A.id)}
+            text("SELECT set_config('footnote.tenant_id', :tenant, true)"),
+            {"tenant": str(ORG_A.id)},
         )
         with pytest.raises(DBAPIError, match="row-level security"):
             await connection.execute(
@@ -158,3 +164,56 @@ async def test_requests_without_valid_token_are_unauthenticated(
     me = await api.get("/api/v1/me", headers=auth(tokens, ALICE))
     assert [m["organization"]["alias"] for m in me.json()["memberships"]] == [ORG_A.alias]
     assert me.json()["memberships"][0]["role"] == "owner"
+
+
+async def _names_in_database(container: Container) -> tuple[set[str], set[str]]:
+    """The settings the policies read and the channels the triggers notify."""
+    async with container.engine.connect() as connection:
+        policies = (
+            await connection.execute(
+                text("SELECT qual, with_check FROM pg_policies WHERE schemaname = current_schema()")
+            )
+        ).all()
+        functions = (
+            await connection.scalars(
+                text(
+                    "SELECT prosrc FROM pg_proc "
+                    "WHERE proname IN ('notify_outbox', 'notify_check_run')"
+                )
+            )
+        ).all()
+    settings = {
+        name
+        for row in policies
+        for expression in row
+        if expression
+        for name in _QUOTED.findall(expression)
+        if "." in name
+    }
+    channels = {name for source in functions for name in _QUOTED.findall(source) if "_" in name}
+    return settings, channels
+
+
+async def test_a_database_made_under_the_former_name_isolates_tenants_once_upgraded(
+    alembic_config: Config, container: Container
+) -> None:
+    # Revision 0014 undone leaves the names a database under the former name has.
+    await asyncio.to_thread(command.downgrade, alembic_config, "0013")
+    try:
+        assert await _names_in_database(container) == (
+            {"snoska.tenant_id"},
+            {"snoska_outbox", "snoska_check_runs"},
+        )
+    finally:
+        await asyncio.to_thread(command.upgrade, alembic_config, "head")
+    assert await _names_in_database(container) == (
+        {"footnote.tenant_id"},
+        {"footnote_outbox", "footnote_check_runs"},
+    )
+
+    uow = SqlUnitOfWorkFactory(container.engine)
+    doc_a = await _seed_tenant(uow, ORG_A.id, ORG_A.alias)
+    doc_b = await _seed_tenant(uow, ORG_B.id, ORG_B.alias)
+    async with uow.for_tenant(ORG_B.id) as tx:
+        assert await tx.documents.get(doc_b.id) is not None
+        assert await tx.documents.get(doc_a.id) is None

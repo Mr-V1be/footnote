@@ -14,7 +14,7 @@ backup() {
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
   target="/backups/$stamp"
   mkdir -p "$target"
-  for db in snoska keycloak; do
+  for db in footnote keycloak; do
     pg_dump --format=custom --no-owner --file="$target/$db.dump" "$db"
   done
   tar -czf "$target/blobs.tar.gz" -C /blobs .

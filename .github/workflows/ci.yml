@@ -39,7 +39,7 @@ jobs:
       KEYCLOAK_DB_PASSWORD: ci-keycloak
       FOOTNOTE_DB_HOST: localhost
       FOOTNOTE_DB_PORT: "5432"
-      FOOTNOTE_DB_NAME: snoska_test
+      FOOTNOTE_DB_NAME: footnote_test
       FOOTNOTE_TEST_S3_ENDPOINT: 127.0.0.1:9000
       FOOTNOTE_TEST_S3_ACCESS_KEY: ci-access
       FOOTNOTE_TEST_S3_SECRET_KEY: ci-secret-key
@@ -49,7 +49,7 @@ jobs:
       - name: Tesseract with Russian data
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-rus
       - name: Database roles and extensions
-        run: bash infra/postgres/initdb/10-snoska.sh
+        run: bash infra/postgres/initdb/10-footnote.sh
       - name: Object storage for the S3 adapter's contract tests
         run: |
           docker run -d --name minio -p 9000:9000 \

@@ -39,7 +39,7 @@ def create_engine(config: DatabaseConfig) -> AsyncEngine:
         connect_args={
             "server_settings": {
                 "statement_timeout": str(config.statement_timeout_ms),
-                "application_name": "snoska",
+                "application_name": "footnote",
             }
         },
     )

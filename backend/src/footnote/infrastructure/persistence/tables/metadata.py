@@ -15,7 +15,7 @@ metadata = MetaData(
 
 # Name of the transaction-local setting that carries the current tenant.
 # Row-level security policies compare tenant columns against it.
-TENANT_SETTING = "snoska.tenant_id"
+TENANT_SETTING = "footnote.tenant_id"
 
 # Tables whose rows belong to exactly one organization and are protected by
 # row-level security. Kept here so migrations and tests share one list.

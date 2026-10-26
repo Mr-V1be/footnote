@@ -34,10 +34,10 @@ class DatabaseSettings(BaseSettings):
 
     host: str = "127.0.0.1"
     port: int = 46310
-    name: str = "snoska"
-    app_user: str = "snoska_app"
+    name: str = "footnote"
+    app_user: str = "footnote_app"
     app_password: SecretStr = SecretStr("")
-    owner_user: str = "snoska_owner"
+    owner_user: str = "footnote_owner"
     owner_password: SecretStr = SecretStr("")
     pool_size: int = 5
     max_overflow: int = 5
