@@ -28,8 +28,8 @@ class NoticeWording:
 
 NOTICE_WORDINGS: Mapping[Locale, NoticeWording] = {
     Locale.RU: NoticeWording(
-        subject_new="Сноска: новая редакция закона в корпусе",
-        subject_failed="Сноска: не удалось проверить редакцию закона",
+        subject_new="Footnote: новая редакция закона в корпусе",
+        subject_failed="Footnote: не удалось проверить редакцию закона",
         opening="Еженедельная проверка корпуса норм.",
         new_edition="• {act}: на портале новая редакция ({revision}). Она загружена "
         "в корпус и стала действующей; индексация для поиска идёт в фоне.",
@@ -41,8 +41,8 @@ NOTICE_WORDINGS: Mapping[Locale, NoticeWording] = {
         status="Состояние системы: {url}",
     ),
     Locale.EN: NoticeWording(
-        subject_new="Snoska: a new edition of a law in the corpus",
-        subject_failed="Snoska: the edition of a law could not be checked",
+        subject_new="Footnote: a new edition of a law in the corpus",
+        subject_failed="Footnote: the edition of a law could not be checked",
         opening="The weekly check of the corpus of norms.",
         new_edition="• {act}: the portal has a new edition ({revision}). It is loaded "
         "into the corpus and is now in force; it is being indexed for search in the background.",

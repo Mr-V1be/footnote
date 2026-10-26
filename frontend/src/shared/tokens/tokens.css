@@ -1,5 +1,5 @@
 /*
- * Design tokens of Snoska. Components use only these variables.
+ * Design tokens of Footnote. Components use only these variables.
  *
  * Colours are declared once with light-dark(): the active scheme comes from
  * `color-scheme`, set by the theme preference (system, light or dark).

@@ -11,13 +11,13 @@ demo_login:
   owner: ershov@zarya.example
   lawyer: polyakova@zarya.example
   observer: gusev@zarya.example
-  operator: operator@snoska.example
+  operator: operator@footnote.example
 
 platform_admin:
-  email: operator@snoska.example
+  email: operator@footnote.example
   first_name: Ольга
   last_name: Платонова
-  password: Snoska-Demo-2026
+  password: Footnote-Demo-2026
   realm_role: platform-admin
 
 organizations:
@@ -28,22 +28,22 @@ organizations:
       - email: kovaleva@polyarnaya-zvezda.example
         first_name: Анна
         last_name: Ковалёва
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: owner
       - email: orlov@polyarnaya-zvezda.example
         first_name: Михаил
         last_name: Орлов
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: lawyer
       - email: smirnova@polyarnaya-zvezda.example
         first_name: Дарья
         last_name: Смирнова
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: executor
       - email: belov@polyarnaya-zvezda.example
         first_name: Игорь
         last_name: Белов
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: observer
     # Four people do not fit the free plan: the stand starts on "team".
     plan: team
@@ -106,12 +106,12 @@ organizations:
       - email: vorontsova@rechnoy-port.example
         first_name: Елена
         last_name: Воронцова
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: owner
       - email: lebedev@rechnoy-port.example
         first_name: Сергей
         last_name: Лебедев
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: lawyer
     documents:
       - file: documents/rechnoy-port/politika-pd.pdf
@@ -132,17 +132,17 @@ organizations:
       - email: ershov@zarya.example
         first_name: Константин
         last_name: Ершов
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: owner
       - email: polyakova@zarya.example
         first_name: Нина
         last_name: Полякова
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: lawyer
       - email: gusev@zarya.example
         first_name: Пётр
         last_name: Гусев
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: observer
     documents:
       - file: reference/prikaz-zarya.docx
@@ -293,5 +293,5 @@ organizations:
       - email: sokolova@sokolova.example
         first_name: Екатерина
         last_name: Соколова
-        password: Snoska-Demo-2026
+        password: Footnote-Demo-2026
         role: owner

@@ -70,7 +70,7 @@ async def test_the_notice_is_written_in_the_language_the_operator_last_used(
     inbox = Inbox()
     await watch(container, inbox).run()
     [email] = inbox.sent
-    assert email.subject == "Snoska: a new edition of a law in the corpus"
+    assert email.subject == "Footnote: a new edition of a law in the corpus"
     assert "152-FZ: the portal has a new edition" in email.text
 
 

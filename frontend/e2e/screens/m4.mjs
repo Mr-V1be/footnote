@@ -230,5 +230,5 @@ export const USERS = {
   zaryaOwner: "ershov@zarya.example",
   lawyer: "polyakova@zarya.example",
   sokolova: "sokolova@sokolova.example",
-  operator: "operator@snoska.example",
+  operator: "operator@footnote.example",
 };

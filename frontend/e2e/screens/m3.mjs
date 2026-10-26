@@ -246,5 +246,5 @@ export const USERS = {
   zarya: "ershov@zarya.example",
   lawyer: "polyakova@zarya.example",
   workspaceLawyer: "belov@polyarnaya-zvezda.example",
-  operator: "operator@snoska.example",
+  operator: "operator@footnote.example",
 };

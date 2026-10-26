@@ -128,7 +128,6 @@ export const SCENES = [
 ];
 
 export const INTRO = {
-  title: "Сноска",
   note: "Проверка документов по 152-ФЗ и ГОСТ — со ссылкой на норму к каждому замечанию",
 };
 export const OUTRO = {

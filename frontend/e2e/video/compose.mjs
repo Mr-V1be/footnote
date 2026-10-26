@@ -3,10 +3,12 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import { BASE } from "../runner.mjs";
+import { BASE, messages } from "../runner.mjs";
 import { FFMPEG } from "../landing/media.mjs";
 
 const run = promisify(execFile);
+// The wordmark names the product as the interface does.
+const { app } = await messages();
 const FPS = 30;
 const FADE = 0.4;
 
@@ -19,7 +21,7 @@ function escape(text) {
  * frame, so one card reads well in both formats.
  */
 function cardHtml({ eyebrow, title, note, brand }) {
-  const mark = `<span class="mark">Сноска</span><sup>1</sup>`;
+  const mark = `<span class="mark">${escape(app.name)}</span><sup>1</sup>`;
   return `
     <style>
       .card { --unit: 1vw; position: fixed; inset: 0; display: grid; align-content: center;

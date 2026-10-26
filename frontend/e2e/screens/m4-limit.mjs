@@ -61,5 +61,5 @@ export const SCREENS = [
 
 export const USERS = {
   lawyer: "polyakova@zarya.example",
-  operator: "operator@snoska.example",
+  operator: "operator@footnote.example",
 };

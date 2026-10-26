@@ -279,7 +279,7 @@ class OperationsSettings(BaseSettings):
 
     smtp_host: str = "127.0.0.1"
     smtp_port: int = 46331
-    smtp_sender: str = "Сноска <no-reply@snoska.example>"
+    smtp_sender: str = "Footnote <no-reply@footnote.example>"
     # A real mail server asks for an account and STARTTLS; Mailpit does not.
     smtp_username: str = ""
     smtp_password: SecretStr = SecretStr("")

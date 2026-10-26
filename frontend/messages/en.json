@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Snoska",
+    "name": "Footnote",
     "description": "Checks Russian documents against personal data law 152-FZ and the GOST R 7.0.97 formatting standard, with footnotes to the norms",
     "demo": "Demo",
     "demoHint": "Fictional data; the documents were made for the demo"
@@ -747,7 +747,7 @@
     "rotatedTitle": "New signing secret",
     "secret": "Secret",
     "emptyTitle": "No webhooks yet",
-    "emptyDescription": "Snoska will tell your system about documents read, checks completed and decisions made.",
+    "emptyDescription": "Footnote will tell your system about documents read, checks completed and decisions made.",
     "deliveries": "Deliveries",
     "noDeliveriesTitle": "No deliveries yet",
     "noDeliveriesDescription": "Send a test event to check the address.",
@@ -844,7 +844,7 @@
     "noMoney": "No money is charged: this is how payment is checked on the demo.",
     "failed": "No decision was made: the link is out of date or the payment is already processed.",
     "invalidTitle": "The payment link is invalid",
-    "invalidDescription": "Go back to Snoska and open the invoice again."
+    "invalidDescription": "Go back to Footnote and open the invoice again."
   },
   "autofix": {
     "title": "Fix formatting",
@@ -917,10 +917,10 @@
     "identity": "Sign-in and accounts"
   },
   "landing": {
-    "metaTitle": "Snoska: checks of Russian documents against 152-FZ, with footnotes to the law",
+    "metaTitle": "Footnote: checks of Russian documents against 152-FZ, with footnotes to the law",
     "metaDescription": "Policies, consents, contracts and orders of Russian companies: findings under personal data law 152-FZ and GOST R 7.0.97 with a quote of the norm, automatic formatting fixes and answers from the law with quotes.",
     "skip": "Skip to content",
-    "home": "Snoska home",
+    "home": "Footnote home",
     "navLabel": "Site sections",
     "nav": {
       "how": "How it works",
@@ -1041,7 +1041,7 @@
   },
   "demo": {
     "title": "One-click demo",
-    "lead": "Choose a role: the same Snoska opens as after a regular sign-in, with fictional Russian documents.",
+    "lead": "Choose a role: the same Footnote opens as after a regular sign-in, with fictional Russian documents.",
     "enter": "Sign in",
     "platform": "Platform",
     "failed": "Sign-in failed. Try again in a minute.",

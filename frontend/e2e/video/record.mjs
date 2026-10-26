@@ -28,14 +28,14 @@ const FORMATS = {
     scale: 1.5,
     size: { width: 1920, height: 1080 },
     narrow: false,
-    file: "snoska-1920x1080",
+    file: "footnote-1920x1080",
   },
   vertical: {
     viewport: { width: 360, height: 640 },
     scale: 3,
     size: { width: 1080, height: 1920 },
     narrow: true,
-    file: "snoska-1080x1920",
+    file: "footnote-1080x1920",
   },
 };
 
