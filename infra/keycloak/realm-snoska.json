@@ -21,14 +21,14 @@
   "ssoSessionIdleTimeout": 3600,
   "ssoSessionMaxLifespan": 36000,
   "smtpServer": {
-    "host": "${SNOSKA_SMTP_HOST:mailpit}",
-    "port": "${SNOSKA_SMTP_PORT:1025}",
-    "from": "${SNOSKA_SMTP_FROM:no-reply@snoska.example}",
+    "host": "${FOOTNOTE_SMTP_HOST:mailpit}",
+    "port": "${FOOTNOTE_SMTP_PORT:1025}",
+    "from": "${FOOTNOTE_SMTP_FROM:no-reply@snoska.example}",
     "fromDisplayName": "Сноска",
-    "auth": "${SNOSKA_SMTP_AUTH:false}",
-    "user": "${SNOSKA_SMTP_USERNAME:}",
-    "password": "${SNOSKA_SMTP_PASSWORD:}",
-    "starttls": "${SNOSKA_SMTP_START_TLS:false}"
+    "auth": "${FOOTNOTE_SMTP_AUTH:false}",
+    "user": "${FOOTNOTE_SMTP_USERNAME:}",
+    "password": "${FOOTNOTE_SMTP_PASSWORD:}",
+    "starttls": "${FOOTNOTE_SMTP_START_TLS:false}"
   },
   "roles": {
     "realm": [
@@ -460,21 +460,21 @@
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${SNOSKA_WEB_CLIENT_SECRET}",
+      "secret": "${FOOTNOTE_WEB_CLIENT_SECRET}",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "frontchannelLogout": true,
       "redirectUris": [
-        "${SNOSKA_WEB_URL}/auth/callback",
-        "${SNOSKA_WEB_URL}"
+        "${FOOTNOTE_WEB_URL}/auth/callback",
+        "${FOOTNOTE_WEB_URL}"
       ],
       "webOrigins": [
-        "${SNOSKA_WEB_URL}"
+        "${FOOTNOTE_WEB_URL}"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "${SNOSKA_WEB_URL}/*"
+        "post.logout.redirect.uris": "${FOOTNOTE_WEB_URL}/*"
       },
       "protocolMappers": [
         {
@@ -506,11 +506,11 @@
     {
       "clientId": "snoska-demo",
       "name": "Snoska Demo Sign-in",
-      "description": "One-click sign-in by role on the demo stand (SNOSKA_DEMO_MODE). Only the web server knows its secret; an installation without the demo may disable it.",
+      "description": "One-click sign-in by role on the demo stand (FOOTNOTE_DEMO_MODE). Only the web server knows its secret; an installation without the demo may disable it.",
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${SNOSKA_DEMO_CLIENT_SECRET}",
+      "secret": "${FOOTNOTE_DEMO_CLIENT_SECRET}",
       "standardFlowEnabled": false,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
@@ -548,7 +548,7 @@
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${SNOSKA_DIRECTORY_CLIENT_SECRET}",
+      "secret": "${FOOTNOTE_DIRECTORY_CLIENT_SECRET}",
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": true,

@@ -37,8 +37,8 @@ const seedSchema = z.object({
  */
 export async function demoAccounts(): Promise<DemoAccount[]> {
   const config = serverConfig();
-  if (!config.SNOSKA_DEMO_MODE) return [];
-  const seed = seedSchema.parse(parse(await readFile(config.SNOSKA_DEMO_SEED, "utf8")));
+  if (!config.FOOTNOTE_DEMO_MODE) return [];
+  const seed = seedSchema.parse(parse(await readFile(config.FOOTNOTE_DEMO_SEED, "utf8")));
   return DEMO_ROLES.flatMap((role) => {
     const email = seed.demo_login[role];
     if (!email) return [];

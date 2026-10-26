@@ -10,8 +10,8 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env}
-      SNOSKA_DB_OWNER_PASSWORD: ${SNOSKA_DB_OWNER_PASSWORD:?set SNOSKA_DB_OWNER_PASSWORD in .env}
-      SNOSKA_DB_APP_PASSWORD: ${SNOSKA_DB_APP_PASSWORD:?set SNOSKA_DB_APP_PASSWORD in .env}
+      FOOTNOTE_DB_OWNER_PASSWORD: ${FOOTNOTE_DB_OWNER_PASSWORD:?set FOOTNOTE_DB_OWNER_PASSWORD in .env}
+      FOOTNOTE_DB_APP_PASSWORD: ${FOOTNOTE_DB_APP_PASSWORD:?set FOOTNOTE_DB_APP_PASSWORD in .env}
       KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD in .env}
     command:
       - postgres
@@ -20,7 +20,7 @@ services:
       - -c
       - max_connections=120
     ports:
-      - "127.0.0.1:${SNOSKA_DB_PORT:-46310}:5432"
+      - "127.0.0.1:${FOOTNOTE_DB_PORT:-46310}:5432"
     volumes:
       - pgdata:/var/lib/postgresql
       - ./infra/postgres/initdb:/docker-entrypoint-initdb.d:ro
@@ -37,7 +37,7 @@ services:
     command:
       - redis-server
       - --requirepass
-      - ${SNOSKA_REDIS_PASSWORD:?set SNOSKA_REDIS_PASSWORD in .env}
+      - ${FOOTNOTE_REDIS_PASSWORD:?set FOOTNOTE_REDIS_PASSWORD in .env}
       - --appendonly
       - "yes"
       - --maxmemory
@@ -45,7 +45,7 @@ services:
       - --maxmemory-policy
       - noeviction
     ports:
-      - "127.0.0.1:${SNOSKA_REDIS_PORT:-46311}:6379"
+      - "127.0.0.1:${FOOTNOTE_REDIS_PORT:-46311}:6379"
     volumes:
       - redisdata:/data
     mem_limit: 256m
@@ -55,7 +55,7 @@ services:
       timeout: 3s
       retries: 20
     environment:
-      REDIS_PASSWORD: ${SNOSKA_REDIS_PASSWORD}
+      REDIS_PASSWORD: ${FOOTNOTE_REDIS_PASSWORD}
 
   keycloak:
     image: keycloak/keycloak:26.8.0
@@ -71,18 +71,18 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD in .env}
-      KC_HOSTNAME: http://localhost:${SNOSKA_KEYCLOAK_PORT:-46320}
+      KC_HOSTNAME: http://localhost:${FOOTNOTE_KEYCLOAK_PORT:-46320}
       KC_HTTP_PORT: "8080"
       KC_HEALTH_ENABLED: "true"
       KC_LOG_LEVEL: info
       # Placeholders resolved inside the realm import file.
-      SNOSKA_WEB_URL: ${SNOSKA_WEB_URL:-http://localhost:46300}
-      SNOSKA_WEB_CLIENT_SECRET: ${SNOSKA_WEB_CLIENT_SECRET:?set SNOSKA_WEB_CLIENT_SECRET in .env}
-      SNOSKA_DIRECTORY_CLIENT_SECRET: ${SNOSKA_DIRECTORY_CLIENT_SECRET:?set SNOSKA_DIRECTORY_CLIENT_SECRET in .env}
-      SNOSKA_DEMO_CLIENT_SECRET: ${SNOSKA_DEMO_CLIENT_SECRET:?set SNOSKA_DEMO_CLIENT_SECRET in .env}
-      SNOSKA_SMTP_PORT: "1025"
+      FOOTNOTE_WEB_URL: ${FOOTNOTE_WEB_URL:-http://localhost:46300}
+      FOOTNOTE_WEB_CLIENT_SECRET: ${FOOTNOTE_WEB_CLIENT_SECRET:?set FOOTNOTE_WEB_CLIENT_SECRET in .env}
+      FOOTNOTE_DIRECTORY_CLIENT_SECRET: ${FOOTNOTE_DIRECTORY_CLIENT_SECRET:?set FOOTNOTE_DIRECTORY_CLIENT_SECRET in .env}
+      FOOTNOTE_DEMO_CLIENT_SECRET: ${FOOTNOTE_DEMO_CLIENT_SECRET:?set FOOTNOTE_DEMO_CLIENT_SECRET in .env}
+      FOOTNOTE_SMTP_PORT: "1025"
     ports:
-      - "127.0.0.1:${SNOSKA_KEYCLOAK_PORT:-46320}:8080"
+      - "127.0.0.1:${FOOTNOTE_KEYCLOAK_PORT:-46320}:8080"
     volumes:
       - ./infra/keycloak/realm-snoska.json:/opt/keycloak/data/import/realm-snoska.json:ro
       - ./infra/keycloak/themes/snoska:/opt/keycloak/themes/snoska:ro
@@ -107,11 +107,11 @@ services:
     restart: unless-stopped
     command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
     environment:
-      MINIO_ROOT_USER: ${SNOSKA_S3_ACCESS_KEY:?set SNOSKA_S3_ACCESS_KEY in .env}
-      MINIO_ROOT_PASSWORD: ${SNOSKA_S3_SECRET_KEY:?set SNOSKA_S3_SECRET_KEY in .env}
+      MINIO_ROOT_USER: ${FOOTNOTE_S3_ACCESS_KEY:?set FOOTNOTE_S3_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${FOOTNOTE_S3_SECRET_KEY:?set FOOTNOTE_S3_SECRET_KEY in .env}
     ports:
-      - "127.0.0.1:${SNOSKA_MINIO_PORT:-46340}:9000"
-      - "127.0.0.1:${SNOSKA_MINIO_CONSOLE_PORT:-46341}:9001"
+      - "127.0.0.1:${FOOTNOTE_MINIO_PORT:-46340}:9000"
+      - "127.0.0.1:${FOOTNOTE_MINIO_CONSOLE_PORT:-46341}:9001"
     volumes:
       - miniodata:/data
     mem_limit: 256m
@@ -125,8 +125,8 @@ services:
     image: axllent/mailpit:v1.31.3
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${SNOSKA_MAILPIT_UI_PORT:-46330}:8025"
-      - "127.0.0.1:${SNOSKA_MAILPIT_SMTP_PORT:-46331}:1025"
+      - "127.0.0.1:${FOOTNOTE_MAILPIT_UI_PORT:-46330}:8025"
+      - "127.0.0.1:${FOOTNOTE_MAILPIT_SMTP_PORT:-46331}:1025"
     mem_limit: 128m
 
 networks:

@@ -59,7 +59,7 @@ def reindex(
         settings = settings_for_cli()
         space = settings.ai.embedding_space()
         if space.dimensions <= 0:
-            raise typer.BadParameter("configure SNOSKA_EMBEDDING_MODEL and _DIMENSIONS first")
+            raise typer.BadParameter("configure FOOTNOTE_EMBEDDING_MODEL and _DIMENSIONS first")
         engine = owner_engine(settings)
         try:
             await ensure_space(engine, space)

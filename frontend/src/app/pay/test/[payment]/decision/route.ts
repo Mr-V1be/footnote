@@ -22,7 +22,7 @@ export async function POST(
     params: { path: { payment_id: payment } },
     body: { token, succeeded },
   });
-  const web = serverConfig().SNOSKA_WEB_URL;
+  const web = serverConfig().FOOTNOTE_WEB_URL;
   if (!result.data) {
     const back = new URL(`/pay/test/${encodeURIComponent(payment)}`, web);
     back.searchParams.set("token", token);

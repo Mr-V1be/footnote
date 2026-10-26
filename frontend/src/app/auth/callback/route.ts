@@ -12,7 +12,7 @@ import { tokensFrom } from "@/server/auth/tokens";
 import { serverConfig } from "@/server/config";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const base = serverConfig().SNOSKA_WEB_URL;
+  const base = serverConfig().FOOTNOTE_WEB_URL;
   const state = request.nextUrl.searchParams.get("state");
   const transaction = state ? await finishLogin(state) : null;
   if (!state || !transaction) {

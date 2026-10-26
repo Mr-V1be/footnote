@@ -49,7 +49,7 @@ class TestPaymentProvider:
 
     def __init__(self, secret: str, web_url: str) -> None:
         if not secret:
-            raise ValueError("SNOSKA_PAYMENTS_TEST_SECRET is not set")
+            raise ValueError("FOOTNOTE_PAYMENTS_TEST_SECRET is not set")
         self._secret = secret.encode()
         self._web_url = web_url.rstrip("/")
 

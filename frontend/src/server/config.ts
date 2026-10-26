@@ -6,28 +6,28 @@ import { loadEnvConfig } from "@next/env";
 import { z } from "zod";
 
 const schema = z.object({
-  SNOSKA_WEB_URL: z.url(),
-  SNOSKA_API_URL: z.url(),
-  SNOSKA_KEYCLOAK_URL: z.url(),
+  FOOTNOTE_WEB_URL: z.url(),
+  FOOTNOTE_API_URL: z.url(),
+  FOOTNOTE_KEYCLOAK_URL: z.url(),
   // Where the web server reaches Keycloak inside a private network; the
   // public URL stays the issuer. Empty: the public URL serves both.
-  SNOSKA_KEYCLOAK_INTERNAL_URL: z.union([z.url(), z.literal("")]).default(""),
-  SNOSKA_KEYCLOAK_REALM: z.string().min(1),
-  SNOSKA_WEB_CLIENT_ID: z.string().min(1).default("snoska-web"),
-  SNOSKA_WEB_CLIENT_SECRET: z.string().min(1),
-  SNOSKA_SESSION_SECRET: z.string().min(32),
-  SNOSKA_REDIS_HOST: z.string().min(1).default("127.0.0.1"),
-  SNOSKA_REDIS_PORT: z.coerce.number().int().positive().default(46311),
-  SNOSKA_REDIS_PASSWORD: z.string().default(""),
+  FOOTNOTE_KEYCLOAK_INTERNAL_URL: z.union([z.url(), z.literal("")]).default(""),
+  FOOTNOTE_KEYCLOAK_REALM: z.string().min(1),
+  FOOTNOTE_WEB_CLIENT_ID: z.string().min(1).default("snoska-web"),
+  FOOTNOTE_WEB_CLIENT_SECRET: z.string().min(1),
+  FOOTNOTE_SESSION_SECRET: z.string().min(32),
+  FOOTNOTE_REDIS_HOST: z.string().min(1).default("127.0.0.1"),
+  FOOTNOTE_REDIS_PORT: z.coerce.number().int().positive().default(46311),
+  FOOTNOTE_REDIS_PASSWORD: z.string().default(""),
   // The demo stand: one-click sign-in by role. Off unless set to "true".
-  SNOSKA_DEMO_MODE: z
+  FOOTNOTE_DEMO_MODE: z
     .enum(["true", "false"])
     .default("false")
     .transform((value) => value === "true"),
-  SNOSKA_DEMO_CLIENT_ID: z.string().min(1).default("snoska-demo"),
-  SNOSKA_DEMO_CLIENT_SECRET: z.string().default(""),
+  FOOTNOTE_DEMO_CLIENT_ID: z.string().min(1).default("snoska-demo"),
+  FOOTNOTE_DEMO_CLIENT_SECRET: z.string().default(""),
   // The seed file names the account each role opens.
-  SNOSKA_DEMO_SEED: z.string().default(path.resolve(process.cwd(), "../backend/demo/seed.yaml")),
+  FOOTNOTE_DEMO_SEED: z.string().default(path.resolve(process.cwd(), "../backend/demo/seed.yaml")),
 });
 
 export type ServerConfig = z.infer<typeof schema>;

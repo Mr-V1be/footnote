@@ -34,16 +34,16 @@ jobs:
       POSTGRES_USER: postgres
       PGHOST: localhost
       PGPASSWORD: ci-superuser
-      SNOSKA_DB_OWNER_PASSWORD: ci-owner
-      SNOSKA_DB_APP_PASSWORD: ci-app
+      FOOTNOTE_DB_OWNER_PASSWORD: ci-owner
+      FOOTNOTE_DB_APP_PASSWORD: ci-app
       KEYCLOAK_DB_PASSWORD: ci-keycloak
-      SNOSKA_DB_HOST: localhost
-      SNOSKA_DB_PORT: "5432"
-      SNOSKA_DB_NAME: snoska_test
-      SNOSKA_TEST_S3_ENDPOINT: 127.0.0.1:9000
-      SNOSKA_TEST_S3_ACCESS_KEY: ci-access
-      SNOSKA_TEST_S3_SECRET_KEY: ci-secret-key
-      SNOSKA_SECRETS_KEY: ci-secrets-key
+      FOOTNOTE_DB_HOST: localhost
+      FOOTNOTE_DB_PORT: "5432"
+      FOOTNOTE_DB_NAME: snoska_test
+      FOOTNOTE_TEST_S3_ENDPOINT: 127.0.0.1:9000
+      FOOTNOTE_TEST_S3_ACCESS_KEY: ci-access
+      FOOTNOTE_TEST_S3_SECRET_KEY: ci-secret-key
+      FOOTNOTE_SECRETS_KEY: ci-secrets-key
     steps:
       - uses: actions/checkout@v7
       - name: Tesseract with Russian data

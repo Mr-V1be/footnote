@@ -32,8 +32,8 @@ COPY backend/demo ./demo
 RUN mkdir -p /app/var/blobs && chown -R snoska:snoska /app/var
 ENV PATH=/app/backend/.venv/bin:$PATH \
     PYTHONUNBUFFERED=1 \
-    SNOSKA_API_HOST=0.0.0.0 \
-    SNOSKA_API_PORT=8000
+    FOOTNOTE_API_HOST=0.0.0.0 \
+    FOOTNOTE_API_PORT=8000
 USER snoska
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \

@@ -28,11 +28,11 @@ def seed(file: Path | None = None) -> None:
 
 @app.command()
 def reset() -> None:
-    """Return the demo stand to its seed now (SNOSKA_DEMO_MODE only)."""
+    """Return the demo stand to its seed now (FOOTNOTE_DEMO_MODE only)."""
     asyncio.run(reset_stand(settings_for_cli()))
 
 
 @app.command()
 def nightly() -> None:
-    """Return the demo stand to its seed every night at SNOSKA_DEMO_RESET_HOUR."""
+    """Return the demo stand to its seed every night at FOOTNOTE_DEMO_RESET_HOUR."""
     asyncio.run(run_nightly(settings_for_cli()))

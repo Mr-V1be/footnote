@@ -900,11 +900,11 @@
       "indexDescription": "Ответы появятся, когда текст закона будет проиндексирован.",
       "forAdmin": "Для администратора стенда",
       "steps": {
-        "llm": "SNOSKA_LLM_BASE_URL, SNOSKA_LLM_API_KEY, SNOSKA_LLM_MODEL",
-        "embedding": "SNOSKA_EMBEDDING_BASE_URL, SNOSKA_EMBEDDING_API_KEY, SNOSKA_EMBEDDING_MODEL",
+        "llm": "FOOTNOTE_LLM_BASE_URL, FOOTNOTE_LLM_API_KEY, FOOTNOTE_LLM_MODEL",
+        "embedding": "FOOTNOTE_EMBEDDING_BASE_URL, FOOTNOTE_EMBEDDING_API_KEY, FOOTNOTE_EMBEDDING_MODEL",
         "index": "make index",
         "restart": "make api, make worker",
-        "paid": "SNOSKA_LLM_MODEL — платная модель, SNOSKA_LLM_REQUESTS_PER_DAY=0"
+        "paid": "FOOTNOTE_LLM_MODEL — платная модель, FOOTNOTE_LLM_REQUESTS_PER_DAY=0"
       },
       "limitTitle": "Дневной лимит модели исчерпан",
       "limitDescription": "Бесплатный тариф модели позволяет ограниченное число запросов в день. Спросите завтра."

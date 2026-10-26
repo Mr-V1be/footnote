@@ -36,6 +36,6 @@ export async function publicFacts(): Promise<PublicFacts> {
     quality: (quality as Quality | null) ?? null,
     kinds,
     plans,
-    demo: serverConfig().SNOSKA_DEMO_MODE,
+    demo: serverConfig().FOOTNOTE_DEMO_MODE,
   };
 }

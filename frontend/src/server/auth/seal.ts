@@ -9,7 +9,7 @@ const IV_BYTES = 12;
 const TAG_BYTES = 16;
 
 function key(): Buffer {
-  return createHash("sha256").update(serverConfig().SNOSKA_SESSION_SECRET).digest();
+  return createHash("sha256").update(serverConfig().FOOTNOTE_SESSION_SECRET).digest();
 }
 
 /** Encrypts session data at rest: a leaked store does not leak tokens. */

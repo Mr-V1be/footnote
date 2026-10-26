@@ -12,14 +12,14 @@ const SEE_OTHER = 303;
 /**
  * One-click sign-in on the demo stand: the chosen role's seeded account is
  * signed in through the same identity provider and gets an ordinary session.
- * Without SNOSKA_DEMO_MODE the route does not exist.
+ * Without FOOTNOTE_DEMO_MODE the route does not exist.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const config = serverConfig();
-  if (!config.SNOSKA_DEMO_MODE) return new NextResponse(null, { status: 404 });
+  if (!config.FOOTNOTE_DEMO_MODE) return new NextResponse(null, { status: 404 });
   const role = String((await request.formData()).get("role") ?? "");
   const account = (await demoAccounts()).find((item) => item.role === role);
-  const base = config.SNOSKA_WEB_URL;
+  const base = config.FOOTNOTE_WEB_URL;
   if (!account) return NextResponse.redirect(new URL("/demo", base), SEE_OTHER);
   try {
     const response = await client.genericGrantRequest(await oidc("demo"), "password", {

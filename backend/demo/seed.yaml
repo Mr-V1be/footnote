@@ -4,7 +4,7 @@
 # test roles of the demo stand only. Apply with `footnote demo seed`; the
 # command is idempotent (Keycloak objects are ensured, uploads are keyed).
 
-# One-click sign-in on the demo stand (SNOSKA_DEMO_MODE): the seeded account
+# One-click sign-in on the demo stand (FOOTNOTE_DEMO_MODE): the seeded account
 # each role opens. These accounts keep their roles while the stand is up, and
 # the nightly reset returns everything else to this file.
 demo_login:

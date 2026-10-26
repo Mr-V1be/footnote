@@ -30,7 +30,7 @@ def _config(prefix: str) -> SettingsConfigDict:
 
 
 class DatabaseSettings(BaseSettings):
-    model_config = _config("SNOSKA_DB_")
+    model_config = _config("FOOTNOTE_DB_")
 
     host: str = "127.0.0.1"
     port: int = 46310
@@ -45,7 +45,7 @@ class DatabaseSettings(BaseSettings):
 
 
 class RedisSettings(BaseSettings):
-    model_config = _config("SNOSKA_REDIS_")
+    model_config = _config("FOOTNOTE_REDIS_")
 
     host: str = "127.0.0.1"
     port: int = 46311
@@ -59,7 +59,7 @@ class RedisSettings(BaseSettings):
 
 
 class KeycloakSettings(BaseSettings):
-    model_config = _config("SNOSKA_KEYCLOAK_")
+    model_config = _config("FOOTNOTE_KEYCLOAK_")
 
     # Public base URL: it is the token issuer the browser and the API agree on.
     url: str = "http://localhost:46320"
@@ -85,7 +85,7 @@ class KeycloakSettings(BaseSettings):
 
 
 class DirectorySettings(BaseSettings):
-    model_config = _config("SNOSKA_DIRECTORY_")
+    model_config = _config("FOOTNOTE_DIRECTORY_")
 
     client_id: str = "snoska-directory"
     client_secret: SecretStr = SecretStr("")
@@ -105,7 +105,7 @@ _SPACE_CODE_LIMIT = 40
 class AiSettings(BaseSettings):
     """Models run only behind an external API; nothing runs on this machine."""
 
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     ai_provider: AiProvider = AiProvider.NONE
     llm_base_url: str = ""
@@ -138,7 +138,7 @@ class AiSettings(BaseSettings):
             return {}
         value = json.loads(self.llm_extra_body)
         if not isinstance(value, dict):
-            raise ValueError("SNOSKA_LLM_EXTRA_BODY must be a JSON object")
+            raise ValueError("FOOTNOTE_LLM_EXTRA_BODY must be a JSON object")
         return value
 
     def fallback_models(self) -> tuple[str, ...]:
@@ -159,14 +159,14 @@ class AiSettings(BaseSettings):
         missing = [
             name
             for name, value in (
-                ("SNOSKA_LLM_BASE_URL", self.llm_base_url),
-                ("SNOSKA_LLM_MODEL", self.llm_model),
-                ("SNOSKA_EMBEDDING_MODEL", self.embedding_model),
+                ("FOOTNOTE_LLM_BASE_URL", self.llm_base_url),
+                ("FOOTNOTE_LLM_MODEL", self.llm_model),
+                ("FOOTNOTE_EMBEDDING_MODEL", self.embedding_model),
             )
             if not value
         ]
         if self.embedding_dimensions <= 0:
-            missing.append("SNOSKA_EMBEDDING_DIMENSIONS")
+            missing.append("FOOTNOTE_EMBEDDING_DIMENSIONS")
         if missing:
             raise ValueError(f"the openai_compatible provider needs {', '.join(missing)}")
 
@@ -175,7 +175,7 @@ UNCONFIGURED_SPACE = "none"
 
 
 class ChecksSettings(BaseSettings):
-    model_config = _config("SNOSKA_CHECKS_")
+    model_config = _config("FOOTNOTE_CHECKS_")
 
     catalog_dir: Path = BACKEND_ROOT / "data" / "checks"
     # Labelled documents the checks are measured on, and the latest result.
@@ -195,7 +195,7 @@ class ChecksSettings(BaseSettings):
 
 
 class ApiSettings(BaseSettings):
-    model_config = _config("SNOSKA_API_")
+    model_config = _config("FOOTNOTE_API_")
 
     host: str = "127.0.0.1"
     port: int = 46301
@@ -206,7 +206,7 @@ class ApiSettings(BaseSettings):
 
 
 class WorkerSettings(BaseSettings):
-    model_config = _config("SNOSKA_WORKER_")
+    model_config = _config("FOOTNOTE_WORKER_")
 
     threads: int = 2
     metrics_port: int = 46302
@@ -215,7 +215,7 @@ class WorkerSettings(BaseSettings):
 
 
 class ObservabilitySettings(BaseSettings):
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     log_level: str = "INFO"
     log_json: bool = True
@@ -231,7 +231,7 @@ class StorageBackend(StrEnum):
 class StorageSettings(BaseSettings):
     """Where files are kept: a local directory or an S3-compatible store."""
 
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     storage_backend: StorageBackend = StorageBackend.LOCAL
     storage_root: Path = Path("var/blobs")
@@ -249,7 +249,7 @@ class StorageSettings(BaseSettings):
 
 
 class IntegrationsSettings(BaseSettings):
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     # Seals stored secrets (webhook signing keys); `make env` generates it.
     secrets_key: SecretStr = SecretStr("")
@@ -261,7 +261,7 @@ class IntegrationsSettings(BaseSettings):
 
 
 class PaymentsSettings(BaseSettings):
-    model_config = _config("SNOSKA_PAYMENTS_")
+    model_config = _config("FOOTNOTE_PAYMENTS_")
 
     # Only the test provider exists until a live one is chosen and contracted.
     provider: str = "test"
@@ -269,13 +269,13 @@ class PaymentsSettings(BaseSettings):
 
 
 class BillingSettings(BaseSettings):
-    model_config = _config("SNOSKA_BILLING_")
+    model_config = _config("FOOTNOTE_BILLING_")
 
     plans: Path = BACKEND_ROOT / "data" / "billing" / "plans.yaml"
 
 
 class OperationsSettings(BaseSettings):
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     smtp_host: str = "127.0.0.1"
     smtp_port: int = 46331
@@ -295,7 +295,7 @@ class DemoSettings(BaseSettings):
     roles and a nightly return to the seed. Off unless set: a production
     installation never enables it."""
 
-    model_config = _config("SNOSKA_DEMO_")
+    model_config = _config("FOOTNOTE_DEMO_")
 
     mode: bool = False
     # Local time of the nightly reset to the seed.
@@ -304,7 +304,7 @@ class DemoSettings(BaseSettings):
 
 
 class TenancySettings(BaseSettings):
-    model_config = _config("SNOSKA_TENANCY_")
+    model_config = _config("FOOTNOTE_TENANCY_")
 
     default_workspace_slug: str = "main"
     default_workspace_name: str = "Основное пространство"
@@ -313,7 +313,7 @@ class TenancySettings(BaseSettings):
 class Settings(BaseSettings):
     """All configuration of a process. Values come from the environment / .env."""
 
-    model_config = _config("SNOSKA_")
+    model_config = _config("FOOTNOTE_")
 
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)

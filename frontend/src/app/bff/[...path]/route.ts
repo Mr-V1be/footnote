@@ -55,7 +55,7 @@ async function forward(
   }
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const upstream = await fetch(
-    `${serverConfig().SNOSKA_API_URL}/${target}${request.nextUrl.search}`,
+    `${serverConfig().FOOTNOTE_API_URL}/${target}${request.nextUrl.search}`,
     {
       method: request.method,
       headers,

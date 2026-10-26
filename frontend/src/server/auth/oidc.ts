@@ -19,8 +19,8 @@ const globalForOidc = globalThis as typeof globalThis & {
 function credentials(kind: OidcClient): [string, string] {
   const config = serverConfig();
   return kind === "demo"
-    ? [config.SNOSKA_DEMO_CLIENT_ID, config.SNOSKA_DEMO_CLIENT_SECRET]
-    : [config.SNOSKA_WEB_CLIENT_ID, config.SNOSKA_WEB_CLIENT_SECRET];
+    ? [config.FOOTNOTE_DEMO_CLIENT_ID, config.FOOTNOTE_DEMO_CLIENT_SECRET]
+    : [config.FOOTNOTE_WEB_CLIENT_ID, config.FOOTNOTE_WEB_CLIENT_SECRET];
 }
 
 /**
@@ -50,10 +50,12 @@ export function oidc(kind: OidcClient = "web"): Promise<client.Configuration> {
   const cache = (globalForOidc.snoskaOidc ??= {});
   cache[kind] ??= (async () => {
     const config = serverConfig();
-    const issuer = new URL(`${config.SNOSKA_KEYCLOAK_URL}/realms/${config.SNOSKA_KEYCLOAK_REALM}`);
+    const issuer = new URL(
+      `${config.FOOTNOTE_KEYCLOAK_URL}/realms/${config.FOOTNOTE_KEYCLOAK_REALM}`,
+    );
     const [id, secret] = credentials(kind);
-    if (config.SNOSKA_KEYCLOAK_INTERNAL_URL) {
-      return internalConfiguration(config.SNOSKA_KEYCLOAK_INTERNAL_URL, issuer, [id, secret]);
+    if (config.FOOTNOTE_KEYCLOAK_INTERNAL_URL) {
+      return internalConfiguration(config.FOOTNOTE_KEYCLOAK_INTERNAL_URL, issuer, [id, secret]);
     }
     return client.discovery(
       issuer,
@@ -71,5 +73,5 @@ export function oidc(kind: OidcClient = "web"): Promise<client.Configuration> {
 }
 
 export function callbackUrl(): string {
-  return `${serverConfig().SNOSKA_WEB_URL}/auth/callback`;
+  return `${serverConfig().FOOTNOTE_WEB_URL}/auth/callback`;
 }

@@ -15,7 +15,7 @@
 # The runs leave no trace: the stand is returned to its seed at the end.
 #
 # Needs the infrastructure, the API, the worker and the web app running
-# (make up, make api, make worker, make web) and SNOSKA_DEMO_MODE=true.
+# (make up, make api, make worker, make web) and FOOTNOTE_DEMO_MODE=true.
 #
 # Model answers are cached by request, so steps 2, 3, 5-7 cost no requests
 # for documents checked before. The benchmark asks the model anew to time

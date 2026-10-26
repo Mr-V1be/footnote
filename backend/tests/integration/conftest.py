@@ -19,7 +19,7 @@ from alembic.config import Config
 from pydantic import SecretStr
 from sqlalchemy import text
 
-os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
+os.environ.setdefault("FOOTNOTE_DB_NAME", "snoska_test")
 
 from footnote.api.app import create_app
 from footnote.bootstrap.container import Container, Overrides, build_container

@@ -8,7 +8,7 @@ import { serverConfig } from "@/server/config";
 /** Ends the local session and the identity provider session. */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await readSession(request.cookies.get(SESSION_COOKIE)?.value);
-  const base = serverConfig().SNOSKA_WEB_URL;
+  const base = serverConfig().FOOTNOTE_WEB_URL;
   let destination = new URL("/", base);
   if (session?.tokens.client === "demo") {
     // A demo session has no login page to return through: end it at the provider.

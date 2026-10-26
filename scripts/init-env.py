@@ -16,8 +16,13 @@ ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / ".env.example"
 TARGET = ROOT / ".env"
 # Provider settings the owner fills in; they stay empty rather than random.
-OPTIONAL_PREFIXES = ("SNOSKA_LLM_", "SNOSKA_EMBEDDING_", "SNOSKA_OTLP_", "SNOSKA_PAYMENTS_LIVE_")
-OPTIONAL = frozenset({"SNOSKA_S3_REGION"})
+OPTIONAL_PREFIXES = (
+    "FOOTNOTE_LLM_",
+    "FOOTNOTE_EMBEDDING_",
+    "FOOTNOTE_OTLP_",
+    "FOOTNOTE_PAYMENTS_LIVE_",
+)
+OPTIONAL = frozenset({"FOOTNOTE_S3_REGION"})
 SECRET_BYTES = 24
 SESSION_SECRET_BYTES = 32
 _ASSIGNMENT = re.compile(r"^([A-Z0-9_]+)=(.*)$")
@@ -39,7 +44,7 @@ def main() -> int:
         value = current.get(key) or default
         optional = key in OPTIONAL or key.startswith(OPTIONAL_PREFIXES)
         if not value and not optional:
-            size = SESSION_SECRET_BYTES if key == "SNOSKA_SESSION_SECRET" else SECRET_BYTES
+            size = SESSION_SECRET_BYTES if key == "FOOTNOTE_SESSION_SECRET" else SECRET_BYTES
             value = secrets.token_urlsafe(size)
         lines.append(f"{key}={value}")
     TARGET.write_text("\n".join(lines) + "\n", encoding="utf-8")

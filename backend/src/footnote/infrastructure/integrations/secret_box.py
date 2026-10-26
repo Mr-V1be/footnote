@@ -12,7 +12,7 @@ class FernetSecretBox:
 
     def __init__(self, platform_secret: str) -> None:
         if not platform_secret:
-            raise ValueError("SNOSKA_SECRETS_KEY is not set")
+            raise ValueError("FOOTNOTE_SECRETS_KEY is not set")
         key = base64.urlsafe_b64encode(hashlib.sha256(platform_secret.encode()).digest())
         self._fernet = Fernet(key)
 

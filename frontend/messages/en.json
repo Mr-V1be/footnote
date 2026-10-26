@@ -900,11 +900,11 @@
       "indexDescription": "Answers appear once the text of the law is indexed.",
       "forAdmin": "For the stand's administrator",
       "steps": {
-        "llm": "SNOSKA_LLM_BASE_URL, SNOSKA_LLM_API_KEY, SNOSKA_LLM_MODEL",
-        "embedding": "SNOSKA_EMBEDDING_BASE_URL, SNOSKA_EMBEDDING_API_KEY, SNOSKA_EMBEDDING_MODEL",
+        "llm": "FOOTNOTE_LLM_BASE_URL, FOOTNOTE_LLM_API_KEY, FOOTNOTE_LLM_MODEL",
+        "embedding": "FOOTNOTE_EMBEDDING_BASE_URL, FOOTNOTE_EMBEDDING_API_KEY, FOOTNOTE_EMBEDDING_MODEL",
         "index": "make index",
         "restart": "make api, make worker",
-        "paid": "SNOSKA_LLM_MODEL: a paid model, SNOSKA_LLM_REQUESTS_PER_DAY=0"
+        "paid": "FOOTNOTE_LLM_MODEL: a paid model, FOOTNOTE_LLM_REQUESTS_PER_DAY=0"
       },
       "limitTitle": "The model's daily limit is used up",
       "limitDescription": "The model's free tier allows a limited number of requests a day. Ask tomorrow."

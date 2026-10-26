@@ -17,7 +17,7 @@ def copy_to_s3() -> None:
     """Copy every file of the local store into the S3 bucket (idempotent).
 
     Used when a stand moves from the local directory to the object store:
-    run it, then set SNOSKA_STORAGE_BACKEND=s3.
+    run it, then set FOOTNOTE_STORAGE_BACKEND=s3.
     """
     settings = settings_for_cli().storage
 

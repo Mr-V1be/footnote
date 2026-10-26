@@ -4,13 +4,13 @@
 # role and is subject to row-level security (it never owns tenant tables).
 set -euo pipefail
 
-: "${SNOSKA_DB_OWNER_PASSWORD:?SNOSKA_DB_OWNER_PASSWORD is required}"
-: "${SNOSKA_DB_APP_PASSWORD:?SNOSKA_DB_APP_PASSWORD is required}"
+: "${FOOTNOTE_DB_OWNER_PASSWORD:?FOOTNOTE_DB_OWNER_PASSWORD is required}"
+: "${FOOTNOTE_DB_APP_PASSWORD:?FOOTNOTE_DB_APP_PASSWORD is required}"
 : "${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD is required}"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres \
-  -v owner_pw="$SNOSKA_DB_OWNER_PASSWORD" \
-  -v app_pw="$SNOSKA_DB_APP_PASSWORD" \
+  -v owner_pw="$FOOTNOTE_DB_OWNER_PASSWORD" \
+  -v app_pw="$FOOTNOTE_DB_APP_PASSWORD" \
   -v kc_pw="$KEYCLOAK_DB_PASSWORD" <<'SQL'
 CREATE ROLE snoska_owner LOGIN PASSWORD :'owner_pw';
 CREATE ROLE snoska_app LOGIN PASSWORD :'app_pw' NOBYPASSRLS;

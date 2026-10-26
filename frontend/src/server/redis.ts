@@ -8,11 +8,11 @@ function connect() {
   const config = serverConfig();
   const client = createClient({
     socket: {
-      host: config.SNOSKA_REDIS_HOST,
-      port: config.SNOSKA_REDIS_PORT,
+      host: config.FOOTNOTE_REDIS_HOST,
+      port: config.FOOTNOTE_REDIS_PORT,
       connectTimeout: 5000,
     },
-    password: config.SNOSKA_REDIS_PASSWORD || undefined,
+    password: config.FOOTNOTE_REDIS_PASSWORD || undefined,
   });
   client.on("error", (error: unknown) => {
     console.error(JSON.stringify({ event: "redis.error", error: String(error) }));

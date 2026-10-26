@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 # Nightly backups: both databases as custom-format dumps and the uploaded
-# files as a tarball, kept for SNOSKA_BACKUP_KEEP_DAYS days in /backups.
+# files as a tarball, kept for FOOTNOTE_BACKUP_KEEP_DAYS days in /backups.
 # Runs in the PostgreSQL image (its pg_dump matches the server).
-#   backup.sh          sleep until SNOSKA_BACKUP_HOUR, back up, repeat
+#   backup.sh          sleep until FOOTNOTE_BACKUP_HOUR, back up, repeat
 #   backup.sh now      one backup at once
 set -eu
 
-HOUR="${SNOSKA_BACKUP_HOUR:-2}"
-KEEP="${SNOSKA_BACKUP_KEEP_DAYS:-14}"
+HOUR="${FOOTNOTE_BACKUP_HOUR:-2}"
+KEEP="${FOOTNOTE_BACKUP_KEEP_DAYS:-14}"
 export PGHOST=postgres PGUSER=postgres PGPASSWORD="${POSTGRES_SUPERUSER_PASSWORD:?}"
 
 backup() {

@@ -23,7 +23,7 @@ flowchart LR
 | --- | --- |
 | `caddy` | TLS, HTTP/3, обратный прокси; консоль администратора Keycloak снаружи закрыта |
 | `web` | Next.js (standalone), BFF: токены остаются на сервере |
-| `api` | FastAPI, `SNOSKA_API_WORKERS` процессов |
+| `api` | FastAPI, `FOOTNOTE_API_WORKERS` процессов |
 | `worker` | разбор документов, проверки, вебхуки, периодические задачи |
 | `migrate` | миграции базы при каждой выкатке, до старта API и воркера |
 | `keycloak` | вход, организации и роли; браузер ходит на `auth.домен`, серверы — на `keycloak:8080`; образ собирается заранее (`infra/keycloak/Dockerfile`): realm и тема входа внутри, `start --optimized` |
@@ -50,9 +50,9 @@ flowchart LR
 
 | Переменная | Значение | Зачем |
 | --- | --- | --- |
-| `SNOSKA_API_WORKERS` | `1` | один процесс API вместо двух |
-| `SNOSKA_WORKER_THREADS` | `2` | воркер разбирает два документа одновременно; бесплатный тариф модели всё равно ограничивает темп |
-| `SNOSKA_DB_POOL_SIZE`, `SNOSKA_DB_MAX_OVERFLOW` | `3`, `2` | до 5 соединений с PostgreSQL на процесс |
+| `FOOTNOTE_API_WORKERS` | `1` | один процесс API вместо двух |
+| `FOOTNOTE_WORKER_THREADS` | `2` | воркер разбирает два документа одновременно; бесплатный тариф модели всё равно ограничивает темп |
+| `FOOTNOTE_DB_POOL_SIZE`, `FOOTNOTE_DB_MAX_OVERFLOW` | `3`, `2` | до 5 соединений с PostgreSQL на процесс |
 | `KEYCLOAK_HEAP_OPTIONS` | `-Xms64m -Xmx192m` | потолок кучи JVM вместо 70% лимита контейнера |
 | `KEYCLOAK_JAVA_OPTIONS` | `-XX:TieredStopAtLevel=1 -Xss512k -XX:ReservedCodeCacheSize=64m -XX:MaxMetaspaceSize=192m` | только быстрый JIT, меньше памяти на стеки и код |
 | `KEYCLOAK_DB_POOL_MAX_SIZE` | `8` | соединения Keycloak с базой |
@@ -65,15 +65,15 @@ Keycloak может жить не на своём имени, а под путё
 `https://snoska.example.ru/auth`. В `.env.prod`:
 
 ```bash
-SNOSKA_KEYCLOAK_URL=https://snoska.example.ru/auth
+FOOTNOTE_KEYCLOAK_URL=https://snoska.example.ru/auth
 KEYCLOAK_PATH=/auth
 ```
 
 Образ Keycloak собирается с этим путём (`KEYCLOAK_HTTP_RELATIVE_PATH` — параметр сборки,
 проверка здоровья на порту управления остаётся на `/health/ready`), серверы обращаются к
 `http://keycloak:8080/auth`, а издатель токенов, адреса входа и выхода, redirect URI клиентов
-из импорта realm (`${SNOSKA_WEB_URL}/auth/callback`) следуют за `SNOSKA_KEYCLOAK_URL` и
-`SNOSKA_WEB_URL` сами. Прокси перед стеком отдаёт Keycloak только его публичные пути —
+из импорта realm (`${FOOTNOTE_WEB_URL}/auth/callback`) следуют за `FOOTNOTE_KEYCLOAK_URL` и
+`FOOTNOTE_WEB_URL` сами. Прокси перед стеком отдаёт Keycloak только его публичные пути —
 `/auth/realms/*` и `/auth/resources/*`; `/auth/login`, `/auth/callback`, `/auth/logout` и
 `/auth/demo` — маршруты веб-приложения, консоль `/auth/admin` снаружи закрыта. Встроенный Caddy
 этого файла настроен на отдельное имя Keycloak.
@@ -119,7 +119,7 @@ KEYCLOAK_PATH=/auth
    cp infra/prod/env.example .env.prod && chmod 600 .env.prod
    ```
 
-   Заполнить `.env.prod`: адреса, почту, ключ модели. Каждый секрет — случайный: `openssl rand -hex 32`. `SNOSKA_SECRETS_KEY` после первого запуска не меняется (иначе секреты вебхуков станут нечитаемыми). `SNOSKA_DEMO_MODE=false` для настоящей установки.
+   Заполнить `.env.prod`: адреса, почту, ключ модели. Каждый секрет — случайный: `openssl rand -hex 32`. `FOOTNOTE_SECRETS_KEY` после первого запуска не меняется (иначе секреты вебхуков станут нечитаемыми). `FOOTNOTE_DEMO_MODE=false` для настоящей установки.
 
 4. **Сборка и запуск.**
 
@@ -180,7 +180,7 @@ $C exec keycloak /opt/keycloak/bin/kcadm.sh update realms/snoska \
 
 ## Резервные копии
 
-Сервис `backup` каждую ночь (`SNOSKA_BACKUP_HOUR`, по UTC) кладёт в `SNOSKA_BACKUP_DIR` каталог с `snoska.dump`, `keycloak.dump` (pg_dump, формат custom) и `blobs.tar.gz` (загруженные файлы) и удаляет копии старше `SNOSKA_BACKUP_KEEP_DAYS`. Копию вне расписания: `docker compose -f docker-compose.prod.yml --env-file .env.prod exec backup /usr/local/bin/backup.sh now`. Каталог копий стоит синхронизировать за пределы сервера (rclone, rsync).
+Сервис `backup` каждую ночь (`FOOTNOTE_BACKUP_HOUR`, по UTC) кладёт в `FOOTNOTE_BACKUP_DIR` каталог с `snoska.dump`, `keycloak.dump` (pg_dump, формат custom) и `blobs.tar.gz` (загруженные файлы) и удаляет копии старше `FOOTNOTE_BACKUP_KEEP_DAYS`. Копию вне расписания: `docker compose -f docker-compose.prod.yml --env-file .env.prod exec backup /usr/local/bin/backup.sh now`. Каталог копий стоит синхронизировать за пределы сервера (rclone, rsync).
 
 Восстановление — в пустые базы, объекты создаются от ролей-владельцев, права роли приложения и политики RLS приходят из дампа:
 
@@ -202,7 +202,7 @@ $C up -d
 
 ## Демо-стенд
 
-То же самое с `SNOSKA_DEMO_MODE=true` и профилем `demo`: вход в один клик по ролям, защищённые демо-учётные записи и ночной сброс к сиду (`SNOSKA_DEMO_RESET_HOUR`, по Москве).
+То же самое с `FOOTNOTE_DEMO_MODE=true` и профилем `demo`: вход в один клик по ролям, защищённые демо-учётные записи и ночной сброс к сиду (`FOOTNOTE_DEMO_RESET_HOUR`, по Москве).
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.prod --profile demo up -d --build
@@ -211,4 +211,4 @@ snoska demo seed
 
 ## Проверено локально
 
-Сборка запускалась целиком на этой машине без настоящего деплоя: `SNOSKA_DOMAIN=localhost`, `SNOSKA_AUTH_DOMAIN=auth.localhost`, порты 46380 и 46381 (TLS от локального центра Caddy), демо-режим. Проверено: все сервисы `healthy`, миграции и сид, лендинг, вход в один клик и обычный вход через Keycloak по HTTPS, выход, документ с результатом проверки, публичный API через Caddy, закрытая консоль Keycloak, резервная копия и её восстановление в отдельную базу (с ролью-владельцем — на базе разработки).
+Сборка запускалась целиком на этой машине без настоящего деплоя: `FOOTNOTE_DOMAIN=localhost`, `FOOTNOTE_AUTH_DOMAIN=auth.localhost`, порты 46380 и 46381 (TLS от локального центра Caddy), демо-режим. Проверено: все сервисы `healthy`, миграции и сид, лендинг, вход в один клик и обычный вход через Keycloak по HTTPS, выход, документ с результатом проверки, публичный API через Caddy, закрытая консоль Keycloak, резервная копия и её восстановление в отдельную базу (с ролью-владельцем — на базе разработки).

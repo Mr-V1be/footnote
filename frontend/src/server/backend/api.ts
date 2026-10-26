@@ -25,7 +25,7 @@ export async function serverApi(returnTo: string): Promise<ApiClient> {
     redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
   const locale = await getLocale();
-  const client = createClient<paths>({ baseUrl: serverConfig().SNOSKA_API_URL });
+  const client = createClient<paths>({ baseUrl: serverConfig().FOOTNOTE_API_URL });
   client.use({
     onRequest({ request }) {
       request.headers.set("Authorization", `Bearer ${token}`);
@@ -42,7 +42,7 @@ export async function serverApi(returnTo: string): Promise<ApiClient> {
  */
 export async function publicApi(): Promise<ApiClient> {
   const locale = await getLocale();
-  const client = createClient<paths>({ baseUrl: serverConfig().SNOSKA_API_URL });
+  const client = createClient<paths>({ baseUrl: serverConfig().FOOTNOTE_API_URL });
   client.use({
     onRequest({ request }) {
       request.headers.set("Accept-Language", locale);

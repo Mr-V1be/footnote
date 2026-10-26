@@ -25,7 +25,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
-    SNOSKA_DEMO_SEED=/app/demo/seed.yaml
+    FOOTNOTE_DEMO_SEED=/app/demo/seed.yaml
 USER snoska
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \

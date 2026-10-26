@@ -14,7 +14,7 @@ from footnote.infrastructure.storage.filesystem import FileSystemBlobStorage
 from footnote.infrastructure.storage.s3 import S3BlobStorage, S3Config
 from footnote.ports.blob_storage import BlobNotFoundError, BlobStorage, BlobTooLargeError
 
-S3_ENDPOINT = os.environ.get("SNOSKA_TEST_S3_ENDPOINT")
+S3_ENDPOINT = os.environ.get("FOOTNOTE_TEST_S3_ENDPOINT")
 
 
 async def chunks(*parts: bytes) -> AsyncIterator[bytes]:
@@ -28,10 +28,10 @@ def storage(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[BlobStor
         yield FileSystemBlobStorage(tmp_path)
         return
     if not S3_ENDPOINT:
-        pytest.skip("no S3 endpoint for tests (SNOSKA_TEST_S3_ENDPOINT)")
+        pytest.skip("no S3 endpoint for tests (FOOTNOTE_TEST_S3_ENDPOINT)")
     access, secret = (
-        os.environ["SNOSKA_TEST_S3_ACCESS_KEY"],
-        os.environ["SNOSKA_TEST_S3_SECRET_KEY"],
+        os.environ["FOOTNOTE_TEST_S3_ACCESS_KEY"],
+        os.environ["FOOTNOTE_TEST_S3_SECRET_KEY"],
     )
     bucket = f"test-{uuid4().hex[:12]}"
     yield S3BlobStorage(

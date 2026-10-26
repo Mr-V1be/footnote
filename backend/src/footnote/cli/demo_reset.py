@@ -28,7 +28,7 @@ async def reset_stand(settings: Settings) -> None:
     """Clear every seeded organization, then seed the stand again."""
     if not settings.demo.mode:
         raise typer.BadParameter(
-            "the reset clears the seeded organizations: it runs only with SNOSKA_DEMO_MODE=true"
+            "the reset clears the seeded organizations: it runs only with FOOTNOTE_DEMO_MODE=true"
         )
     data = read_seed(settings.demo_root / "seed.yaml")
     engine = owner_engine(settings)
