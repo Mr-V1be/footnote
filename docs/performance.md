@@ -4,10 +4,10 @@
 
 ## Как запускали
 
-- Сценарий — [`load/k6/snoska.js`](../load/k6/snoska.js), запуск `make load` (k6 1.3.0 в Docker-образе `grafana/k6`, в систему ничего не ставится, сеть хоста).
+- Сценарий — [`load/k6/footnote.js`](../load/k6/footnote.js), запуск `make load` (k6 1.3.0 в Docker-образе `grafana/k6`, в систему ничего не ставится, сеть хоста).
 - Стенд разработки на одной машине: API — один процесс uvicorn (`FOOTNOTE_API_WORKERS=1`), воркер Dramatiq (2 потока), PostgreSQL 18 с pgvector, Redis, файлы на диске. Машина — 32 потока, 30 ГБ памяти, общая с другими задачами: цифры — нижняя граница, а не предел продукта.
 - Клиент — интеграция по API-ключу: тест входит владельцем демо-организации через демо-клиент Keycloak, выпускает ключ на время прогона и отзывает его в конце.
-- Перед прогоном стенд возвращается к сиду (`snoska demo reset`), после загрузок — `snoska checks wait`.
+- Перед прогоном стенд возвращается к сиду (`footnote demo reset`), после загрузок — `footnote checks wait`.
 - Ответы модели для документов, которые уже проверялись, берутся из кэша: тест меряет продукт, а не внешнего провайдера. Время модели — отдельно, ниже.
 
 Четыре потока одновременно, каждый — с постоянной частотой запросов:
@@ -67,7 +67,7 @@
 
 ```bash
 make up && make api && make worker      # стенд, FOOTNOTE_DEMO_MODE=true
-cd backend && uv run snoska demo reset && uv run snoska checks wait && cd ..
+cd backend && uv run footnote demo reset && uv run footnote checks wait && cd ..
 make load                               # 60 секунд, сводка в .run/k6/summary.json
 DURATION=30s LIST_RATE=150 REPORT_RATE=50 UPLOAD_RATE=2 CHECK_RATE=2 scripts/load-test.sh
 ```

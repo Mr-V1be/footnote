@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif">
-  <title>Архитектура «Сноски»</title>
+  <title>Архитектура Footnote</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="#4f5560"/>
@@ -19,8 +19,8 @@
   </defs>
 
   <rect width="1200" height="780" fill="#f6f6f3"/>
-  <text x="40" y="48" font-size="26" font-weight="600" fill="#1d2025">Сноска<tspan font-size="15" dy="-10" fill="#2438c4">1</tspan></text>
-  <text x="152" y="47" class="t">проверка документов по 152-ФЗ и ГОСТ Р 7.0.97-2016 со ссылкой на норму к каждому замечанию</text>
+  <!-- One line, so the tagline follows the wordmark in whatever font renders it. -->
+  <text x="40" y="48"><tspan font-size="26" font-weight="600" fill="#1d2025">Footnote</tspan><tspan font-size="15" font-weight="600" dy="-10" fill="#2438c4">1</tspan><tspan class="t" dx="12" dy="9">проверка документов по 152-ФЗ и ГОСТ Р 7.0.97-2016 со ссылкой на норму к каждому замечанию</tspan></text>
 
   <!-- Clients -->
   <text x="40" y="92" class="label">КЛИЕНТЫ</text>
