@@ -1,0 +1,190 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import timedelta
+
+import httpx
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncEngine
+
+from footnote.application.audit.trail import AuditTrail
+from footnote.application.billing.meter import UsageMeter
+from footnote.application.integrations.events import EventFollowUps, OrganizationEvents
+from footnote.application.tenancy.gate import WorkspaceGate
+from footnote.bootstrap.providers import AiAdapters, AiServices, build_ai_adapters
+from footnote.bootstrap.settings import Settings
+from footnote.bootstrap.storage import build_blob_storage
+from footnote.domain.billing.plans import PlanCatalog
+from footnote.domain.tenancy.roles import ORGANIZATION_ROLES
+from footnote.infrastructure.ai.budget import RedisRequestBudget, UnlimitedBudget
+from footnote.infrastructure.billing.plans import load_plans
+from footnote.infrastructure.corpus_sources.catalog import YamlActCatalog
+from footnote.infrastructure.identity.claims import KeycloakClaimsMapper
+from footnote.infrastructure.identity.jwks import JwksKeySource
+from footnote.infrastructure.identity.jwt_verifier import JwtTokenVerifier, KeySource, TokenPolicy
+from footnote.infrastructure.identity.keycloak_admin import KeycloakAdminClient, KeycloakAdminConfig
+from footnote.infrastructure.integrations.secret_box import FernetSecretBox
+from footnote.infrastructure.parsing.docx.parser import DocxParser
+from footnote.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
+from footnote.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
+from footnote.infrastructure.parsing.registry import ParserRegistry
+from footnote.infrastructure.persistence.database import DatabaseConfig, create_engine
+from footnote.infrastructure.persistence.repositories.completions import PostgresCompletionCache
+from footnote.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
+from footnote.infrastructure.system.clock import SystemClock
+from footnote.ports.ai import Embedder, LanguageModel, RequestBudget
+from footnote.ports.blob_storage import BlobStorage
+from footnote.ports.clock import Clock
+from footnote.ports.identity import MemberAdministration, OrganizationDirectory, TokenVerifier
+from footnote.ports.integrations.transport import WebhookTransport
+
+HTTP_TIMEOUT_SECONDS = 30.0
+
+
+@dataclass(frozen=True, slots=True)
+class Overrides:
+    """Adapters replaced in tests where the real provider is not available."""
+
+    key_source: KeySource | None = None
+    directory: OrganizationDirectory | None = None
+    administration: MemberAdministration | None = None
+    embedder: Embedder | None = None
+    language_model: LanguageModel | None = None
+    webhook_transport: WebhookTransport | None = None
+
+
+def app_database(settings: Settings) -> DatabaseConfig:
+    db = settings.database
+    return DatabaseConfig(
+        host=db.host,
+        port=db.port,
+        name=db.name,
+        user=db.app_user,
+        password=db.app_password.get_secret_value(),
+        pool_size=db.pool_size,
+        max_overflow=db.max_overflow,
+        statement_timeout_ms=db.statement_timeout_ms,
+    )
+
+
+@dataclass(slots=True)
+class Core:
+    """Adapters and services every part of the application shares."""
+
+    settings: Settings
+    overrides: Overrides
+    engine: AsyncEngine
+    http: httpx.AsyncClient
+    ai: AiAdapters
+    redis: Redis
+    clock: SystemClock
+    uow: SqlUnitOfWorkFactory
+    blobs: BlobStorage
+    keycloak: KeycloakAdminClient
+    verifier: TokenVerifier
+    parsers: ParserRegistry
+    plans: PlanCatalog
+    acts: YamlActCatalog
+    gate: WorkspaceGate = field(init=False)
+    audit: AuditTrail = field(init=False)
+    events: OrganizationEvents = field(init=False)
+    follow_ups: EventFollowUps = field(init=False)
+    meter: UsageMeter = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.gate = WorkspaceGate(ORGANIZATION_ROLES)
+        self.audit = AuditTrail(self.clock)
+        self.events = OrganizationEvents(self.clock)
+        self.follow_ups = EventFollowUps(self.events)
+        self.meter = UsageMeter(self.plans, self.clock)
+
+    @property
+    def directory(self) -> OrganizationDirectory:
+        return self.overrides.directory or self.keycloak
+
+    @property
+    def administration(self) -> MemberAdministration:
+        return self.overrides.administration or self.keycloak
+
+    @property
+    def embedder(self) -> Embedder:
+        return self.overrides.embedder or self.ai.embedder
+
+    @property
+    def language_model(self) -> LanguageModel:
+        return self.overrides.language_model or self.ai.language_model
+
+    async def close(self) -> None:
+        await self.ai.close()
+        await self.http.aclose()
+        await self.redis.aclose()
+        await self.engine.dispose()
+
+
+def _ai_services(settings: Settings, engine: AsyncEngine, clock: Clock, redis: Redis) -> AiServices:
+    ai = settings.ai
+    limited = ai.llm_requests_per_minute > 0 or ai.llm_requests_per_day > 0
+    budget: RequestBudget = (
+        RedisRequestBudget(
+            redis,
+            per_minute=ai.llm_requests_per_minute,
+            per_day=ai.llm_requests_per_day,
+            clock=clock,
+        )
+        if limited
+        else UnlimitedBudget()
+    )
+    cache = (
+        PostgresCompletionCache(engine, clock, timedelta(days=ai.llm_cache_days))
+        if ai.llm_cache_days > 0
+        else None
+    )
+    return AiServices(budget=budget, cache=cache)
+
+
+async def build_core(settings: Settings, overrides: Overrides) -> Core:
+    engine = create_engine(app_database(settings))
+    http = httpx.AsyncClient(timeout=HTTP_TIMEOUT_SECONDS)
+    redis: Redis = Redis.from_url(settings.redis.url())
+    clock = SystemClock()
+    try:
+        ai = build_ai_adapters(settings.ai, _ai_services(settings, engine, clock, redis))
+    except BaseException:
+        await http.aclose()
+        await redis.aclose()
+        await engine.dispose()
+        raise
+    box = FernetSecretBox(settings.integrations.secrets_key.get_secret_value())
+    return Core(
+        settings=settings,
+        overrides=overrides,
+        engine=engine,
+        http=http,
+        ai=ai,
+        redis=redis,
+        clock=clock,
+        uow=SqlUnitOfWorkFactory(engine, box),
+        blobs=build_blob_storage(settings.storage),
+        keycloak=KeycloakAdminClient(
+            http,
+            KeycloakAdminConfig(
+                base_url=settings.keycloak.backchannel_url,
+                realm=settings.keycloak.realm,
+                client_id=settings.directory.client_id,
+                client_secret=settings.directory.client_secret.get_secret_value(),
+                api_client_id=settings.keycloak.api_client_id,
+                web_client_id=settings.keycloak.web_client_id,
+                web_url=settings.web_url,
+            ),
+        ),
+        verifier=JwtTokenVerifier(
+            overrides.key_source or JwksKeySource(http, settings.keycloak.jwks_url),
+            TokenPolicy(issuer=settings.keycloak.issuer, audience=settings.keycloak.api_client_id),
+            KeycloakClaimsMapper(settings.keycloak.api_client_id),
+        ),
+        parsers=ParserRegistry(
+            [DocxParser(), PdfParser(TesseractOcrEngine(TesseractConfig()), PdfLimits())]
+        ),
+        plans=load_plans(settings.billing.plans),
+        acts=YamlActCatalog(settings.corpus_catalog),
+    )

@@ -7,9 +7,9 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import text
 
-from snoska.bootstrap.container import Container
-from snoska.domain.tenancy.members import Member
-from snoska.ports.identity import OrganizationProfile
+from footnote.bootstrap.container import Container
+from footnote.domain.tenancy.members import Member
+from footnote.ports.identity import OrganizationProfile
 from tests.support.tokens import MemberIdentity, TokenFactory
 
 ORG_A = OrganizationProfile(

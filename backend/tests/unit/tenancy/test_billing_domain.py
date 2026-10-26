@@ -7,9 +7,9 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.domain.billing.plans import Plan, UsageMetric
-from snoska.domain.billing.subscription import Subscription, next_month
-from snoska.domain.billing.usage import QuotaExceededError, counted_pages, ensure_allowance
+from footnote.domain.billing.plans import Plan, UsageMetric
+from footnote.domain.billing.subscription import Subscription, next_month
+from footnote.domain.billing.usage import QuotaExceededError, counted_pages, ensure_allowance
 
 LIMITS = dict.fromkeys(UsageMetric, 10)
 

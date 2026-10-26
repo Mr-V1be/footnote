@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.domain.ask.answer import (
+from footnote.domain.ask.answer import (
     AnswerStatus,
     SourceProvision,
     UngroundedAnswerError,

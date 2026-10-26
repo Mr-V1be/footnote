@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from snoska.domain.documents.requisites import RequisiteDetector
-from snoska.domain.documents.structure import Block, BlockKind, Requisite, RequisiteKind
+from footnote.domain.documents.requisites import RequisiteDetector
+from footnote.domain.documents.structure import Block, BlockKind, Requisite, RequisiteKind
 
 
 def blocks(*texts: str) -> list[Block]:

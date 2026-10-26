@@ -186,7 +186,7 @@ services:
   # Migrations run on every rollout, before the API and the worker start.
   migrate:
     <<: *backend
-    command: ["snoska", "db", "migrate"]
+    command: ["footnote", "db", "migrate"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -200,7 +200,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     pull_policy: missing
-    command: ["snoska", "api"]
+    command: ["footnote", "api"]
     environment:
       <<: *backend-env
       SNOSKA_API_WORKERS: ${SNOSKA_API_WORKERS:-2}
@@ -215,7 +215,7 @@ services:
 
   worker:
     <<: *backend
-    command: ["snoska", "worker"]
+    command: ["footnote", "worker"]
     environment:
       <<: *backend-env
       SNOSKA_WORKER_THREADS: ${SNOSKA_WORKER_THREADS:-4}
@@ -306,7 +306,7 @@ services:
   # nightly return of the seeded organizations to the seed.
   demo-reset:
     <<: *backend
-    command: ["snoska", "demo", "nightly"]
+    command: ["footnote", "demo", "nightly"]
     profiles: ["demo"]
     mem_limit: 512m
     depends_on:

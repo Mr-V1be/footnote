@@ -71,8 +71,8 @@ export async function restoreStand() {
   if (process.env.KEEP_STAND === "1") return;
   const run = promisify(execFile);
   const backend = { cwd: resolve(ROOT, "backend"), maxBuffer: 16 * 1024 * 1024 };
-  await run("uv", ["run", "--frozen", "snoska", "demo", "reset"], backend);
-  await run("uv", ["run", "--frozen", "snoska", "checks", "wait"], backend);
+  await run("uv", ["run", "--frozen", "footnote", "demo", "reset"], backend);
+  await run("uv", ["run", "--frozen", "footnote", "checks", "wait"], backend);
   console.log("demo stand restored to its seed");
 }
 

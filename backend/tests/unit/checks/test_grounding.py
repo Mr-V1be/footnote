@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from snoska.domain.checks.grounding import locate_quote
+from footnote.domain.checks.grounding import locate_quote
 
 TEXT = "Оператор обрабатывает персональные данные «клиентов» — в целях\nисполнения договоров."
 

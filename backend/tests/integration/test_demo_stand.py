@@ -12,13 +12,13 @@ import httpx
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from snoska.api.app import create_app
-from snoska.application.operations.demo_reset import DemoStandReset
-from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import DemoSettings, Settings
-from snoska.domain.tenancy.members import Member
-from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from snoska.infrastructure.persistence.maintenance import OwnerBacklogProbe, OwnerTenantPurge
+from footnote.api.app import create_app
+from footnote.application.operations.demo_reset import DemoStandReset
+from footnote.bootstrap.container import Container, Overrides, build_container
+from footnote.bootstrap.settings import DemoSettings, Settings
+from footnote.domain.tenancy.members import Member
+from footnote.infrastructure.persistence.database import DatabaseConfig, create_engine
+from footnote.infrastructure.persistence.maintenance import OwnerBacklogProbe, OwnerTenantPurge
 from tests.support.fakes import FakeDirectory
 from tests.support.scenario import (
     ALICE,

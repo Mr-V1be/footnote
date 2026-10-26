@@ -2,7 +2,7 @@
 #
 # `sources` holds the document reference per source adapter. `snapshot` is a
 # copy of the portal page bundled for offline seeding; refresh it with
-# `snoska corpus snapshot <code>`. The text of federal laws is an official
+# `footnote corpus snapshot <code>`. The text of federal laws is an official
 # document and is not an object of copyright (Civil Code of the Russian
 # Federation, art. 1259 part 6).
 #

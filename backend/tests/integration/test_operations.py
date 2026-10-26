@@ -8,11 +8,11 @@ from uuid import uuid4
 import httpx
 from sqlalchemy import text
 
-from snoska.application.operations.corpus_watch import WatchCorpusEditions
-from snoska.bootstrap.container import Container
-from snoska.domain.operations.schedule import WatchOutcome
-from snoska.infrastructure.corpus_sources.catalog import YamlActCatalog
-from snoska.ports.operations.notifications import Email, Recipient
+from footnote.application.operations.corpus_watch import WatchCorpusEditions
+from footnote.bootstrap.container import Container
+from footnote.domain.operations.schedule import WatchOutcome
+from footnote.infrastructure.corpus_sources.catalog import YamlActCatalog
+from footnote.ports.operations.notifications import Email, Recipient
 from tests.support.scenario import ALICE, ORG_A, auth, run_jobs
 from tests.support.tokens import MemberIdentity, TokenFactory
 
@@ -60,7 +60,7 @@ async def test_a_new_edition_is_loaded_and_the_operator_told_once(container: Con
     [email] = inbox.sent
     assert email.to == (OPERATOR.email,)
     assert "новая редакция" in email.text
-    assert "snoska checks recheck" in email.text
+    assert "footnote checks recheck" in email.text
 
 
 async def test_the_notice_is_written_in_the_language_the_operator_last_used(

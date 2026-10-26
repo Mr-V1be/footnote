@@ -14,8 +14,8 @@ SERVICES=(api worker web)
 
 command_of() {
   case "$1" in
-    api) echo "cd '$ROOT' && exec backend/.venv/bin/snoska api" ;;
-    worker) echo "cd '$ROOT' && exec backend/.venv/bin/snoska worker" ;;
+    api) echo "cd '$ROOT' && exec backend/.venv/bin/footnote api" ;;
+    worker) echo "cd '$ROOT' && exec backend/.venv/bin/footnote worker" ;;
     web) echo "cd '$ROOT/frontend' && exec pnpm dev" ;;
   esac
 }

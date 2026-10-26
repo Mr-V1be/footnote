@@ -7,17 +7,17 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from snoska.domain.corpus.acts import ActKind, LegalAct
-from snoska.domain.corpus.assembly import (
+from footnote.domain.corpus.acts import ActKind, LegalAct
+from footnote.domain.corpus.assembly import (
     assemble_edition,
     edition_content_hash,
     embedding_texts_for,
 )
-from snoska.domain.corpus.citation import PathStep, anchor_of, citation_of, cite, cite_clause
-from snoska.domain.corpus.units import UnitKind
-from snoska.domain.shared.locale import Locale, LocalizedText
-from snoska.infrastructure.corpus_sources.law_html import ParsedLaw, parse_law_html
-from snoska.infrastructure.corpus_sources.pravo_ips import PORTAL_ENCODING
+from footnote.domain.corpus.citation import PathStep, anchor_of, citation_of, cite, cite_clause
+from footnote.domain.corpus.units import UnitKind
+from footnote.domain.shared.locale import Locale, LocalizedText
+from footnote.infrastructure.corpus_sources.law_html import ParsedLaw, parse_law_html
+from footnote.infrastructure.corpus_sources.pravo_ips import PORTAL_ENCODING
 
 SNAPSHOT = Path(__file__).parents[3] / "data" / "corpus" / "snapshots" / "152-fz.pravo-ips.html.gz"
 ACT = LegalAct(

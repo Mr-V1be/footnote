@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from snoska.api.locale import preferred_locale
-from snoska.domain.shared.locale import Locale
+from footnote.api.locale import preferred_locale
+from footnote.domain.shared.locale import Locale
 
 
 @pytest.mark.parametrize(

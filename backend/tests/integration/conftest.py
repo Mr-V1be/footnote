@@ -21,18 +21,18 @@ from sqlalchemy import text
 
 os.environ.setdefault("SNOSKA_DB_NAME", "snoska_test")
 
-from snoska.api.app import create_app
-from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import (
+from footnote.api.app import create_app
+from footnote.bootstrap.container import Container, Overrides, build_container
+from footnote.bootstrap.settings import (
     BACKEND_ROOT,
     AiProvider,
     AiSettings,
     Settings,
     StorageBackend,
 )
-from snoska.domain.corpus.embedding import EmbeddingSpace
-from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from snoska.infrastructure.persistence.vector_index import ensure_space
+from footnote.domain.corpus.embedding import EmbeddingSpace
+from footnote.infrastructure.persistence.database import DatabaseConfig, create_engine
+from footnote.infrastructure.persistence.vector_index import ensure_space
 from tests.support.fakes import (
     FakeDirectory,
     HashEmbedder,

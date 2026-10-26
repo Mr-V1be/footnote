@@ -5,10 +5,10 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.domain.documents.document import Document, InvalidTitleError, title_from_filename
-from snoska.domain.documents.formats import SUPPORTED_FORMATS, UnsupportedFormatError
-from snoska.domain.documents.structure import Block, BlockKind, DocumentStructure
-from snoska.domain.documents.version import (
+from footnote.domain.documents.document import Document, InvalidTitleError, title_from_filename
+from footnote.domain.documents.formats import SUPPORTED_FORMATS, UnsupportedFormatError
+from footnote.domain.documents.structure import Block, BlockKind, DocumentStructure
+from footnote.domain.documents.version import (
     DocumentVersion,
     ExtractionMethod,
     ParseFailureCode,
@@ -16,7 +16,7 @@ from snoska.domain.documents.version import (
     ParseSummary,
     StoredFile,
 )
-from snoska.domain.shared.errors import InvalidStateError
+from footnote.domain.shared.errors import InvalidStateError
 
 NOW = datetime(2026, 10, 2, tzinfo=UTC)
 

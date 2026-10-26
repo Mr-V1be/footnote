@@ -11,15 +11,15 @@ import anyio
 import httpx
 import pytest
 
-from snoska.api.app import create_app
-from snoska.application.checks.quality.benchmark import BenchmarkIncompleteError
-from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import Settings
-from snoska.infrastructure.ai.budget import UnlimitedBudget
-from snoska.infrastructure.ai.cache import CachingLanguageModel
-from snoska.infrastructure.persistence.repositories.completions import PostgresCompletionCache
-from snoska.infrastructure.system.clock import SystemClock
-from snoska.ports.ai import (
+from footnote.api.app import create_app
+from footnote.application.checks.quality.benchmark import BenchmarkIncompleteError
+from footnote.bootstrap.container import Container, Overrides, build_container
+from footnote.bootstrap.settings import Settings
+from footnote.infrastructure.ai.budget import UnlimitedBudget
+from footnote.infrastructure.ai.cache import CachingLanguageModel
+from footnote.infrastructure.persistence.repositories.completions import PostgresCompletionCache
+from footnote.infrastructure.system.clock import SystemClock
+from footnote.ports.ai import (
     ChatMessage,
     Completion,
     CompletionRequest,

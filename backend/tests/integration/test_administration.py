@@ -8,7 +8,7 @@ import io
 import anyio
 import httpx
 
-from snoska.bootstrap.container import Container
+from footnote.bootstrap.container import Container
 from tests.support.fakes import FakeDirectory
 from tests.support.scenario import ALICE, BOB, EVA, LEO, OLGA, ORG_A, auth, run_jobs
 from tests.support.tokens import TokenFactory

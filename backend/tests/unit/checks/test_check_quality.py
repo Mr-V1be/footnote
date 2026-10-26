@@ -7,30 +7,30 @@ from pathlib import Path
 
 import pytest
 
-from snoska.application.checks.deterministic import DeterministicExecutor
-from snoska.application.checks.engine import CheckEngine, DocumentUnderCheck, ExecutorSession
-from snoska.application.checks.quality.benchmark import CheckBenchmark
-from snoska.bootstrap.container import load_check_catalog
-from snoska.bootstrap.settings import ChecksSettings
-from snoska.domain.checks.catalog import CheckDefinition, CheckMethod
-from snoska.domain.checks.outcome import ResultStatus
-from snoska.domain.checks.quality import (
+from footnote.application.checks.deterministic import DeterministicExecutor
+from footnote.application.checks.engine import CheckEngine, DocumentUnderCheck, ExecutorSession
+from footnote.application.checks.quality.benchmark import CheckBenchmark
+from footnote.bootstrap.container import load_check_catalog
+from footnote.bootstrap.settings import ChecksSettings
+from footnote.domain.checks.catalog import CheckDefinition, CheckMethod
+from footnote.domain.checks.outcome import ResultStatus
+from footnote.domain.checks.quality import (
     DocumentTiming,
     Metrics,
     Observation,
     QualityReport,
 )
-from snoska.domain.checks.rules.registry import DEFAULT_RULES
-from snoska.domain.documents.formats import SUPPORTED_FORMATS
-from snoska.domain.documents.requisites import RequisiteDetector
-from snoska.infrastructure.checks.quality_store import JsonQualityReportStore
-from snoska.infrastructure.checks.reference import YamlReferenceSet
-from snoska.infrastructure.parsing.docx.parser import DocxParser
-from snoska.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
-from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
-from snoska.infrastructure.parsing.registry import ParserRegistry
-from snoska.ports.ai import ModelNotConfiguredError
-from snoska.ports.checks.quality import ReferenceDocument, ReferenceSetError
+from footnote.domain.checks.rules.registry import DEFAULT_RULES
+from footnote.domain.documents.formats import SUPPORTED_FORMATS
+from footnote.domain.documents.requisites import RequisiteDetector
+from footnote.infrastructure.checks.quality_store import JsonQualityReportStore
+from footnote.infrastructure.checks.reference import YamlReferenceSet
+from footnote.infrastructure.parsing.docx.parser import DocxParser
+from footnote.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
+from footnote.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
+from footnote.infrastructure.parsing.registry import ParserRegistry
+from footnote.ports.ai import ModelNotConfiguredError
+from footnote.ports.checks.quality import ReferenceDocument, ReferenceSetError
 
 SETTINGS = ChecksSettings()
 MOMENT = datetime(2026, 10, 3, 9, 0, tzinfo=UTC)

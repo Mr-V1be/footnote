@@ -7,10 +7,10 @@ import asyncio
 
 import httpx
 
-from snoska.bootstrap.container import Container
-from snoska.domain.tenancy.access import SYSTEM_ACTOR
-from snoska.infrastructure.billing.test_provider import TestPaymentProvider
-from snoska.ports.billing.payments import PaymentStatus
+from footnote.bootstrap.container import Container
+from footnote.domain.tenancy.access import SYSTEM_ACTOR
+from footnote.infrastructure.billing.test_provider import TestPaymentProvider
+from footnote.ports.billing.payments import PaymentStatus
 from tests.integration.test_administration import upload
 from tests.support.scenario import ALICE, EVA, LEO, ORG_A, auth, run_jobs
 from tests.support.tokens import TokenFactory

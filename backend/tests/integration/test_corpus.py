@@ -7,10 +7,10 @@ import pytest
 from alembic import command
 from alembic.config import Config
 
-from snoska.application.corpus.sync import SyncOutcome
-from snoska.application.shared.jobs import INDEX_CORPUS_EDITION
-from snoska.bootstrap.container import Container
-from snoska.domain.corpus.assembly import embedding_texts_for
+from footnote.application.corpus.sync import SyncOutcome
+from footnote.application.shared.jobs import INDEX_CORPUS_EDITION
+from footnote.bootstrap.container import Container
+from footnote.domain.corpus.assembly import embedding_texts_for
 from tests.support.scenario import ALICE, auth, run_jobs
 from tests.support.tokens import TokenFactory
 

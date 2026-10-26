@@ -5,7 +5,7 @@ from __future__ import annotations
 import anyio
 import httpx
 
-from snoska.bootstrap.container import Container
+from footnote.bootstrap.container import Container
 from tests.support.scenario import ALICE, OLGA, auth, run_jobs
 from tests.support.tokens import TokenFactory
 

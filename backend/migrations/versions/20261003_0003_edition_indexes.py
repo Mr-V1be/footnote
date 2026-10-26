@@ -2,7 +2,7 @@
 
 Embedding spaces come from configuration now (model and vector size of the
 external embedding API) and are registered with their index by
-``snoska corpus reindex``. An edition is served as soon as it is ingested;
+``footnote corpus reindex``. An edition is served as soon as it is ingested;
 it is searchable in a space once all its passages are embedded there.
 
 Revision ID: 0003

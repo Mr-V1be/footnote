@@ -10,9 +10,9 @@ from uuid import uuid4
 import pytest
 from minio import Minio
 
-from snoska.infrastructure.storage.filesystem import FileSystemBlobStorage
-from snoska.infrastructure.storage.s3 import S3BlobStorage, S3Config
-from snoska.ports.blob_storage import BlobNotFoundError, BlobStorage, BlobTooLargeError
+from footnote.infrastructure.storage.filesystem import FileSystemBlobStorage
+from footnote.infrastructure.storage.s3 import S3BlobStorage, S3Config
+from footnote.ports.blob_storage import BlobNotFoundError, BlobStorage, BlobTooLargeError
 
 S3_ENDPOINT = os.environ.get("SNOSKA_TEST_S3_ENDPOINT")
 

@@ -8,7 +8,7 @@ import anyio
 import httpx
 import pytest
 
-from snoska.bootstrap.container import Container
+from footnote.bootstrap.container import Container
 from tests.support.scenario import ALICE, ORG_A, auth, run_jobs
 from tests.support.tokens import TokenFactory
 

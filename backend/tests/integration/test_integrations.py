@@ -7,8 +7,8 @@ import json
 import httpx
 from sqlalchemy import text
 
-from snoska.bootstrap.container import Container
-from snoska.domain.integrations.webhooks import verify_signature
+from footnote.bootstrap.container import Container
+from footnote.domain.integrations.webhooks import verify_signature
 from tests.integration.test_administration import DEMO, upload
 from tests.support.fakes import RecordingTransport
 from tests.support.scenario import ALICE, EVA, auth, run_jobs

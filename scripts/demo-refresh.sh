@@ -33,27 +33,27 @@ WEB_URL="${WEB_URL:-http://localhost:46300}"
 export KEEP_STAND=1
 
 step() { printf '\n\033[1m▶ %s\033[0m\n' "$*"; }
-snoska() { (cd "$ROOT/backend" && uv run --frozen snoska "$@"); }
+footnote() { (cd "$ROOT/backend" && uv run --frozen footnote "$@"); }
 
 step "the stand is up"
 curl -fsS "$API_URL/api/health/live" >/dev/null || { echo "the API does not answer at $API_URL" >&2; exit 1; }
 curl -fsS -o /dev/null "$WEB_URL/" || { echo "the web app does not answer at $WEB_URL" >&2; exit 1; }
 
 step "1/7 corpus index"
-snoska corpus reindex
+footnote corpus reindex
 
 step "2/7 demo stand reset"
-snoska demo reset
-snoska checks wait
+footnote demo reset
+footnote checks wait
 
 step "3/7 recheck"
-snoska checks recheck
-snoska checks wait
+footnote checks recheck
+footnote checks wait
 
 step "4/7 benchmark"
 if [[ "${SKIP_BENCHMARK:-0}" == 1 ]]; then
   echo "left out (SKIP_BENCHMARK=1): the last measurement stays"
-elif ! snoska checks benchmark --markdown ../docs/quality.md; then
+elif ! footnote checks benchmark --markdown ../docs/quality.md; then
   echo "not measured today: the last measurement stays (see the message above)" >&2
 fi
 
@@ -70,8 +70,8 @@ step "7/7 product video"
 node e2e/video/record.mjs
 
 step "the demo stand back to its seed"
-snoska demo reset
-snoska checks wait
+footnote demo reset
+footnote checks wait
 
 step "done"
 echo "review the changes with git status before committing"

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 
-from snoska.application.tenancy.onboarding import Onboarding, Person
-from snoska.domain.tenancy.roles import ORGANIZATION_ROLES
-from snoska.ports.identity import Invitation, MemberSpec, OrganizationProfile
+from footnote.application.tenancy.onboarding import Onboarding, Person
+from footnote.domain.tenancy.roles import ORGANIZATION_ROLES
+from footnote.ports.identity import Invitation, MemberSpec, OrganizationProfile
 
 
 class RecordingIdentity:

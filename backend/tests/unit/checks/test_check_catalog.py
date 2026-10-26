@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from snoska.bootstrap.settings import ChecksSettings
-from snoska.domain.checks.catalog import CatalogError, CheckMethod, LawNorm, StandardNorm
-from snoska.domain.checks.rules.registry import DEFAULT_RULES
-from snoska.domain.documents.kinds import DOCUMENT_KINDS
-from snoska.domain.shared.locale import Locale
-from snoska.infrastructure.checks.catalog import YamlCheckCatalog
+from footnote.bootstrap.settings import ChecksSettings
+from footnote.domain.checks.catalog import CatalogError, CheckMethod, LawNorm, StandardNorm
+from footnote.domain.checks.rules.registry import DEFAULT_RULES
+from footnote.domain.documents.kinds import DOCUMENT_KINDS
+from footnote.domain.shared.locale import Locale
+from footnote.infrastructure.checks.catalog import YamlCheckCatalog
 
 HEADER = (
     "family: formatting\nrank: 1\nstandard: {ru: ГОСТ Р 7.0.97-2016, en: GOST R 7.0.97-2016}\n"

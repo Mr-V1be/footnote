@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from snoska.domain.documents.structure import BlockKind, LayoutSource
-from snoska.domain.documents.version import ExtractionMethod, ParseFailureCode
-from snoska.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
-from snoska.infrastructure.parsing.pdf.lines import parse_font_name
-from snoska.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
-from snoska.ports.document_parsing import DocumentParseError
+from footnote.domain.documents.structure import BlockKind, LayoutSource
+from footnote.domain.documents.version import ExtractionMethod, ParseFailureCode
+from footnote.infrastructure.parsing.ocr.tesseract import TesseractConfig, TesseractOcrEngine
+from footnote.infrastructure.parsing.pdf.lines import parse_font_name
+from footnote.infrastructure.parsing.pdf.parser import PdfLimits, PdfParser
+from footnote.ports.document_parsing import DocumentParseError
 
 DEMO = Path(__file__).parents[3] / "demo" / "documents"
 

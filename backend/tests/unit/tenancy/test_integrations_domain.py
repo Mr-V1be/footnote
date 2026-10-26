@@ -7,8 +7,8 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.domain.integrations.api_keys import ApiScope, issue_key, prefix_of
-from snoska.domain.integrations.webhooks import (
+from footnote.domain.integrations.api_keys import ApiScope, issue_key, prefix_of
+from footnote.domain.integrations.webhooks import (
     DeliveryStatus,
     InvalidWebhookUrlError,
     RetryPolicy,
@@ -18,7 +18,7 @@ from snoska.domain.integrations.webhooks import (
     validate_url,
     verify_signature,
 )
-from snoska.domain.tenancy.permissions import Permission
+from footnote.domain.tenancy.permissions import Permission
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
 

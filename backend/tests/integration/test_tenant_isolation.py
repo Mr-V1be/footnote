@@ -12,10 +12,10 @@ from docx import Document
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 
-from snoska.bootstrap.container import Container
-from snoska.domain.documents.document import Document as DocumentEntity
-from snoska.domain.tenancy.organization import Organization, Workspace
-from snoska.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
+from footnote.bootstrap.container import Container
+from footnote.domain.documents.document import Document as DocumentEntity
+from footnote.domain.tenancy.organization import Organization, Workspace
+from footnote.infrastructure.persistence.unit_of_work import SqlUnitOfWorkFactory
 from tests.support.scenario import ALICE, BOB, OLGA, ORG_A, ORG_B, auth
 from tests.support.tokens import TokenFactory
 

@@ -7,9 +7,9 @@ import asyncio
 from alembic import context
 from sqlalchemy.engine import Connection
 
-from snoska.bootstrap.settings import Settings
-from snoska.infrastructure.persistence.database import DatabaseConfig, create_engine
-from snoska.infrastructure.persistence.tables import metadata
+from footnote.bootstrap.settings import Settings
+from footnote.infrastructure.persistence.database import DatabaseConfig, create_engine
+from footnote.infrastructure.persistence.tables import metadata
 
 target_metadata = metadata
 

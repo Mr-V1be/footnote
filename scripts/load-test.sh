@@ -19,7 +19,7 @@ password="$(awk '/email: kovaleva@/{found=1} found && /password:/{print $2; exit
 
 restore() {
   if [[ "${KEEP_STAND:-0}" != 1 ]]; then
-    (cd "$ROOT/backend" && uv run --frozen snoska demo reset && uv run --frozen snoska checks wait)
+    (cd "$ROOT/backend" && uv run --frozen footnote demo reset && uv run --frozen footnote checks wait)
   fi
 }
 # Also when k6 fails a threshold.

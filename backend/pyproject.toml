@@ -1,5 +1,5 @@
 [project]
-name = "snoska"
+name = "footnote"
 version = "0.1.0"
 description = "Document compliance checks against 152-FZ and GOST R 7.0.97 with cited norms"
 readme = "README.md"
@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [project.scripts]
-snoska = "snoska.cli.main:run"
+footnote = "footnote.cli.main:run"
 
 [build-system]
 requires = ["uv_build>=0.9.26,<0.10"]
@@ -81,9 +81,9 @@ ignore = [
 "tests/**" = ["S", "PLR0915", "ARG001"]
 "migrations/**" = ["E501", "S608"]
 # Strategies of one interface: not every rule or executor needs every argument.
-"src/snoska/domain/checks/rules/*.py" = ["ARG002"]
-"src/snoska/application/checks/*.py" = ["ARG002"]
-"src/snoska/infrastructure/ai/unconfigured.py" = ["ARG002"]
+"src/footnote/domain/checks/rules/*.py" = ["ARG002"]
+"src/footnote/application/checks/*.py" = ["ARG002"]
+"src/footnote/infrastructure/ai/unconfigured.py" = ["ARG002"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -95,7 +95,7 @@ quote-style = "double"
 python_version = "3.13"
 strict = true
 mypy_path = "src"
-packages = ["snoska"]
+packages = ["footnote"]
 plugins = ["pydantic.mypy"]
 warn_unreachable = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -116,26 +116,26 @@ markers = [
 filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
 
 [tool.importlinter]
-root_package = "snoska"
+root_package = "footnote"
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Layers point inwards"
 type = "layers"
 layers = [
-  "snoska.cli",
-  "snoska.api | snoska.worker",
-  "snoska.bootstrap",
-  "snoska.infrastructure",
-  "snoska.application",
-  "snoska.ports",
-  "snoska.domain",
+  "footnote.cli",
+  "footnote.api | footnote.worker",
+  "footnote.bootstrap",
+  "footnote.infrastructure",
+  "footnote.application",
+  "footnote.ports",
+  "footnote.domain",
 ]
 
 [[tool.importlinter.contracts]]
 name = "Domain is pure"
 type = "forbidden"
-source_modules = ["snoska.domain"]
+source_modules = ["footnote.domain"]
 forbidden_modules = [
   "sqlalchemy", "fastapi", "starlette", "httpx", "pydantic", "dramatiq", "redis",
   "asyncpg", "structlog", "docx", "pdfplumber", "lxml",
@@ -144,7 +144,7 @@ forbidden_modules = [
 [[tool.importlinter.contracts]]
 name = "Application depends on ports, not on frameworks"
 type = "forbidden"
-source_modules = ["snoska.application", "snoska.ports"]
+source_modules = ["footnote.application", "footnote.ports"]
 forbidden_modules = [
   "sqlalchemy", "fastapi", "starlette", "httpx", "pydantic", "dramatiq", "redis", "asyncpg",
 ]

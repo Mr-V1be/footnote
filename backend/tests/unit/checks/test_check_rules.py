@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from snoska.domain.checks.outcome import ResultStatus
-from snoska.domain.checks.rules.base import RuleParams
-from snoska.domain.checks.rules.registry import DEFAULT_RULES
-from snoska.domain.checks.spread import SpreadPolicy
-from snoska.domain.documents.structure import (
+from footnote.domain.checks.outcome import ResultStatus
+from footnote.domain.checks.rules.base import RuleParams
+from footnote.domain.checks.rules.registry import DEFAULT_RULES
+from footnote.domain.checks.spread import SpreadPolicy
+from footnote.domain.documents.structure import (
     Alignment,
     Block,
     BlockKind,

@@ -1,7 +1,7 @@
 # Demo stand: organizations, members and documents.
 #
 # Everything here is fictional. The passwords are demo credentials for the
-# test roles of the demo stand only. Apply with `snoska demo seed`; the
+# test roles of the demo stand only. Apply with `footnote demo seed`; the
 # command is idempotent (Keycloak objects are ensured, uploads are keyed).
 
 # One-click sign-in on the demo stand (SNOSKA_DEMO_MODE): the seeded account

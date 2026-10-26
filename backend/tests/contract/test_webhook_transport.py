@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 import respx
 
-from snoska.infrastructure.integrations.http_transport import HttpWebhookTransport
+from footnote.infrastructure.integrations.http_transport import HttpWebhookTransport
 
 
 @respx.mock

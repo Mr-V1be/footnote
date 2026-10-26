@@ -5,12 +5,12 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from snoska.api.app import create_app
-from snoska.application.ask.service import RecordedAnswer, RecordedCitation
-from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import Settings
-from snoska.domain.ask.answer import UngroundedAnswerError
-from snoska.domain.tenancy.access import MembershipClaim, Principal
+from footnote.api.app import create_app
+from footnote.application.ask.service import RecordedAnswer, RecordedCitation
+from footnote.bootstrap.container import Container, Overrides, build_container
+from footnote.bootstrap.settings import Settings
+from footnote.domain.ask.answer import UngroundedAnswerError
+from footnote.domain.tenancy.access import MembershipClaim, Principal
 from tests.support.fakes import FakeDirectory, RecordedLanguageModel
 from tests.support.scenario import EVA, OLGA, ORG_A, ORG_B, auth, run_jobs
 from tests.support.tokens import StaticKeys, TokenFactory

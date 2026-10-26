@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from snoska.application.operations.backlog import wait_until_idle
-from snoska.ports.operations.maintenance import Backlog
+from footnote.application.operations.backlog import wait_until_idle
+from footnote.ports.operations.maintenance import Backlog
 
 IDLE = Backlog(jobs=0, versions=0, checks=0)
 

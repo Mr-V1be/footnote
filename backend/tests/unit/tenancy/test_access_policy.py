@@ -5,16 +5,16 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.domain.tenancy.access import (
+from footnote.domain.tenancy.access import (
     AccessPolicy,
     MembershipClaim,
     MissingPermissionError,
     NotAMemberError,
     Principal,
 )
-from snoska.domain.tenancy.organization import Organization
-from snoska.domain.tenancy.permissions import Permission
-from snoska.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
+from footnote.domain.tenancy.organization import Organization
+from footnote.domain.tenancy.permissions import Permission
+from footnote.domain.tenancy.roles import ORGANIZATION_ROLES, PLATFORM_ROLES
 
 POLICY = AccessPolicy(ORGANIZATION_ROLES, PLATFORM_ROLES)
 ORG = Organization(id=uuid4(), alias="acme", name="Acme", created_at=datetime.now(UTC))

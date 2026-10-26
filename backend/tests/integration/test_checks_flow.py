@@ -9,9 +9,9 @@ import anyio
 import httpx
 import pytest
 
-from snoska.api.app import create_app
-from snoska.bootstrap.container import Container, Overrides, build_container
-from snoska.bootstrap.settings import Settings
+from footnote.api.app import create_app
+from footnote.bootstrap.container import Container, Overrides, build_container
+from footnote.bootstrap.settings import Settings
 from tests.integration.conftest import TEST_SPACE
 from tests.support.fakes import FakeDirectory, HashEmbedder
 from tests.support.scenario import ALICE, BOB, EVA, OLGA, ORG_A, ORG_B, auth, run_jobs

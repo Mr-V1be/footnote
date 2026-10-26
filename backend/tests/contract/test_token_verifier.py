@@ -7,10 +7,10 @@ import jwt
 import pytest
 import respx
 
-from snoska.infrastructure.identity.claims import KeycloakClaimsMapper
-from snoska.infrastructure.identity.jwks import JwksKeySource
-from snoska.infrastructure.identity.jwt_verifier import JwtTokenVerifier, TokenPolicy
-from snoska.ports.identity import AuthenticationError
+from footnote.infrastructure.identity.claims import KeycloakClaimsMapper
+from footnote.infrastructure.identity.jwks import JwksKeySource
+from footnote.infrastructure.identity.jwt_verifier import JwtTokenVerifier, TokenPolicy
+from footnote.ports.identity import AuthenticationError
 from tests.support.tokens import AUDIENCE, ISSUER, KEY_ID, MemberIdentity, StaticKeys, TokenFactory
 
 FACTORY = TokenFactory()
@@ -79,7 +79,7 @@ async def test_jwks_source_refreshes_on_unknown_key_with_rate_limit() -> None:
 @respx.mock
 async def test_jwks_source_fetches_keys_right_after_boot(monkeypatch: pytest.MonkeyPatch) -> None:
     # Monotonic time counts from boot: a fresh host must still load the keys.
-    monkeypatch.setattr("snoska.infrastructure.identity.jwks.time.monotonic", lambda: 5.0)
+    monkeypatch.setattr("footnote.infrastructure.identity.jwks.time.monotonic", lambda: 5.0)
     jwks_url = f"{ISSUER}/protocol/openid-connect/certs"
     respx.get(jwks_url).mock(return_value=httpx.Response(200, json={"keys": [FACTORY.public_jwk]}))
     async with httpx.AsyncClient() as client:

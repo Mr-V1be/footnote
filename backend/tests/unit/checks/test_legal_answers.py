@@ -7,21 +7,21 @@ from uuid import uuid4
 
 import pytest
 
-from snoska.application.checks.legal.answer import parse_batch
-from snoska.application.checks.legal.executor import outcome_of
-from snoska.application.checks.legal.index import Fragment
-from snoska.application.checks.legal.prompt import PreparedCheck, build_batch_context
-from snoska.application.checks.norms import Provision
-from snoska.domain.checks.catalog import (
+from footnote.application.checks.legal.answer import parse_batch
+from footnote.application.checks.legal.executor import outcome_of
+from footnote.application.checks.legal.index import Fragment
+from footnote.application.checks.legal.prompt import PreparedCheck, build_batch_context
+from footnote.application.checks.norms import Provision
+from footnote.domain.checks.catalog import (
     CheckDefinition,
     CheckMethod,
     LawNorm,
     ModelBrief,
     Severity,
 )
-from snoska.domain.checks.outcome import FindingKind, ResultStatus
-from snoska.domain.documents.structure import Block, BlockKind
-from snoska.domain.shared.locale import Locale, LocalizedText
+from footnote.domain.checks.outcome import FindingKind, ResultStatus
+from footnote.domain.documents.structure import Block, BlockKind
+from footnote.domain.shared.locale import Locale, LocalizedText
 
 PURPOSES = "Оператор обрабатывает персональные данные в целях исполнения трудовых договоров."
 TERMS = "Персональные данные хранятся не дольше, чем этого требуют цели обработки."

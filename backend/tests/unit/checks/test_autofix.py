@@ -8,11 +8,11 @@ import docx
 import pytest
 from docx.shared import Pt
 
-from snoska.domain.autofix.actions import FixPlan, ReplaceText, SetFontSize
-from snoska.domain.autofix.planning import arabic_label, initials_first, standard_date
-from snoska.domain.documents.structure import DocumentStructure
-from snoska.infrastructure.autofix.docx_patcher import DocxPatcher
-from snoska.infrastructure.parsing.docx.parser import DocxParser
+from footnote.domain.autofix.actions import FixPlan, ReplaceText, SetFontSize
+from footnote.domain.autofix.planning import arabic_label, initials_first, standard_date
+from footnote.domain.documents.structure import DocumentStructure
+from footnote.infrastructure.autofix.docx_patcher import DocxPatcher
+from footnote.infrastructure.parsing.docx.parser import DocxParser
 
 
 @pytest.mark.parametrize(

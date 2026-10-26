@@ -10,11 +10,11 @@ from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from uuid import UUID, uuid4
 
-from snoska.domain.corpus.embedding import EmbeddingSpace
-from snoska.domain.tenancy.members import Member
-from snoska.ports.ai import Completion, CompletionRequest
-from snoska.ports.identity import Invitation, OrganizationProfile
-from snoska.ports.integrations.transport import TransportResult
+from footnote.domain.corpus.embedding import EmbeddingSpace
+from footnote.domain.tenancy.members import Member
+from footnote.ports.ai import Completion, CompletionRequest
+from footnote.ports.identity import Invitation, OrganizationProfile
+from footnote.ports.integrations.transport import TransportResult
 
 
 class FakeDirectory:

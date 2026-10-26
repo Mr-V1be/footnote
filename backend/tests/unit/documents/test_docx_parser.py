@@ -7,11 +7,11 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Mm, Pt
 
-from snoska.domain.documents.structure import Alignment, BlockKind
-from snoska.domain.documents.version import ExtractionMethod, ParseFailureCode
-from snoska.infrastructure.parsing.docx.numbering import format_number
-from snoska.infrastructure.parsing.docx.parser import DocxParser
-from snoska.ports.document_parsing import DocumentParseError
+from footnote.domain.documents.structure import Alignment, BlockKind
+from footnote.domain.documents.version import ExtractionMethod, ParseFailureCode
+from footnote.infrastructure.parsing.docx.numbering import format_number
+from footnote.infrastructure.parsing.docx.parser import DocxParser
+from footnote.ports.document_parsing import DocumentParseError
 
 
 def build_docx() -> bytes:

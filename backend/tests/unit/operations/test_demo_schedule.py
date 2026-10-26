@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from snoska.cli.demo_reset import next_reset
+from footnote.cli.demo_reset import next_reset
 
 MOSCOW = ZoneInfo("Europe/Moscow")
 

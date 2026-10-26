@@ -3,8 +3,8 @@
 What a finding, a check result, an answer's footnote or an act's name tells
 a reader becomes a JSON object of wordings by language code. Rows written
 before keep their Russian wording under "ru", the source language; the other
-languages appear when the checks run again (`snoska checks recheck`) and the
-acts are synced (`snoska corpus sync`). A person's interface language, as
+languages appear when the checks run again (`footnote checks recheck`) and the
+acts are synced (`footnote corpus sync`). A person's interface language, as
 last seen by the API, is kept for the mail sent to them.
 
 Revision ID: 0013

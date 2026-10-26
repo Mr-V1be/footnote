@@ -6,15 +6,15 @@ import httpx
 import pytest
 import respx
 
-from snoska.domain.corpus.embedding import EmbeddingSpace
-from snoska.infrastructure.ai.cache import CachingLanguageModel
-from snoska.infrastructure.ai.http import HttpPolicy
-from snoska.infrastructure.ai.openai_compatible import (
+from footnote.domain.corpus.embedding import EmbeddingSpace
+from footnote.infrastructure.ai.cache import CachingLanguageModel
+from footnote.infrastructure.ai.http import HttpPolicy
+from footnote.infrastructure.ai.openai_compatible import (
     OpenAiCompatibleEmbedder,
     OpenAiCompatibleLanguageModel,
 )
-from snoska.infrastructure.ai.unconfigured import UnconfiguredEmbedder, UnconfiguredLanguageModel
-from snoska.ports.ai import (
+from footnote.infrastructure.ai.unconfigured import UnconfiguredEmbedder, UnconfiguredLanguageModel
+from footnote.ports.ai import (
     AiProviderError,
     ChatMessage,
     Completion,

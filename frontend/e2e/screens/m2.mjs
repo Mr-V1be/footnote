@@ -1,5 +1,5 @@
 // Milestone 2: the check — results as footnotes, review, progress and the
-// methodology page. Captured against the demo stand after `snoska demo seed`
+// methodology page. Captured against the demo stand after `footnote demo seed`
 // with no model API connected, so the legal checks honestly report that.
 //
 // The "queued" screens need the worker stopped, so the run stays queued:

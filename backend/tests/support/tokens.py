@@ -12,7 +12,7 @@ from uuid import UUID
 import jwt
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from snoska.ports.identity import AuthenticationError
+from footnote.ports.identity import AuthenticationError
 
 ISSUER = "http://keycloak.test/realms/snoska"
 AUDIENCE = "snoska-api"
