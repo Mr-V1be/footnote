@@ -22,13 +22,13 @@ function connect() {
 
 type RedisClient = Awaited<ReturnType<typeof connect>>;
 
-const globalForRedis = globalThis as typeof globalThis & { snoskaRedis?: Promise<RedisClient> };
+const globalForRedis = globalThis as typeof globalThis & { footnoteRedis?: Promise<RedisClient> };
 
 /** One connection per server process, reused across requests and hot reloads. */
 export function redis(): Promise<RedisClient> {
-  const existing = globalForRedis.snoskaRedis;
+  const existing = globalForRedis.footnoteRedis;
   if (existing) return existing;
   const created = connect();
-  globalForRedis.snoskaRedis = created;
+  globalForRedis.footnoteRedis = created;
   return created;
 }

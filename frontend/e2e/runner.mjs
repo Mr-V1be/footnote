@@ -13,7 +13,7 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const BASE = process.env.WEB_URL ?? "http://localhost:46300";
 /** The interface language of a run (LOCALE=en); Russian, as the milestones were shot, by default. */
 export const LOCALE = process.env.LOCALE ?? "ru";
-const LOCALE_COOKIE = { name: "snoska_locale", value: LOCALE, url: BASE };
+const LOCALE_COOKIE = { name: "footnote_locale", value: LOCALE, url: BASE };
 
 /** The interface's texts in the run's language, to find controls by their names. */
 export async function messages() {
@@ -140,7 +140,7 @@ export async function capture({ screens, users, outDir }) {
           hasTouch: viewport !== "desktop",
         });
         await context.addCookies([
-          { name: "snoska_theme", value: theme, url: BASE },
+          { name: "footnote_theme", value: theme, url: BASE },
           LOCALE_COOKIE,
         ]);
         const page = await context.newPage();

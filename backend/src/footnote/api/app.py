@@ -61,7 +61,7 @@ def create_app(
             await container.close()
 
     app = FastAPI(
-        title="Snoska API",
+        title="Footnote API",
         generate_unique_id_function=lambda route: route.name,
         version=API_VERSION,
         lifespan=lifespan,

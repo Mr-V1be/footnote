@@ -12,26 +12,26 @@ class Metrics:
     def __init__(self) -> None:
         self.registry = CollectorRegistry(auto_describe=True)
         self.http_requests = Counter(
-            "snoska_http_requests_total",
+            "footnote_http_requests_total",
             "HTTP requests by route and status.",
             ("method", "route", "status"),
             registry=self.registry,
         )
         self.http_latency = Histogram(
-            "snoska_http_request_duration_seconds",
+            "footnote_http_request_duration_seconds",
             "HTTP request latency by route.",
             ("method", "route"),
             buckets=LATENCY_BUCKETS,
             registry=self.registry,
         )
         self.jobs = Counter(
-            "snoska_jobs_total",
+            "footnote_jobs_total",
             "Background jobs by name and outcome.",
             ("job", "outcome"),
             registry=self.registry,
         )
         self.job_duration = Histogram(
-            "snoska_job_duration_seconds",
+            "footnote_job_duration_seconds",
             "Background job duration.",
             ("job",),
             buckets=JOB_BUCKETS,

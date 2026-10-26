@@ -47,7 +47,7 @@ class RedisRequestBudget:
         self._clock = clock
 
     def _day_key(self) -> str:
-        return f"snoska:ai:requests:day:{self._clock.now().date().isoformat()}"
+        return f"footnote:ai:requests:day:{self._clock.now().date().isoformat()}"
 
     async def spend(self) -> None:
         if self._per_day > 0:
@@ -74,7 +74,7 @@ class RedisRequestBudget:
         waited = 0.0
         while True:
             minute = int(time.time() // SECONDS_PER_MINUTE)
-            key = f"snoska:ai:requests:minute:{minute}"
+            key = f"footnote:ai:requests:minute:{minute}"
             count = int(await self._redis.incr(key))
             if count == 1:
                 await self._redis.expire(key, MINUTE_KEY_TTL_SECONDS)

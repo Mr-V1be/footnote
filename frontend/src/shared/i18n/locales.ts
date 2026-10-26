@@ -18,7 +18,7 @@ export const DOCUMENT_LOCALE: Locale = "ru";
 /** Each language as its readers name it, whatever the interface shows. */
 export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ru: "Русский" };
 
-export const LOCALE_COOKIE = "snoska_locale";
+export const LOCALE_COOKIE = "footnote_locale";
 /** One year: the choice outlives sessions, like the theme. */
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 

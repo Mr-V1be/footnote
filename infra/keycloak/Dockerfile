@@ -2,7 +2,7 @@
 # Keycloak of the production stack, built ahead of time: build options are fixed here, so
 # `start --optimized` skips the augmentation every start would otherwise repeat, and the
 # realm and the login theme travel inside the image. Build from the repository root:
-#   docker build -f infra/keycloak/Dockerfile -t snoska-keycloak .
+#   docker build -f infra/keycloak/Dockerfile -t footnote-keycloak .
 
 ARG KEYCLOAK_IMAGE=keycloak/keycloak:26.8.0
 

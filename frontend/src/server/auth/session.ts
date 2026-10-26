@@ -33,8 +33,8 @@ export interface LoginTransaction {
   returnTo: string;
 }
 
-const sessionKey = (id: string) => `snoska:web:session:${id}`;
-const loginKey = (state: string) => `snoska:web:login:${state}`;
+const sessionKey = (id: string) => `footnote:web:session:${id}`;
+const loginKey = (state: string) => `footnote:web:login:${state}`;
 
 export async function createSession(tokens: SessionTokens): Promise<Session> {
   const id = randomBytes(SESSION_ID_BYTES).toString("base64url");

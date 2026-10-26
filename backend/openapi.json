@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Snoska API",
+    "title": "Footnote API",
     "version": "1.0.0"
   },
   "paths": {

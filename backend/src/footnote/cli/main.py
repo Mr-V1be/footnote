@@ -44,7 +44,7 @@ def worker() -> None:
     settings = Settings()
     configure_logging(settings.observability.log_level, json=settings.observability.log_json)
     configure_tracing(
-        "snoska-worker",
+        "footnote-worker",
         settings.observability.tracing_exporter,
         settings.observability.otlp_endpoint,
     )

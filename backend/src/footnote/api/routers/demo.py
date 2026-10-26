@@ -15,7 +15,7 @@ async def demo_webhook_receiver(
     container: ContainerDep,
     organization: OrganizationAlias,
     endpoint_id: UUID,
-    signature: str = Header(default="", alias="Snoska-Signature"),
+    signature: str = Header(default="", alias="Footnote-Signature"),
 ) -> Response:
     """A receiver for the demo stand's webhooks: accepts what is signed with
     the endpoint's secret, like an integration would. Mounted on demo stands only."""

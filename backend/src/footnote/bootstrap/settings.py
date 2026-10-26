@@ -211,7 +211,7 @@ class WorkerSettings(BaseSettings):
     threads: int = 2
     metrics_port: int = 46302
     relay_poll_seconds: float = 5.0
-    queue_namespace: str = "snoska"
+    queue_namespace: str = "footnote"
 
 
 class ObservabilitySettings(BaseSettings):
@@ -238,7 +238,7 @@ class StorageSettings(BaseSettings):
     s3_endpoint: str = "127.0.0.1:46340"
     s3_access_key: SecretStr = SecretStr("")
     s3_secret_key: SecretStr = SecretStr("")
-    s3_bucket: str = "snoska"
+    s3_bucket: str = "footnote"
     s3_secure: bool = False
     s3_region: str | None = None
 

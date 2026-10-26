@@ -1,4 +1,4 @@
-export const THEME_COOKIE = "snoska_theme";
+export const THEME_COOKIE = "footnote_theme";
 export const THEMES = ["system", "light", "dark"] as const;
 export type ThemePreference = (typeof THEMES)[number];
 /** One year: the preference outlives sessions. */

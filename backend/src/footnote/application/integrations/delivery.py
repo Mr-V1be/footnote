@@ -14,13 +14,13 @@ from footnote.ports.unit_of_work import UnitOfWorkFactory
 
 log = structlog.get_logger(__name__)
 
-USER_AGENT = "Snoska-Webhooks/1.0"
+USER_AGENT = "Footnote-Webhooks/1.0"
 
 
 class DeliverWebhook:
     """Background job: one try of one delivery.
 
-    The body is signed with the endpoint's secret (header ``Snoska-Signature:
+    The body is signed with the endpoint's secret (header ``Footnote-Signature:
     t=<unix time>,v1=<HMAC-SHA256 of "t.body">``). On failure the next try is
     scheduled by the delivery's retry policy; after the last one it is
     marked failed. A delivery already settled is left alone (at-least-once
@@ -55,9 +55,9 @@ class DeliverWebhook:
             {
                 "Content-Type": "application/json",
                 "User-Agent": USER_AGENT,
-                "Snoska-Event": delivery.event.value,
-                "Snoska-Delivery": str(delivery.id),
-                "Snoska-Signature": signature_header(endpoint.secret, timestamp, body),
+                "Footnote-Event": delivery.event.value,
+                "Footnote-Delivery": str(delivery.id),
+                "Footnote-Signature": signature_header(endpoint.secret, timestamp, body),
             },
         )
         async with self._uow_factory.for_tenant(organization_id) as uow:

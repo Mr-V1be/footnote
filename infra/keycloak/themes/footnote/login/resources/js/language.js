@@ -9,7 +9,7 @@
       event.target.closest && event.target.closest("[data-footnote-locale]");
     if (!link) return;
     document.cookie =
-      "snoska_locale=" +
+      "footnote_locale=" +
       link.getAttribute("data-footnote-locale") +
       "; path=/; max-age=" +
       YEAR +

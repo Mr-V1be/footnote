@@ -94,7 +94,7 @@ async def test_events_are_signed_delivered_and_retried_with_backoff(
         f"{BASE}/webhooks",
         headers=auth(tokens, ALICE),
         json={
-            "url": "https://hooks.alpha.example/snoska",
+            "url": "https://hooks.alpha.example/footnote",
             "events": ["document.uploaded", "check.completed"],
         },
     )
@@ -104,11 +104,11 @@ async def test_events_are_signed_delivered_and_retried_with_backoff(
 
     await upload(api, tokens, "main")
     await run_jobs(container)
-    events = [headers["Snoska-Event"] for _, _, headers in receiver.sent]
+    events = [headers["Footnote-Event"] for _, _, headers in receiver.sent]
     assert events == ["document.uploaded", "check.completed"]
     _, body, headers = receiver.sent[0]
-    assert verify_signature(secret, headers["Snoska-Signature"], body)
-    assert not verify_signature("whsec_other", headers["Snoska-Signature"], body)
+    assert verify_signature(secret, headers["Footnote-Signature"], body)
+    assert not verify_signature("whsec_other", headers["Footnote-Signature"], body)
     assert json.loads(body)["data"]["kind"] == "pd_consent"
 
     deliveries = await api.get(

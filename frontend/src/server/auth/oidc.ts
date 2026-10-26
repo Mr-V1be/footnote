@@ -13,7 +13,7 @@ export const SCOPES = "openid profile email organization:*";
 export type OidcClient = "web" | "demo";
 
 const globalForOidc = globalThis as typeof globalThis & {
-  snoskaOidc?: Partial<Record<OidcClient, Promise<client.Configuration>>>;
+  footnoteOidc?: Partial<Record<OidcClient, Promise<client.Configuration>>>;
 };
 
 function credentials(kind: OidcClient): [string, string] {
@@ -47,7 +47,7 @@ async function internalConfiguration(
 
 /** Discovered Keycloak configuration for one of the web server's clients. */
 export function oidc(kind: OidcClient = "web"): Promise<client.Configuration> {
-  const cache = (globalForOidc.snoskaOidc ??= {});
+  const cache = (globalForOidc.footnoteOidc ??= {});
   cache[kind] ??= (async () => {
     const config = serverConfig();
     const issuer = new URL(

@@ -103,13 +103,13 @@ jobs:
           docker compose -f docker-compose.prod.yml --env-file "$RUNNER_TEMP/ci.env" --profile demo config --quiet
       - name: Keycloak image is built with its options fixed
         run: |
-          docker build -f infra/keycloak/Dockerfile -t snoska-keycloak:ci .
-          docker run --rm snoska-keycloak:ci show-config | tee "$RUNNER_TEMP/keycloak.txt"
+          docker build -f infra/keycloak/Dockerfile -t footnote-keycloak:ci .
+          docker run --rm footnote-keycloak:ci show-config | tee "$RUNNER_TEMP/keycloak.txt"
           grep -q 'kc.db =  postgres (Persisted)' "$RUNNER_TEMP/keycloak.txt"
           grep -q 'kc.health-enabled =  true (Persisted)' "$RUNNER_TEMP/keycloak.txt"
       - name: Keycloak image under a path keeps its health check at the root
         run: |
-          docker build -f infra/keycloak/Dockerfile --build-arg KEYCLOAK_HTTP_RELATIVE_PATH=/auth -t snoska-keycloak:ci-path .
-          docker run --rm snoska-keycloak:ci-path show-config | tee "$RUNNER_TEMP/keycloak-path.txt"
+          docker build -f infra/keycloak/Dockerfile --build-arg KEYCLOAK_HTTP_RELATIVE_PATH=/auth -t footnote-keycloak:ci-path .
+          docker run --rm footnote-keycloak:ci-path show-config | tee "$RUNNER_TEMP/keycloak-path.txt"
           grep -q 'kc.http-relative-path =  /auth (Persisted)' "$RUNNER_TEMP/keycloak-path.txt"
           grep -q 'kc.http-management-relative-path =  / (Persisted)' "$RUNNER_TEMP/keycloak-path.txt"

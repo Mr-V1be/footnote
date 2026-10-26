@@ -1,4 +1,4 @@
-name: snoska-prod
+name: footnote-prod
 
 # Production stack on one server: Caddy terminates TLS and is the only
 # service with published ports; everything else talks over the private
@@ -66,7 +66,7 @@ x-backend-env: &backend-env
 x-backend: &backend
   # One image for the API, the worker and the one-off commands; the api
   # service builds it.
-  image: ${FOOTNOTE_IMAGE_PREFIX:-snoska}-backend:${FOOTNOTE_VERSION:-latest}
+  image: ${FOOTNOTE_IMAGE_PREFIX:-footnote}-backend:${FOOTNOTE_VERSION:-latest}
   pull_policy: never
   environment: *backend-env
   volumes:
@@ -124,7 +124,7 @@ services:
   # Built ahead of time from infra/keycloak/Dockerfile: the realm and the login theme are
   # inside the image, build options (database, health, features) are fixed there.
   keycloak:
-    image: ${FOOTNOTE_IMAGE_PREFIX:-snoska}-keycloak:${FOOTNOTE_VERSION:-latest}
+    image: ${FOOTNOTE_IMAGE_PREFIX:-footnote}-keycloak:${FOOTNOTE_VERSION:-latest}
     build:
       context: .
       dockerfile: infra/keycloak/Dockerfile
@@ -237,7 +237,7 @@ services:
     mem_limit: 1536m
 
   web:
-    image: ${FOOTNOTE_IMAGE_PREFIX:-snoska}-web:${FOOTNOTE_VERSION:-latest}
+    image: ${FOOTNOTE_IMAGE_PREFIX:-footnote}-web:${FOOTNOTE_VERSION:-latest}
     build:
       context: .
       dockerfile: frontend/Dockerfile

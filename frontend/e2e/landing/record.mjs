@@ -255,7 +255,7 @@ for (const theme of THEMES) {
       colorScheme: theme,
       storageState: states[still.user],
     });
-    await context.addCookies([{ name: "snoska_theme", value: theme, url: BASE }]);
+    await context.addCookies([{ name: "footnote_theme", value: theme, url: BASE }]);
     const page = await context.newPage();
     await still.run(page, facts);
     const png = resolve(WORK, `${name}-${theme}.png`);

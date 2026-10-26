@@ -39,7 +39,7 @@ export async function recording(
     recordVideo: { dir, size: { width: viewport.width * scale, height: viewport.height * scale } },
   });
   await context.addCookies([
-    { name: "snoska_theme", value: theme, url: process.env.WEB_URL ?? "http://localhost:46300" },
+    { name: "footnote_theme", value: theme, url: process.env.WEB_URL ?? "http://localhost:46300" },
   ]);
   const opened = Date.now();
   const page = await context.newPage();

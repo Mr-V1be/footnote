@@ -1,4 +1,4 @@
-name: snoska
+name: footnote
 
 # Local infrastructure for development and the demo stand.
 # Every published port is bound to loopback and lives in the 46300–46399 range.

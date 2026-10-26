@@ -53,7 +53,7 @@ export async function renderCard(browser, format, card, out) {
     deviceScaleFactor: format.scale,
     colorScheme: "light",
   });
-  await context.addCookies([{ name: "snoska_theme", value: "light", url: BASE }]);
+  await context.addCookies([{ name: "footnote_theme", value: "light", url: BASE }]);
   const page = await context.newPage();
   // A public page of the app: its stylesheet carries the fonts and tokens.
   await page.goto(`${BASE}/how-we-check`, { waitUntil: "networkidle" });
