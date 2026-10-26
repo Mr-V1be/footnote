@@ -13,7 +13,7 @@ const schema = z.object({
   // public URL stays the issuer. Empty: the public URL serves both.
   FOOTNOTE_KEYCLOAK_INTERNAL_URL: z.union([z.url(), z.literal("")]).default(""),
   FOOTNOTE_KEYCLOAK_REALM: z.string().min(1),
-  FOOTNOTE_WEB_CLIENT_ID: z.string().min(1).default("snoska-web"),
+  FOOTNOTE_WEB_CLIENT_ID: z.string().min(1).default("footnote-web"),
   FOOTNOTE_WEB_CLIENT_SECRET: z.string().min(1),
   FOOTNOTE_SESSION_SECRET: z.string().min(32),
   FOOTNOTE_REDIS_HOST: z.string().min(1).default("127.0.0.1"),
@@ -24,7 +24,7 @@ const schema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((value) => value === "true"),
-  FOOTNOTE_DEMO_CLIENT_ID: z.string().min(1).default("snoska-demo"),
+  FOOTNOTE_DEMO_CLIENT_ID: z.string().min(1).default("footnote-demo"),
   FOOTNOTE_DEMO_CLIENT_SECRET: z.string().default(""),
   // The seed file names the account each role opens.
   FOOTNOTE_DEMO_SEED: z.string().default(path.resolve(process.cwd(), "../backend/demo/seed.yaml")),

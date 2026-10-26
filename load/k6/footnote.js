@@ -18,7 +18,7 @@ import { Counter, Trend } from "k6/metrics";
 
 const API = __ENV.API_URL || "http://127.0.0.1:46301/api";
 const KEYCLOAK = __ENV.KEYCLOAK_URL || "http://localhost:46320";
-const REALM = __ENV.KEYCLOAK_REALM || "snoska";
+const REALM = __ENV.KEYCLOAK_REALM || "footnote";
 const ORG = __ENV.ORG || "polyarnaya-zvezda";
 const DURATION = __ENV.DURATION || "60s";
 const CHECKED = __ENV.CHECKED_TITLE || "Согласие покупателя на обработку ПДн";
@@ -64,7 +64,7 @@ function ownerToken() {
     `${KEYCLOAK}/realms/${REALM}/protocol/openid-connect/token`,
     {
       grant_type: "password",
-      client_id: __ENV.DEMO_CLIENT_ID || "snoska-demo",
+      client_id: __ENV.DEMO_CLIENT_ID || "footnote-demo",
       client_secret: __ENV.DEMO_CLIENT_SECRET,
       username: __ENV.OWNER_EMAIL || "kovaleva@polyarnaya-zvezda.example",
       password: __ENV.OWNER_PASSWORD,

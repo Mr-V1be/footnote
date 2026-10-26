@@ -44,7 +44,7 @@ async def test_keycloak_organization_claim_becomes_memberships() -> None:
 
 @pytest.mark.parametrize(
     "overrides",
-    [{"aud": "another-api"}, {"iss": "http://evil.test/realms/snoska"}],
+    [{"aud": "another-api"}, {"iss": "http://evil.test/realms/footnote"}],
 )
 async def test_foreign_audience_or_issuer_is_rejected(overrides: dict[str, str]) -> None:
     with pytest.raises(AuthenticationError):

@@ -6,11 +6,11 @@
   var YEAR = 60 * 60 * 24 * 365;
   document.addEventListener("click", function (event) {
     var link =
-      event.target.closest && event.target.closest("[data-snoska-locale]");
+      event.target.closest && event.target.closest("[data-footnote-locale]");
     if (!link) return;
     document.cookie =
       "snoska_locale=" +
-      link.getAttribute("data-snoska-locale") +
+      link.getAttribute("data-footnote-locale") +
       "; path=/; max-age=" +
       YEAR +
       "; samesite=lax";

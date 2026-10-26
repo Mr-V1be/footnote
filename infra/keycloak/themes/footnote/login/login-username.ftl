@@ -1,12 +1,12 @@
 <#import "template.ftl" as layout>
-<#import "snoska.ftl" as ui>
+<#import "footnote.ftl" as ui>
 <#import "passkeys.ftl" as passkeys>
 <#-- Step one of sign-in: the e-mail identifies the person and the organisation. -->
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username'); section>
   <#if section = "header">
-    ${msg("snoskaSignInTitle")}
+    ${msg("footnoteSignInTitle")}
   <#elseif section = "form">
-    <p class="auth__lead">${msg("snoskaSignInLead")}</p>
+    <p class="auth__lead">${msg("footnoteSignInLead")}</p>
     <#if realm.password>
       <form id="kc-form-login" class="form" action="${url.loginAction}" method="post" onsubmit="login.disabled = true; return true;">
         <#if !usernameHidden??>

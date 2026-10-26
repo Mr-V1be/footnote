@@ -14,8 +14,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from footnote.ports.identity import AuthenticationError
 
-ISSUER = "http://keycloak.test/realms/snoska"
-AUDIENCE = "snoska-api"
+ISSUER = "http://keycloak.test/realms/footnote"
+AUDIENCE = "footnote-api"
 KEY_ID = "test-key"
 
 

@@ -1,10 +1,10 @@
 <#import "template.ftl" as layout>
-<#import "snoska.ftl" as ui>
+<#import "footnote.ftl" as ui>
 <#import "passkeys.ftl" as passkeys>
 <#-- Sign-in on one page, used when the flow asks for e-mail and password together. -->
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password'); section>
   <#if section = "header">
-    ${msg("snoskaSignInTitle")}
+    ${msg("footnoteSignInTitle")}
   <#elseif section = "form">
     <#if realm.password>
       <form id="kc-form-login" class="form" action="${url.loginAction}" method="post" onsubmit="login.disabled = true; return true;">

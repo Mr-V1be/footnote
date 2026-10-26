@@ -1,5 +1,5 @@
 <#import "template.ftl" as layout>
-<#import "snoska.ftl" as ui>
+<#import "footnote.ftl" as ui>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username'); section>
   <#if section = "header">
     ${msg("emailForgotTitle")}

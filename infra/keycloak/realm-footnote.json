@@ -1,8 +1,8 @@
 {
-  "realm": "snoska",
-  "displayName": "Сноска",
-  "loginTheme": "snoska",
-  "emailTheme": "snoska",
+  "realm": "footnote",
+  "displayName": "Footnote",
+  "loginTheme": "footnote",
+  "emailTheme": "footnote",
   "enabled": true,
   "organizationsEnabled": true,
   "sslRequired": "external",
@@ -23,8 +23,8 @@
   "smtpServer": {
     "host": "${FOOTNOTE_SMTP_HOST:mailpit}",
     "port": "${FOOTNOTE_SMTP_PORT:1025}",
-    "from": "${FOOTNOTE_SMTP_FROM:no-reply@snoska.example}",
-    "fromDisplayName": "Сноска",
+    "from": "${FOOTNOTE_SMTP_FROM:no-reply@footnote.example}",
+    "fromDisplayName": "Footnote",
     "auth": "${FOOTNOTE_SMTP_AUTH:false}",
     "user": "${FOOTNOTE_SMTP_USERNAME:}",
     "password": "${FOOTNOTE_SMTP_PASSWORD:}",
@@ -38,7 +38,7 @@
       }
     ],
     "client": {
-      "snoska-api": [
+      "footnote-api": [
         {
           "name": "owner",
           "description": "Organization owner"
@@ -393,22 +393,22 @@
   ],
   "scopeMappings": [
     {
-      "client": "snoska-web",
+      "client": "footnote-web",
       "roles": [
         "platform-admin"
       ]
     },
     {
-      "client": "snoska-demo",
+      "client": "footnote-demo",
       "roles": [
         "platform-admin"
       ]
     }
   ],
   "clientScopeMappings": {
-    "snoska-api": [
+    "footnote-api": [
       {
-        "client": "snoska-web",
+        "client": "footnote-web",
         "roles": [
           "owner",
           "lawyer",
@@ -417,7 +417,7 @@
         ]
       },
       {
-        "client": "snoska-demo",
+        "client": "footnote-demo",
         "roles": [
           "owner",
           "lawyer",
@@ -428,7 +428,7 @@
     ],
     "realm-management": [
       {
-        "client": "snoska-directory",
+        "client": "footnote-directory",
         "roles": [
           "manage-organizations",
           "manage-users",
@@ -444,8 +444,8 @@
   },
   "clients": [
     {
-      "clientId": "snoska-api",
-      "name": "Snoska API",
+      "clientId": "footnote-api",
+      "name": "Footnote API",
       "enabled": true,
       "publicClient": false,
       "bearerOnly": true,
@@ -455,8 +455,8 @@
       "fullScopeAllowed": false
     },
     {
-      "clientId": "snoska-web",
-      "name": "Snoska Web",
+      "clientId": "footnote-web",
+      "name": "Footnote Web",
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
@@ -478,11 +478,11 @@
       },
       "protocolMappers": [
         {
-          "name": "snoska-api-audience",
+          "name": "footnote-api-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "config": {
-            "included.client.audience": "snoska-api",
+            "included.client.audience": "footnote-api",
             "access.token.claim": "true",
             "id.token.claim": "false",
             "introspection.token.claim": "true"
@@ -504,8 +504,8 @@
       "fullScopeAllowed": false
     },
     {
-      "clientId": "snoska-demo",
-      "name": "Snoska Demo Sign-in",
+      "clientId": "footnote-demo",
+      "name": "Footnote Demo Sign-in",
       "description": "One-click sign-in by role on the demo stand (FOOTNOTE_DEMO_MODE). Only the web server knows its secret; an installation without the demo may disable it.",
       "enabled": true,
       "publicClient": false,
@@ -517,11 +517,11 @@
       "serviceAccountsEnabled": false,
       "protocolMappers": [
         {
-          "name": "snoska-api-audience",
+          "name": "footnote-api-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "config": {
-            "included.client.audience": "snoska-api",
+            "included.client.audience": "footnote-api",
             "access.token.claim": "true",
             "id.token.claim": "false",
             "introspection.token.claim": "true"
@@ -543,8 +543,8 @@
       "fullScopeAllowed": false
     },
     {
-      "clientId": "snoska-directory",
-      "name": "Snoska Directory",
+      "clientId": "footnote-directory",
+      "name": "Footnote Directory",
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
@@ -557,9 +557,9 @@
   ],
   "users": [
     {
-      "username": "service-account-snoska-directory",
+      "username": "service-account-footnote-directory",
       "enabled": true,
-      "serviceAccountClientId": "snoska-directory",
+      "serviceAccountClientId": "footnote-directory",
       "clientRoles": {
         "realm-management": [
           "manage-organizations",

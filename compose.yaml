@@ -84,8 +84,8 @@ services:
     ports:
       - "127.0.0.1:${FOOTNOTE_KEYCLOAK_PORT:-46320}:8080"
     volumes:
-      - ./infra/keycloak/realm-snoska.json:/opt/keycloak/data/import/realm-snoska.json:ro
-      - ./infra/keycloak/themes/snoska:/opt/keycloak/themes/snoska:ro
+      - ./infra/keycloak/realm-footnote.json:/opt/keycloak/data/import/realm-footnote.json:ro
+      - ./infra/keycloak/themes/footnote:/opt/keycloak/themes/footnote:ro
     mem_limit: 1g
     healthcheck:
       test:

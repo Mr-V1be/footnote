@@ -18,8 +18,8 @@
 
 <#-- The wordmark: the product name carries its own footnote marker, as in the app. -->
 <#macro wordmark>
-  <span class="wordmark" aria-label="${msg("snoskaName")}">
-    <span class="wordmark__word" aria-hidden="true">${msg("snoskaName")}</span><sup class="wordmark__mark" aria-hidden="true">1</sup>
+  <span class="wordmark" aria-label="${msg("footnoteName")}">
+    <span class="wordmark__word" aria-hidden="true">${msg("footnoteName")}</span><sup class="wordmark__mark" aria-hidden="true">1</sup>
   </span>
 </#macro>
 
@@ -29,10 +29,10 @@
 -->
 <#macro languages>
   <#if realm.internationalizationEnabled && locale?? && locale.supported?size gt 1>
-    <nav class="languages" aria-label="${msg("snoskaLanguages")}">
+    <nav class="languages" aria-label="${msg("footnoteLanguages")}">
       <#list locale.supported as language>
         <a class="languages__item" href="${language.url}" hreflang="${language.languageTag}" lang="${language.languageTag}"
-           title="${language.label}" data-snoska-locale="${language.languageTag}"
+           title="${language.label}" data-footnote-locale="${language.languageTag}"
            <#if language.languageTag == locale.currentLanguageTag>aria-current="true"</#if>>${language.languageTag?upper_case}</a>
       </#list>
     </nav>
@@ -40,7 +40,7 @@
 </#macro>
 
 <#macro demoMark>
-  <span class="demo-mark">${msg("snoskaDemo")}</span>
+  <span class="demo-mark">${msg("footnoteDemo")}</span>
 </#macro>
 
 <#macro alert type text>
@@ -53,10 +53,10 @@
 
 <#-- A finding as the product shows it: a marked phrase, its marker and the footnote. -->
 <#macro specimen>
-  <figure class="specimen" aria-label="${msg("snoskaSpecimenLabel")}">
+  <figure class="specimen" aria-label="${msg("footnoteSpecimenLabel")}">
     <div class="specimen__sheet" aria-hidden="true" lang="ru">
-      <p class="specimen__heading">${msg("snoskaSpecimenHeading")}</p>
-      <p class="specimen__text">${msg("snoskaSpecimenBefore")} <mark class="specimen__mark">${msg("snoskaSpecimenMarked")}</mark>&#8288;<sup class="specimen__marker">1</sup> ${msg("snoskaSpecimenAfter")}</p>
+      <p class="specimen__heading">${msg("footnoteSpecimenHeading")}</p>
+      <p class="specimen__text">${msg("footnoteSpecimenBefore")} <mark class="specimen__mark">${msg("footnoteSpecimenMarked")}</mark>&#8288;<sup class="specimen__marker">1</sup> ${msg("footnoteSpecimenAfter")}</p>
       <span class="specimen__line"></span>
       <span class="specimen__line specimen__line--short"></span>
       <span class="specimen__line"></span>
@@ -65,11 +65,11 @@
     <figcaption class="specimen__note">
       <span class="specimen__note-head">
         <span class="specimen__note-marker" aria-hidden="true">1</span>
-        <span class="specimen__severity">${msg("snoskaSpecimenSeverity")}</span>
+        <span class="specimen__severity">${msg("footnoteSpecimenSeverity")}</span>
       </span>
-      <span class="specimen__finding">${msg("snoskaSpecimenFinding")}</span>
-      <span class="specimen__quote" lang="ru">${msg("snoskaSpecimenQuote")}</span>
-      <span class="specimen__citation">${msg("snoskaSpecimenCitation")}</span>
+      <span class="specimen__finding">${msg("footnoteSpecimenFinding")}</span>
+      <span class="specimen__quote" lang="ru">${msg("footnoteSpecimenQuote")}</span>
+      <span class="specimen__citation">${msg("footnoteSpecimenCitation")}</span>
     </figcaption>
   </figure>
 </#macro>

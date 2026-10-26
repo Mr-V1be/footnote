@@ -7,7 +7,7 @@
 | IBM Plex Sans | интерфейс | Google Fonts (через `next/font`, файлы раздаются с нашего сервера) | SIL Open Font License 1.1 |
 | IBM Plex Mono | номера, коды, ссылки сносок | Google Fonts | SIL Open Font License 1.1 |
 | IBM Plex Serif | текст документов, знак продукта | Google Fonts | SIL Open Font License 1.1 |
-| IBM Plex Sans, Serif, Mono | страницы входа (`infra/keycloak/themes/snoska/login/resources/fonts`) | npm-пакеты IBM `@ibm/plex-sans` 1.1.0, `@ibm/plex-serif` 2.0.0, `@ibm/plex-mono` 2.5.0 | SIL Open Font License 1.1 (текст лицензии — `OFL.txt` рядом со шрифтами) |
+| IBM Plex Sans, Serif, Mono | страницы входа (`infra/keycloak/themes/footnote/login/resources/fonts`) | npm-пакеты IBM `@ibm/plex-sans` 1.1.0, `@ibm/plex-serif` 2.0.0, `@ibm/plex-mono` 2.5.0 | SIL Open Font License 1.1 (текст лицензии — `OFL.txt` рядом со шрифтами) |
 
 ## Иконки и графика
 

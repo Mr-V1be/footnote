@@ -66,7 +66,7 @@ RECORDED_VERDICTS = {
 def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     base = Settings()
     assert base.database.name.endswith("_test"), "integration tests need a dedicated database"
-    keycloak = base.keycloak.model_copy(update={"url": ISSUER.removesuffix("/realms/snoska")})
+    keycloak = base.keycloak.model_copy(update={"url": ISSUER.removesuffix("/realms/footnote")})
     # Files of a test run stay in a temporary directory, whatever the stand uses.
     storage = base.storage.model_copy(
         update={

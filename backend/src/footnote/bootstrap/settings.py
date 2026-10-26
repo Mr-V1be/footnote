@@ -66,10 +66,10 @@ class KeycloakSettings(BaseSettings):
     # Where the servers themselves reach Keycloak, inside a private network
     # (production: http://keycloak:8080); the public URL when empty.
     internal_url: str = ""
-    realm: str = "snoska"
-    api_client_id: str = "snoska-api"
+    realm: str = "footnote"
+    api_client_id: str = "footnote-api"
     # The web app's client: invitation links lead back to it.
-    web_client_id: str = "snoska-web"
+    web_client_id: str = "footnote-web"
 
     @property
     def issuer(self) -> str:
@@ -87,7 +87,7 @@ class KeycloakSettings(BaseSettings):
 class DirectorySettings(BaseSettings):
     model_config = _config("FOOTNOTE_DIRECTORY_")
 
-    client_id: str = "snoska-directory"
+    client_id: str = "footnote-directory"
     client_secret: SecretStr = SecretStr("")
 
 

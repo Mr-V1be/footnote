@@ -1,4 +1,4 @@
-<#import "snoska.ftl" as ui>
+<#import "footnote.ftl" as ui>
 <#import "footer.ftl" as loginFooter>
 <#--
   Layout of every sign-in page. The form sits in the entry column; on wide
@@ -13,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <meta name="color-scheme" content="light dark">
-  <title>${msg("snoskaPageTitle")}</title>
+  <title>${msg("footnotePageTitle")}</title>
   <link rel="icon" href="${url.resourcesPath}/img/icon.svg" type="image/svg+xml">
   <#list properties.styles?split(' ') as style>
     <link href="${url.resourcesPath}/${style}" rel="stylesheet">
@@ -62,7 +62,7 @@
         <div class="account" id="kc-username">
           <@ui.icon name="user-circle" class="account__icon"/>
           <span class="account__name" id="kc-attempted-username">${auth.attemptedUsername}</span>
-          <a class="account__change" id="reset-login" href="${url.loginRestartFlowUrl}" aria-label="${msg("snoskaChangeAccountLabel")}">${msg("snoskaChangeAccount")}</a>
+          <a class="account__change" id="reset-login" href="${url.loginRestartFlowUrl}" aria-label="${msg("footnoteChangeAccountLabel")}">${msg("footnoteChangeAccount")}</a>
         </div>
       </#if>
 
@@ -101,8 +101,8 @@
 
   <aside class="auth__showcase">
     <div class="showcase">
-      <p class="showcase__title">${msg("snoskaShowcaseTitle")}</p>
-      <p class="showcase__lead">${msg("snoskaShowcaseLead")}</p>
+      <p class="showcase__title">${msg("footnoteShowcaseTitle")}</p>
+      <p class="showcase__lead">${msg("footnoteShowcaseLead")}</p>
       <@ui.specimen/>
     </div>
   </aside>

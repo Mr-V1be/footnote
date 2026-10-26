@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { format, resolveConfig } from "prettier";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const theme = "infra/keycloak/themes/snoska/login/resources";
+const theme = "infra/keycloak/themes/footnote/login/resources";
 const ASSETS = [
   {
     source: "frontend/src/shared/tokens/tokens.css",

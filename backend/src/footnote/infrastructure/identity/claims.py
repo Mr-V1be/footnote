@@ -24,7 +24,7 @@ class KeycloakClaimsMapper:
     organization's groups::
 
         "organization": {
-            "acme": {"id": "…", "resource_access": {"snoska-api": {"roles": ["lawyer"]}}}
+            "acme": {"id": "…", "resource_access": {"footnote-api": {"roles": ["lawyer"]}}}
         }
     """
 

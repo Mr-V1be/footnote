@@ -22,7 +22,7 @@ RUN /opt/keycloak/bin/kc.sh build
 
 FROM ${KEYCLOAK_IMAGE}
 COPY --from=build /opt/keycloak/ /opt/keycloak/
-COPY infra/keycloak/realm-snoska.json /opt/keycloak/data/import/realm-snoska.json
-COPY infra/keycloak/themes/snoska /opt/keycloak/themes/snoska
+COPY infra/keycloak/realm-footnote.json /opt/keycloak/data/import/realm-footnote.json
+COPY infra/keycloak/themes/footnote /opt/keycloak/themes/footnote
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 CMD ["start", "--optimized", "--import-realm"]

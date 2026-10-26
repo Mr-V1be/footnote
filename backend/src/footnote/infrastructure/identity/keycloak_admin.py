@@ -32,7 +32,7 @@ class KeycloakAdminConfig:
     client_secret: str
     api_client_id: str
     # Invitation emails link back to the web app through its client.
-    web_client_id: str = "snoska-web"
+    web_client_id: str = "footnote-web"
     web_url: str = "http://localhost:46300"
 
 

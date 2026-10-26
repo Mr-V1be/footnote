@@ -32,4 +32,4 @@ DEMO_CLIENT_SECRET="$secret" OWNER_PASSWORD="$password" \
   -v "$ROOT:/repo:ro" -v "$ROOT/.run/k6:/out" \
   -e DEMO_CLIENT_SECRET -e OWNER_PASSWORD -e DURATION="${DURATION:-60s}" \
   -e LIST_RATE -e REPORT_RATE -e UPLOAD_RATE -e CHECK_RATE \
-  "$K6_IMAGE" run --summary-export /out/summary.json /repo/load/k6/snoska.js
+  "$K6_IMAGE" run --summary-export /out/summary.json /repo/load/k6/footnote.js
