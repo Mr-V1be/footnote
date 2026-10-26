@@ -25,7 +25,8 @@ from tests.support.tokens import TokenFactory
 
 pytestmark = pytest.mark.integration
 NOW = datetime(2026, 10, 2, tzinfo=UTC)
-_QUOTED = re.compile(r"'([a-z_.]+)'")
+_SETTING = re.compile(r"current_setting\('([a-z_.]+)'")
+_CHANNEL = re.compile(r"pg_notify\(\s*'([a-z_]+)'")
 
 
 def docx_bytes(text_value: str) -> bytes:
@@ -187,10 +188,9 @@ async def _names_in_database(container: Container) -> tuple[set[str], set[str]]:
         for row in policies
         for expression in row
         if expression
-        for name in _QUOTED.findall(expression)
-        if "." in name
+        for name in _SETTING.findall(expression)
     }
-    channels = {name for source in functions for name in _QUOTED.findall(source) if "_" in name}
+    channels = {name for source in functions for name in _CHANNEL.findall(source)}
     return settings, channels
 
 
